@@ -1,0 +1,10 @@
+{
+  "name": "no-sycophancy",
+  "version": "0.1.0",
+  "description": "No flattery or filler. Disagreement is stated plainly, with the reason.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

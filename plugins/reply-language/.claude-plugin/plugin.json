@@ -1,0 +1,18 @@
+{
+  "name": "reply-language",
+  "version": "0.1.0",
+  "description": "Answers in the language you set (English by default). Code, identifiers and commands stay as they are.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "language": {
+      "type": "string",
+      "title": "Reply language",
+      "description": "The language Claude answers in. Code, identifiers and commands stay as they are.",
+      "default": "English"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "hooks": ["engine.ts"],
+  "tests": ["probe.ts", "engine.test.ts"],
+  "register": "registerStyles",
+  "ruleExport": "rule",
+  "options": true,
+  "userConfig": {
+    "reply-language": {
+      "language": {
+        "type": "string",
+        "title": "Reply language",
+        "description": "The language Claude answers in. Code, identifiers and commands stay as they are.",
+        "default": "English"
+      }
+    }
+  }
+}

@@ -10,12 +10,14 @@ export type GuardTools = {
 // One guard rule. `check` runs before the call and names a reason when the
 // call is risky; the engine asks the person (or refuses, for a deny rule)
 // with every reason that fired. `after` runs once the tool answered and
-// names a note the model reads with the result.
+// names a note the model reads with the result. `prompt` reads the person's
+// prompt text and names a note the model reads beside it.
 export type GuardRule = {
   id: string
   decision: 'ask' | 'deny'
   check: (e: ToolCallEnvelope, tools: GuardTools) => string | undefined | Promise<string | undefined>
   after?: (e: ToolCallEnvelope, ran: ToolCallResult) => string | undefined
+  prompt?: (text: string) => string | undefined
 }
 
 type Hit = { id: string; decision: GuardRule['decision']; reason: string }
@@ -63,6 +65,18 @@ const notesFor = (rules: readonly GuardRule[], e: ToolCallEnvelope, ran: ToolCal
     }
   })
 
+// Same drop-on-failure rule as notesFor: a prompt is never held back by a
+// check that threw.
+const promptNotesFor = (rules: readonly GuardRule[], text: string): string[] =>
+  rules.flatMap(rule => {
+    try {
+      const note = rule.prompt?.(text)
+      return note === undefined ? [] : [`SECURITY (${rule.id}): ${note}`]
+    } catch {
+      return []
+    }
+  })
+
 export const registerGuards = (on: On, rules: readonly GuardRule[]): void => {
   on('classic.PreToolUse', async ($, e, next) => {
     const tools: GuardTools = {
@@ -78,6 +92,13 @@ export const registerGuards = (on: On, rules: readonly GuardRule[]): void => {
       if (ran.deny !== undefined) return ran
       const notes = notesFor(rules, e, ran)
       return notes.length === 0 ? ran : { ...ran, context: [...(ran.context ?? []), ...notes] }
+    })
+  }
+
+  if (rules.some(rule => rule.prompt !== undefined)) {
+    on('prompt.submit', (_$, e, next) => {
+      const notes = promptNotesFor(rules, e.text)
+      return next(notes.length === 0 ? e : { ...e, context: [...(e.context ?? []), ...notes] })
     })
   }
 }

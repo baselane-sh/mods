@@ -3,7 +3,7 @@
 // files, so each one gets its own copy of the engine and the rules it uses.
 //
 //   node scripts/build.mjs
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = new URL('..', import.meta.url).pathname
@@ -25,6 +25,11 @@ const write = (path, text) => {
 //   register    the function engine.ts exports, called with (on, rules)
 //   ruleExport  "rule" (a module exports a value) or "create" (a factory,
 //               called once per load, for rules that keep session state)
+//   options     optional. true passes the plugin's userConfig values to
+//               register as a third argument: register(on, rules, options)
+//   userConfig  optional. { ruleId: { field: spec } }: the userConfig fields
+//               each rule reads. A mod's plugin.json carries the fields of
+//               its own rules only.
 const loadEngine = name => {
   const config = JSON.parse(readFileSync(join(ROOT, 'engines', name, 'engine.json'), 'utf8'))
   const isFactory = config.ruleExport === 'create'
@@ -35,16 +40,24 @@ const loadEngine = name => {
   }
 }
 
-const registerSource = (engine, rules) =>
-  [
+const registerSource = (engine, rules) => {
+  const list = `[${rules.map(engine.useRule).join(', ')}]`
+  const call = engine.options
+    ? `(on, options) => ${engine.register}(on, ${list}, options)`
+    : `on => ${engine.register}(on, ${list})`
+  return [
     "import type { Register } from 'claude-code'",
     '',
     `import { ${engine.register} } from './engine'`,
     ...rules.map(engine.importRule),
     '',
-    `export const register: Register = on => ${engine.register}(on, [${rules.map(engine.useRule).join(', ')}])`,
+    `export const register: Register = ${call}`,
     '',
   ].join('\n')
+}
+
+const userConfigFor = (engine, rules) =>
+  Object.assign({}, ...rules.map(id => engine.userConfig?.[id] ?? {}))
 
 const buildMod = (engine, engineDir, mod, outDir) => {
   for (const id of mod.rules) {
@@ -55,16 +68,30 @@ const buildMod = (engine, engineDir, mod, outDir) => {
 
   rmSync(outDir, { recursive: true, force: true })
   write(join(outDir, MARKER), 'Built by scripts/build.mjs from catalog/. Edit the engine or the catalog, not this folder.\n')
+  const userConfig = userConfigFor(engine, mod.rules)
   write(
     join(outDir, '.claude-plugin/plugin.json'),
-    `${JSON.stringify({ name: mod.name, version: VERSION, description: mod.description, author: AUTHOR, license: LICENSE }, null, 2)}\n`,
+    `${JSON.stringify(
+      {
+        name: mod.name,
+        version: VERSION,
+        description: mod.description,
+        author: AUTHOR,
+        license: LICENSE,
+        ...(Object.keys(userConfig).length > 0 ? { userConfig } : {}),
+      },
+      null,
+      2,
+    )}\n`,
   )
   cpSync(join(ROOT, 'LICENSE'), join(outDir, 'LICENSE'))
   write(join(outDir, 'hooks/hooks.json'), '{ "modules": ["./register.ts"] }\n')
   write(join(outDir, 'hooks/register.ts'), registerSource(engine, mod.rules))
 
   for (const file of engine.hooks) {
-    cpSync(join(engineDir, 'hooks', file), join(outDir, 'hooks', file))
+    // copyFileSync follows a symlink: a shared file may link into another engine
+    mkdirSync(join(outDir, 'hooks'), { recursive: true })
+    copyFileSync(join(engineDir, 'hooks', file), join(outDir, 'hooks', file))
   }
   for (const file of engine.tests) {
     cpSync(join(engineDir, 'tests', file), join(outDir, 'tests', file))

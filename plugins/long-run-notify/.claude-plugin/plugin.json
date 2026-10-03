@@ -1,0 +1,26 @@
+{
+  "name": "long-run-notify",
+  "version": "0.1.0",
+  "description": "Sends a phone push through ntfy.sh when a Bash command ran longer than a threshold (60 seconds by default). Sends the project name and the seconds only. Does nothing until you set an ntfy topic.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "ntfyTopic": {
+      "type": "string",
+      "title": "ntfy topic",
+      "description": "A private, hard-to-guess ntfy.sh topic. Subscribe to it in the ntfy app. Anyone who knows the name can read your notifications. Empty means no push is sent.",
+      "default": "",
+      "sensitive": true
+    },
+    "longRunSecs": {
+      "type": "number",
+      "title": "Long command threshold (seconds)",
+      "description": "A Bash command that runs at least this long sends a push.",
+      "default": 60,
+      "min": 1
+    }
+  }
+}

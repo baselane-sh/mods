@@ -1,0 +1,26 @@
+{
+  "name": "lifecycle-pack",
+  "version": "0.1.0",
+  "description": "Every Baselane lifecycle mod in one: auto-format, long-run and input pushes, and the session journal.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "ntfyTopic": {
+      "type": "string",
+      "title": "ntfy topic",
+      "description": "A private, hard-to-guess ntfy.sh topic. Subscribe to it in the ntfy app. Anyone who knows the name can read your notifications. Empty means no push is sent.",
+      "default": "",
+      "sensitive": true
+    },
+    "longRunSecs": {
+      "type": "number",
+      "title": "Long command threshold (seconds)",
+      "description": "A Bash command that runs at least this long sends a push.",
+      "default": 60,
+      "min": 1
+    }
+  }
+}

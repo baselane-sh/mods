@@ -1,0 +1,34 @@
+{
+  "hooks": ["engine.ts", "patterns.ts", "ntfy.ts"],
+  "tests": ["probe.ts", "engine.test.ts"],
+  "register": "registerLifecycle",
+  "ruleExport": "rule",
+  "options": true,
+  "userConfig": {
+    "ntfy-notify": {
+      "ntfyTopic": {
+        "type": "string",
+        "title": "ntfy topic",
+        "description": "A private, hard-to-guess ntfy.sh topic. Subscribe to it in the ntfy app. Anyone who knows the name can read your notifications. Empty means no push is sent.",
+        "default": "",
+        "sensitive": true
+      }
+    },
+    "long-run-notify": {
+      "ntfyTopic": {
+        "type": "string",
+        "title": "ntfy topic",
+        "description": "A private, hard-to-guess ntfy.sh topic. Subscribe to it in the ntfy app. Anyone who knows the name can read your notifications. Empty means no push is sent.",
+        "default": "",
+        "sensitive": true
+      },
+      "longRunSecs": {
+        "type": "number",
+        "title": "Long command threshold (seconds)",
+        "description": "A Bash command that runs at least this long sends a push.",
+        "default": 60,
+        "min": 1
+      }
+    }
+  }
+}

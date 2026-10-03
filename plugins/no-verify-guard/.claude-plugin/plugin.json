@@ -1,0 +1,10 @@
+{
+  "name": "no-verify-guard",
+  "version": "0.1.0",
+  "description": "Asks before git hooks are skipped (--no-verify, commit -n, HUSKY=0, core.hooksPath=/dev/null).",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

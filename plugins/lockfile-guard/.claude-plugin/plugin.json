@@ -1,0 +1,10 @@
+{
+  "name": "lockfile-guard",
+  "version": "0.1.0",
+  "description": "Asks before a lockfile is written or edited by hand; the package manager should change it.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

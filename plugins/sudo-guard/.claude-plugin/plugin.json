@@ -1,0 +1,10 @@
+{
+  "name": "sudo-guard",
+  "version": "0.1.0",
+  "description": "Asks before sudo, doas or su -c runs a command with elevated rights.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

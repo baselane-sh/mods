@@ -1,0 +1,10 @@
+{
+  "name": "curl-pipe-guard",
+  "version": "0.1.0",
+  "description": "Asks before a download is piped into a shell or interpreter (curl | sh, wget -O- | bash, bash <(curl ...)).",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

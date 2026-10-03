@@ -42,9 +42,44 @@
       "rules": ["secret-output"]
     },
     {
+      "name": "curl-pipe-guard",
+      "description": "Asks before a download is piped into a shell or interpreter (curl | sh, wget -O- | bash, bash <(curl ...)).",
+      "rules": ["curl-pipe"]
+    },
+    {
+      "name": "sudo-guard",
+      "description": "Asks before sudo, doas or su -c runs a command with elevated rights.",
+      "rules": ["sudo"]
+    },
+    {
+      "name": "no-verify-guard",
+      "description": "Asks before git hooks are skipped (--no-verify, commit -n, HUSKY=0, core.hooksPath=/dev/null).",
+      "rules": ["no-verify"]
+    },
+    {
+      "name": "lockfile-guard",
+      "description": "Asks before a lockfile is written or edited by hand; the package manager should change it.",
+      "rules": ["lockfile"]
+    },
+    {
+      "name": "package-guard",
+      "description": "Asks before a new dependency is installed (npm, pnpm, yarn, bun, pip, uv, poetry, cargo, go, gem) and names the packages.",
+      "rules": ["new-package"]
+    },
+    {
+      "name": "prod-db-guard",
+      "description": "Asks before destructive SQL runs in a command: TRUNCATE, DELETE or UPDATE with no WHERE.",
+      "rules": ["prod-db"]
+    },
+    {
+      "name": "path-jail",
+      "description": "Asks before Write, Edit or NotebookEdit changes a file outside the working directory, by real path.",
+      "rules": ["path-jail"]
+    },
+    {
       "name": "guard-pack",
       "description": "Every Baselane guard in one mod.",
-      "rules": ["secret-filename", "secret-value", "env-exfil", "infra", "secret-commit", "protect-main", "gitignore", "secret-output"]
+      "rules": ["secret-filename", "secret-value", "env-exfil", "infra", "secret-commit", "protect-main", "gitignore", "secret-output", "curl-pipe", "sudo", "no-verify", "lockfile", "new-package", "prod-db", "path-jail"]
     }
   ]
 }

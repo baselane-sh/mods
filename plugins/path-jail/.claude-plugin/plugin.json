@@ -1,0 +1,10 @@
+{
+  "name": "path-jail",
+  "version": "0.1.0",
+  "description": "Asks before Write, Edit or NotebookEdit changes a file outside the working directory, by real path.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

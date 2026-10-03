@@ -15,5 +15,6 @@ export const FAKE = {
 // Tools for calling a rule's check directly, outside any repo.
 export const NO_TOOLS = {
   cwd: async () => '/nowhere',
+  realPath: async () => undefined,
   run: async () => ({ exitCode: 1, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false }),
 }

@@ -97,6 +97,76 @@
       }
     },
     {
+      "name": "curl-pipe-guard",
+      "source": "./plugins/curl-pipe-guard",
+      "description": "Asks before a download is piped into a shell or interpreter (curl | sh, wget -O- | bash, bash <(curl ...)).",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "sudo-guard",
+      "source": "./plugins/sudo-guard",
+      "description": "Asks before sudo, doas or su -c runs a command with elevated rights.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "no-verify-guard",
+      "source": "./plugins/no-verify-guard",
+      "description": "Asks before git hooks are skipped (--no-verify, commit -n, HUSKY=0, core.hooksPath=/dev/null).",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "lockfile-guard",
+      "source": "./plugins/lockfile-guard",
+      "description": "Asks before a lockfile is written or edited by hand; the package manager should change it.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "package-guard",
+      "source": "./plugins/package-guard",
+      "description": "Asks before a new dependency is installed (npm, pnpm, yarn, bun, pip, uv, poetry, cargo, go, gem) and names the packages.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "prod-db-guard",
+      "source": "./plugins/prod-db-guard",
+      "description": "Asks before destructive SQL runs in a command: TRUNCATE, DELETE or UPDATE with no WHERE.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "path-jail",
+      "source": "./plugins/path-jail",
+      "description": "Asks before Write, Edit or NotebookEdit changes a file outside the working directory, by real path.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "guard-pack",
       "source": "./plugins/guard-pack",
       "description": "Every Baselane guard in one mod.",

@@ -1,0 +1,6 @@
+{
+  "hooks": ["engine.ts"],
+  "tests": ["probe.ts", "engine.test.ts"],
+  "register": "registerNudges",
+  "ruleExport": "create"
+}

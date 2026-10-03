@@ -19,24 +19,20 @@ const write = (path, text) => {
   writeFileSync(path, text)
 }
 
-// What each engine ships and how a mod's register.ts wires its rules in.
-// A guard rule module exports `rule`; a nudge module exports `create`,
-// since each nudge keeps its own per-session state.
-const ENGINES = {
-  guard: {
-    hooks: ['engine.ts', 'patterns.ts', 'git.ts'],
-    tests: ['probe.ts', 'fixtures.ts', 'engine.test.ts'],
-    register: 'registerGuards',
-    importRule: id => `import { rule as ${camel(id)} } from './rules/${id}'`,
-    useRule: id => camel(id),
-  },
-  nudge: {
-    hooks: ['engine.ts'],
-    tests: ['probe.ts', 'engine.test.ts'],
-    register: 'registerNudges',
-    importRule: id => `import { create as ${camel(id)} } from './rules/${id}'`,
-    useRule: id => `${camel(id)}()`,
-  },
+// Each engine describes itself in engines/<name>/engine.json:
+//   hooks       shared files copied into every mod's hooks/
+//   tests       shared test files copied into every mod's tests/
+//   register    the function engine.ts exports, called with (on, rules)
+//   ruleExport  "rule" (a module exports a value) or "create" (a factory,
+//               called once per load, for rules that keep session state)
+const loadEngine = name => {
+  const config = JSON.parse(readFileSync(join(ROOT, 'engines', name, 'engine.json'), 'utf8'))
+  const isFactory = config.ruleExport === 'create'
+  return {
+    ...config,
+    importRule: id => `import { ${config.ruleExport} as ${camel(id)} } from './rules/${id}'`,
+    useRule: id => (isFactory ? `${camel(id)}()` : camel(id)),
+  }
 }
 
 const registerSource = (engine, rules) =>
@@ -84,8 +80,10 @@ const catalogs = readdirSync(join(ROOT, 'catalog'))
   .map(file => JSON.parse(readFileSync(join(ROOT, 'catalog', file), 'utf8')))
 
 const mods = catalogs.flatMap(catalog => {
-  const engine = ENGINES[catalog.engine]
-  if (engine === undefined) throw new Error(`unknown engine ${catalog.engine}`)
+  if (!existsSync(join(ROOT, 'engines', catalog.engine, 'engine.json'))) {
+    throw new Error(`unknown engine ${catalog.engine}`)
+  }
+  const engine = loadEngine(catalog.engine)
   return catalog.mods.map(mod => {
     buildMod(engine, join(ROOT, 'engines', catalog.engine), mod, join(ROOT, 'plugins', mod.name))
     return mod

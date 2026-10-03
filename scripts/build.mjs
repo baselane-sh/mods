@@ -25,6 +25,8 @@ const write = (path, text) => {
 //   register    the function engine.ts exports, called with (on, rules)
 //   ruleExport  "rule" (a module exports a value) or "create" (a factory,
 //               called once per load, for rules that keep session state)
+//   types       optional: a contract .d.ts (the plugin's `$.state` shape),
+//               copied to the mod at the same path and named in plugin.json
 const loadEngine = name => {
   const config = JSON.parse(readFileSync(join(ROOT, 'engines', name, 'engine.json'), 'utf8'))
   const isFactory = config.ruleExport === 'create'
@@ -57,12 +59,24 @@ const buildMod = (engine, engineDir, mod, outDir) => {
   write(join(outDir, MARKER), 'Built by scripts/build.mjs from catalog/. Edit the engine or the catalog, not this folder.\n')
   write(
     join(outDir, '.claude-plugin/plugin.json'),
-    `${JSON.stringify({ name: mod.name, version: VERSION, description: mod.description, author: AUTHOR, license: LICENSE }, null, 2)}\n`,
+    `${JSON.stringify(
+      {
+        name: mod.name,
+        version: VERSION,
+        description: mod.description,
+        author: AUTHOR,
+        license: LICENSE,
+        ...(engine.types === undefined ? {} : { types: `./${engine.types}` }),
+      },
+      null,
+      2,
+    )}\n`,
   )
   cpSync(join(ROOT, 'LICENSE'), join(outDir, 'LICENSE'))
   write(join(outDir, 'hooks/hooks.json'), '{ "modules": ["./register.ts"] }\n')
   write(join(outDir, 'hooks/register.ts'), registerSource(engine, mod.rules))
 
+  if (engine.types !== undefined) cpSync(join(engineDir, engine.types), join(outDir, engine.types))
   for (const file of engine.hooks) {
     cpSync(join(engineDir, 'hooks', file), join(outDir, 'hooks', file))
   }

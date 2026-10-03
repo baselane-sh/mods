@@ -1,0 +1,7 @@
+{
+  "hooks": ["engine.ts", "tracker.ts", "render.ts", "patterns.ts"],
+  "tests": ["probe.ts", "fixtures.ts", "engine.test.ts"],
+  "register": "registerCommands",
+  "ruleExport": "rule",
+  "types": "types/index.d.ts"
+}

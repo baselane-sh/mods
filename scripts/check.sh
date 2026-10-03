@@ -25,7 +25,7 @@ typecheck() {
 { "compilerOptions": { "target": "es2023", "lib": ["es2023"], "types": [], "module": "esnext",
     "moduleResolution": "bundler", "strict": true, "noUncheckedIndexedAccess": true, "noEmit": true,
     "skipLibCheck": true, "jsx": "react", "jsxFactory": "h", "jsxFragmentFactory": "Fragment" },
-  "include": ["$TYPES", "$1/hooks", "$1/tests"] }
+  "include": ["$TYPES", "$1/hooks", "$1/tests", "$1/types"] }
 JSON
   "$TSC" -p "$TMP/tsconfig.json" > "$TMP/tsc.out" 2>&1
 }

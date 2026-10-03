@@ -1,0 +1,10 @@
+{
+  "engine": "command",
+  "mods": [
+    {
+      "name": "receipt",
+      "description": "Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied.",
+      "rules": ["receipt"]
+    }
+  ]
+}

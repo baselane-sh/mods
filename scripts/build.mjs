@@ -30,6 +30,8 @@ const write = (path, text) => {
 //   userConfig  optional. { ruleId: { field: spec } }: the userConfig fields
 //               each rule reads. A mod's plugin.json carries the fields of
 //               its own rules only.
+//   types       optional: a contract .d.ts (the plugin's `$.state` shape),
+//               copied to the mod at the same path and named in plugin.json
 const loadEngine = name => {
   const config = JSON.parse(readFileSync(join(ROOT, 'engines', name, 'engine.json'), 'utf8'))
   const isFactory = config.ruleExport === 'create'
@@ -79,6 +81,7 @@ const buildMod = (engine, engineDir, mod, outDir) => {
         author: AUTHOR,
         license: LICENSE,
         ...(Object.keys(userConfig).length > 0 ? { userConfig } : {}),
+        ...(engine.types === undefined ? {} : { types: `./${engine.types}` }),
       },
       null,
       2,
@@ -88,6 +91,7 @@ const buildMod = (engine, engineDir, mod, outDir) => {
   write(join(outDir, 'hooks/hooks.json'), '{ "modules": ["./register.ts"] }\n')
   write(join(outDir, 'hooks/register.ts'), registerSource(engine, mod.rules))
 
+  if (engine.types !== undefined) cpSync(join(engineDir, engine.types), join(outDir, engine.types))
   for (const file of engine.hooks) {
     // copyFileSync follows a symlink: a shared file may link into another engine
     mkdirSync(join(outDir, 'hooks'), { recursive: true })

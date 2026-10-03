@@ -13,12 +13,15 @@ export const repoDirFor = (command: string, cwd: string): string => {
 export type Repo = { git: (...args: string[]) => Promise<string | undefined> }
 
 // The repo a command works in, or undefined outside a work tree. `git`
-// answers stdout, or undefined when git exits non-zero.
+// answers stdout, or undefined when git exits non-zero. Output past the
+// host's 4 MiB cap throws, so the engine asks rather than scanning half a
+// diff; a git that times out rejects and takes the same path.
 export const openRepo = async (command: string, tools: GuardTools): Promise<Repo | undefined> => {
   const cwd = await tools.cwd()
   const dir = repoDirFor(command, cwd)
   const git = async (...args: string[]) => {
     const ran = await tools.run(['git', '-C', dir, ...args], cwd)
+    if (ran.isStdoutTruncated) throw new Error(`git ${args[0]} output passed the 4 MiB cap`)
     return ran.exitCode === 0 ? ran.stdout : undefined
   }
   return (await git('rev-parse', '--is-inside-work-tree')) === undefined ? undefined : { git }

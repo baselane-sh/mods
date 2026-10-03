@@ -52,3 +52,11 @@ test('secret-commit-guard: follows git -C', () => {
   expect(repoDirFor('git -C "/abs path" commit', '/repo')).toBe('/abs path')
   expect(repoDirFor('git commit -m x', '/repo')).toBe('/repo')
 })
+
+test('secret-commit-guard: a diff cut at the output cap asks', async ($, on) => {
+  const guard = probe($, on, {
+    git: { ...IN_REPO, 'diff --cached --name-only --diff-filter=AMR': 'src/app.ts\n', 'diff --cached -U0 --diff-filter=AM': CLEAN_DIFF },
+    truncated: ['diff --cached -U0 --diff-filter=AM'],
+  })
+  expect(await guard.answered('git commit -m big')).toBe(true)
+})

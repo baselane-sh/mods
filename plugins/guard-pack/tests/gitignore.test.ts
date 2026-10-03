@@ -18,3 +18,11 @@ test('gitignore-check: passes a clean repo and public templates', async ($, on) 
   const guard = probe($, on, { git: { ...IN_REPO, 'ls-files --others --exclude-standard': '.env.example\n', 'ls-files': 'src/app.ts\n' } })
   expect(await guard.answered('git add src')).toBe(false)
 })
+
+test('gitignore-check: a file list cut at the output cap asks', async ($, on) => {
+  const guard = probe($, on, {
+    git: { ...IN_REPO, 'ls-files --others --exclude-standard': '', 'ls-files': 'src/app.ts\n' },
+    truncated: ['ls-files'],
+  })
+  expect(await guard.answered('git add .')).toBe(true)
+})

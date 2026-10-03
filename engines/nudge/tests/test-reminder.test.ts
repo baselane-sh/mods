@@ -34,7 +34,7 @@ test('test-reminder: docs and config edits do not count', async ($, on) => {
 })
 
 test('test-reminder: runner and source tables', () => {
-  for (const command of ['npm test', 'pnpm run test', 'cd x && pytest -q', 'go test ./...', 'uv run pytest', 'bash tests/run.sh']) {
+  for (const command of ['npm test', 'pnpm run test', 'cd x && pytest -q', 'go test ./...', 'uv run pytest', 'bash tests/run.sh', 'claude plugin test plugins/x']) {
     expect({ command, runner: TEST_RUNNER.test(command) }).toEqual({ command, runner: true })
   }
   for (const command of ['cat jest.config.js', 'grep vitest package.json', 'npm install']) {

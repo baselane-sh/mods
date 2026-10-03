@@ -3,7 +3,7 @@ import { openRepo } from '../git'
 
 // Feature work happens on a branch or a worktree. Asks before a commit, push
 // or merge while the repo is on main or master.
-const WRITES_HISTORY = /git +(commit|push|merge)/
+const WRITES_HISTORY = /(^|[;&|] *)git +([^;&|]* +)?(commit|push|merge)( |$)/m
 const PROTECTED = new Set(['main', 'master'])
 
 export const rule: GuardRule = {

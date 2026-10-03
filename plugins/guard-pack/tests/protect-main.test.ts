@@ -20,3 +20,18 @@ test('protect-main: passes git reads on main', async ($, on) => {
   const guard = probe($, on, { git: { ...IN_REPO, 'branch --show-current': 'master\n' } })
   expect(await guard.answered('git status')).toBe(false)
 })
+
+test('protect-main: a branch read cut at the output cap asks', async ($, on) => {
+  const guard = probe($, on, { git: { ...IN_REPO, 'branch --show-current': 'feat/x\n' }, truncated: ['branch --show-current'] })
+  expect(await guard.answered('git commit -m x')).toBe(true)
+})
+
+test('protect-main: follows git -C into another repo', async ($, on) => {
+  const guard = probe($, on, {
+    git: {
+      'git -C /repo/sub rev-parse --is-inside-work-tree': 'true\n',
+      'git -C /repo/sub branch --show-current': 'main\n',
+    },
+  })
+  expect(await guard.answered('git -C sub commit -m x')).toBe(true)
+})

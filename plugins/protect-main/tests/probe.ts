@@ -11,18 +11,19 @@ export const CWD = '/repo'
 // --is-inside-work-tree` to stand for a directory outside any repo.
 export type GitAnswers = Readonly<Record<string, string>>
 
-export type ProbeOptions = { git?: GitAnswers; output?: string }
+// `truncated` names git answers that come back cut at the host's cap.
+export type ProbeOptions = { git?: GitAnswers; truncated?: readonly string[]; output?: string }
 
 export type Probe = {
   answered: (command: string) => Promise<boolean>
   run: (command: string) => Promise<ToolCallResult>
 }
 
-const processResult = (stdout: string | undefined): ProcessRunResult => ({
+const processResult = (stdout: string | undefined, isStdoutTruncated: boolean): ProcessRunResult => ({
   exitCode: stdout === undefined ? 1 : 0,
   stdout: stdout ?? '',
   stderr: '',
-  isStdoutTruncated: false,
+  isStdoutTruncated,
   isStderrTruncated: false,
 })
 
@@ -38,7 +39,7 @@ export const probe = ($: Engine, on: OnFn, options: ProbeOptions = {}): Probe =>
   on('process.run', (_$, e) => {
     const command = e.argv.join(' ')
     const key = command.startsWith(prefix) ? command.slice(prefix.length) : command
-    return { value: processResult(options.git?.[key]) }
+    return { value: processResult(options.git?.[key], options.truncated?.includes(key) ?? false) }
   })
   on('classic.PreToolUse', ($, e, next) => {
     reached += 1

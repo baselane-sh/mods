@@ -32,6 +32,11 @@ const write = (path, text) => {
 //               its own rules only.
 //   types       optional: a contract .d.ts (the plugin's `$.state` shape),
 //               copied to the mod at the same path and named in plugin.json
+//   nameToken   optional: a string that stands for the mod's own name. Every
+//               file copied into the mod has each occurrence replaced by the
+//               mod's name. `$.state` allows only the owning plugin to write
+//               a value, and its `plugin` must be a literal in source, so an
+//               engine whose mods share one source writes the token there.
 const loadEngine = name => {
   const config = JSON.parse(readFileSync(join(ROOT, 'engines', name, 'engine.json'), 'utf8'))
   const isFactory = config.ruleExport === 'create'
@@ -60,6 +65,16 @@ const registerSource = (engine, rules) => {
 
 const userConfigFor = (engine, rules) =>
   Object.assign({}, ...rules.map(id => engine.userConfig?.[id] ?? {}))
+
+// Copies one file into a mod. Without a nameToken it is a plain copy.
+const place = (engine, mod, from, to) => {
+  if (engine.nameToken === undefined) {
+    mkdirSync(join(to, '..'), { recursive: true })
+    copyFileSync(from, to)
+    return
+  }
+  write(to, readFileSync(from, 'utf8').replaceAll(engine.nameToken, mod.name))
+}
 
 const buildMod = (engine, engineDir, mod, outDir) => {
   for (const id of mod.rules) {
@@ -91,18 +106,17 @@ const buildMod = (engine, engineDir, mod, outDir) => {
   write(join(outDir, 'hooks/hooks.json'), '{ "modules": ["./register.ts"] }\n')
   write(join(outDir, 'hooks/register.ts'), registerSource(engine, mod.rules))
 
-  if (engine.types !== undefined) cpSync(join(engineDir, engine.types), join(outDir, engine.types))
+  // place() uses copyFileSync, which follows a symlink: a shared file may link into another engine
+  if (engine.types !== undefined) place(engine, mod, join(engineDir, engine.types), join(outDir, engine.types))
   for (const file of engine.hooks) {
-    // copyFileSync follows a symlink: a shared file may link into another engine
-    mkdirSync(join(outDir, 'hooks'), { recursive: true })
-    copyFileSync(join(engineDir, 'hooks', file), join(outDir, 'hooks', file))
+    place(engine, mod, join(engineDir, 'hooks', file), join(outDir, 'hooks', file))
   }
   for (const file of engine.tests) {
-    cpSync(join(engineDir, 'tests', file), join(outDir, 'tests', file))
+    place(engine, mod, join(engineDir, 'tests', file), join(outDir, 'tests', file))
   }
   for (const id of mod.rules) {
-    cpSync(join(engineDir, 'hooks/rules', `${id}.ts`), join(outDir, 'hooks/rules', `${id}.ts`))
-    cpSync(join(engineDir, 'tests', `${id}.test.ts`), join(outDir, 'tests', `${id}.test.ts`))
+    place(engine, mod, join(engineDir, 'hooks/rules', `${id}.ts`), join(outDir, 'hooks/rules', `${id}.ts`))
+    place(engine, mod, join(engineDir, 'tests', `${id}.test.ts`), join(outDir, 'tests', `${id}.test.ts`))
   }
 }
 

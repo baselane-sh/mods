@@ -7,6 +7,56 @@
   },
   "plugins": [
     {
+      "name": "cost-meter",
+      "source": "./plugins/cost-meter",
+      "description": "A band above the prompt with the session cost so far and what the last turn cost.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "latte-meter",
+      "source": "./plugins/latte-meter",
+      "description": "A band above the prompt that counts the session cost in lattes. Set the latte price in the plugin options.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "context-meter",
+      "source": "./plugins/context-meter",
+      "description": "A band above the prompt with a 10 cell bar of the context window used, yellow from 60 percent, red from 80.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "daily-spend",
+      "source": "./plugins/daily-spend",
+      "description": "A band above the prompt with today's total cost across all your sessions.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "band-pack",
+      "source": "./plugins/band-pack",
+      "description": "Every Baselane band meter in one row above the prompt: session cost, lattes, context bar and today's spend.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "receipt",
       "source": "./plugins/receipt",
       "description": "Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied.",

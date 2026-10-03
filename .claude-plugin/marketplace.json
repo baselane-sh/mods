@@ -195,6 +195,76 @@
         "name": "Baselane",
         "url": "https://baselane.sh"
       }
+    },
+    {
+      "name": "terse-mode",
+      "source": "./plugins/terse-mode",
+      "description": "Short answers: no preamble, no recap.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "plain-english",
+      "source": "./plugins/plain-english",
+      "description": "Writes in ASD-STE-100 Simplified Technical English: short sentences, active voice, simple words.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "junior-mode",
+      "source": "./plugins/junior-mode",
+      "description": "Explains each step and why, and defines jargon once, for a learner.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "reply-language",
+      "source": "./plugins/reply-language",
+      "description": "Answers in the language you set (English by default). Code, identifiers and commands stay as they are.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "no-sycophancy",
+      "source": "./plugins/no-sycophancy",
+      "description": "No flattery or filler. Disagreement is stated plainly, with the reason.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "no-em-dash",
+      "source": "./plugins/no-em-dash",
+      "description": "Never writes the em-dash character. Uses a comma, colon, period or parentheses.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "pirate-mode",
+      "source": "./plugins/pirate-mode",
+      "description": "Talks like a pirate in prose, never inside code, commands or file contents.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
     }
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "name": "pirate-mode",
+  "version": "0.1.0",
+  "description": "Talks like a pirate in prose, never inside code, commands or file contents.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "agent-firewall",
+  "version": "0.1.0",
+  "description": "A live pane of every tool call the agent makes: green when it ran, red when it was blocked, with counters. Open it with /firewall.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

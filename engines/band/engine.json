@@ -1,0 +1,19 @@
+{
+  "hooks": ["engine.tsx", "view.tsx", "rule.ts", "money.ts", "date.ts"],
+  "tests": ["probe.ts", "engine.test.ts"],
+  "register": "registerBand",
+  "ruleExport": "rule",
+  "options": true,
+  "types": "types/index.d.ts",
+  "nameToken": "band-meters",
+  "userConfig": {
+    "latte-meter": {
+      "lattePrice": {
+        "type": "number",
+        "title": "Latte price",
+        "description": "What one latte costs, in the currency of the session cost (US dollars). The latte meter divides the cost by it.",
+        "default": 5.0
+      }
+    }
+  }
+}

@@ -1,0 +1,94 @@
+import { atom, read, update } from 'claude-code'
+import type { On, PluginOptions } from 'claude-code'
+
+import type { Reading } from '../types'
+import { localDate } from './date'
+import type { BandRule, Segment } from './rule'
+import { bandTree, fitSegments } from './view'
+
+// The build writes the mod's own name in place of the token: `$.state` is
+// written only by the plugin that owns it, and the scan wants the atoms here.
+const reading = atom({ plugin: 'band-pack', key: 'reading' } as const, null)
+const turnStartUsd = atom({ plugin: 'band-pack', key: 'turnStartUsd' } as const, null)
+
+const failed = (where: string, error: unknown): string =>
+  `band: ${where} skipped, ${error instanceof Error ? error.message : String(error)}`
+
+const segmentsOf = (rules: readonly BandRule[], draw: Parameters<BandRule['segment']>[0]): Segment[] =>
+  rules.flatMap(rule => {
+    try {
+      const segment = rule.segment(draw)
+      return segment === undefined ? [] : [segment]
+    } catch {
+      // A rule that throws leaves its segment out and the rest draw.
+      return []
+    }
+  })
+
+const clampPercent = (percent: number | undefined): number | undefined =>
+  percent === undefined || !Number.isFinite(percent) ? undefined : Math.min(100, Math.max(0, percent))
+
+export const registerBand = (on: On, rules: readonly BandRule[], options: PluginOptions): void => {
+  // The cost as the turn begins: what this turn's cost is measured from.
+  on('turn.start', async ($, e, next) => {
+    try {
+      const usage = await $.session.usage()
+      await update($, turnStartUsd, () => usage.cost?.usd ?? null)
+    } catch (error) {
+      await $.ui.log(failed('turn start', error))
+    }
+    return next(e)
+  })
+
+  // The figures are read once, here. A render hook never writes, so they go
+  // into $.state for it to draw. A subagent's turn is not the person's turn.
+  on('turn.complete', async ($, e, next) => {
+    if (e.agentId !== undefined) return next(e)
+    try {
+      const usage = await $.session.usage()
+      const usd = usage.cost?.usd
+      const percent = clampPercent(usage.context.percent)
+      const previous = await read($, reading)
+      const base = (await read($, turnStartUsd)) ?? previous?.usd
+      // A cost that fell (a cleared session) leaves the turn's cost unknown.
+      const turnUsd = usd !== undefined && base !== undefined && usd >= base ? usd - base : undefined
+      const date = localDate(await $.clock.now())
+      const store = {
+        get: (key: string) => $.store.get(key),
+        set: (key: string, value: unknown) => $.store.set(key, value),
+      }
+
+      let now: Reading = {
+        ...(usd === undefined ? {} : { usd }),
+        ...(turnUsd === undefined ? {} : { turnUsd }),
+        ...(percent === undefined ? {} : { percent }),
+      }
+      for (const rule of rules) {
+        if (rule.atTurnEnd === undefined) continue
+        try {
+          now = { ...now, ...(await rule.atTurnEnd({ reading: now, turnUsd, date, store })) }
+        } catch (error) {
+          await $.ui.log(failed(rule.id, error))
+        }
+      }
+      await update($, reading, () => now)
+      // Spent: a second end of the same turn adds nothing.
+      await update($, turnStartUsd, () => null)
+    } catch (error) {
+      await $.ui.log(failed('turn end', error))
+    }
+    return next(e)
+  })
+
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    const current = await read($, reading)
+    if (e.props.hasSurvey || current === null) return next(e)
+
+    const date = localDate(await $.clock.now())
+    const segments = fitSegments(segmentsOf(rules, { reading: current, options, date }), e.props.bodyColumns)
+    if (segments.length === 0) return next(e)
+
+    const { Box, Text } = $.ui.resolve(e)
+    return bandTree({ Box, Text }, segments)
+  })
+}

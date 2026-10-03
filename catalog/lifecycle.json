@@ -1,0 +1,30 @@
+{
+  "engine": "lifecycle",
+  "mods": [
+    {
+      "name": "auto-format",
+      "description": "Runs your project's own formatter on each file Claude writes or edits, only when the project has a formatter config, and tells Claude to re-read the file.",
+      "rules": ["auto-format"]
+    },
+    {
+      "name": "long-run-notify",
+      "description": "Sends a phone push through ntfy.sh when a Bash command ran longer than a threshold (60 seconds by default). Sends the project name and the seconds only. Does nothing until you set an ntfy topic.",
+      "rules": ["long-run-notify"]
+    },
+    {
+      "name": "ntfy-notify",
+      "description": "Sends a phone push through ntfy.sh when Claude Code needs your input. The message is generic. Does nothing until you set an ntfy topic.",
+      "rules": ["ntfy-notify"]
+    },
+    {
+      "name": "session-journal",
+      "description": "Appends one line per session end (time, directory, reason) to ~/.claude/journal.log.",
+      "rules": ["session-journal"]
+    },
+    {
+      "name": "lifecycle-pack",
+      "description": "Every Baselane lifecycle mod in one: auto-format, long-run and input pushes, and the session journal.",
+      "rules": ["auto-format", "long-run-notify", "ntfy-notify", "session-journal"]
+    }
+  ]
+}

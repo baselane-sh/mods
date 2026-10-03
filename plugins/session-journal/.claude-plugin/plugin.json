@@ -1,0 +1,10 @@
+{
+  "name": "session-journal",
+  "version": "0.1.0",
+  "description": "Appends one line per session end (time, directory, reason) to ~/.claude/journal.log.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

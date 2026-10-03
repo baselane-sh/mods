@@ -1,0 +1,10 @@
+{
+  "name": "auto-format",
+  "version": "0.1.0",
+  "description": "Runs your project's own formatter on each file Claude writes or edits, only when the project has a formatter config, and tells Claude to re-read the file.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

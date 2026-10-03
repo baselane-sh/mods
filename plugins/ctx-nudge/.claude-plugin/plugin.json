@@ -1,0 +1,10 @@
+{
+  "name": "ctx-nudge",
+  "version": "0.1.0",
+  "description": "Reminds you to /clear or /compact when the context window passes 75 percent.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

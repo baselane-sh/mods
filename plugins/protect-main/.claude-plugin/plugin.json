@@ -1,0 +1,10 @@
+{
+  "name": "protect-main",
+  "version": "0.1.0",
+  "description": "Asks before a commit, push or merge while you are on main or master.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

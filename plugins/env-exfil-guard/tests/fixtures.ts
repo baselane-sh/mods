@@ -11,3 +11,9 @@ export const FAKE = {
   gcp: '{"type": "service_' + 'account", "private_key_id": "abc"}',
   pem: '-----BEGIN RSA PRIVATE ' + 'KEY-----',
 } as const
+
+// Tools for calling a rule's check directly, outside any repo.
+export const NO_TOOLS = {
+  cwd: async () => '/nowhere',
+  run: async () => ({ exitCode: 1, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false }),
+}

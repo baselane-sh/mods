@@ -22,9 +22,29 @@
       "rules": ["infra"]
     },
     {
+      "name": "secret-commit-guard",
+      "description": "Asks before a git commit that would record a credential or a secret-named file.",
+      "rules": ["secret-commit"]
+    },
+    {
+      "name": "protect-main",
+      "description": "Asks before a commit, push or merge while you are on main or master.",
+      "rules": ["protect-main"]
+    },
+    {
+      "name": "gitignore-check",
+      "description": "Asks before git add or commit when secret-looking files are not ignored or are already tracked.",
+      "rules": ["gitignore"]
+    },
+    {
+      "name": "secret-output-guard",
+      "description": "Tells Claude not to repeat a credential that showed up in command or file output, and names the source to rotate.",
+      "rules": ["secret-output"]
+    },
+    {
       "name": "guard-pack",
       "description": "Every Baselane guard in one mod.",
-      "rules": ["secret-filename", "secret-value", "env-exfil", "infra"]
+      "rules": ["secret-filename", "secret-value", "env-exfil", "infra", "secret-commit", "protect-main", "gitignore", "secret-output"]
     }
   ]
 }

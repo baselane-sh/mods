@@ -1,0 +1,10 @@
+{
+  "name": "gitignore-check",
+  "version": "0.1.0",
+  "description": "Asks before git add or commit when secret-looking files are not ignored or are already tracked.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

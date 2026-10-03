@@ -40,3 +40,6 @@ export const SECRET_NAME_SAFE = /\.env\.(example|sample|template|dist|md)/g
 export const SECRET_VAR_NAMES = '(KEY|SECRET|TOKEN|PASSWORD|PASSWD|PASS|CREDENTIAL|PRIVATE)'
 
 export const redact = (text: string): string => text.replace(SECRET_VALUE_GLOBAL, '[REDACTED]')
+
+// A path or command that names a secret-looking file, public templates aside.
+export const isSecretName = (text: string): boolean => SECRET_NAME.test(text.replace(SECRET_NAME_SAFE, ''))

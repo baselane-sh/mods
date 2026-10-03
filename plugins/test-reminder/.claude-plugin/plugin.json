@@ -1,0 +1,10 @@
+{
+  "name": "test-reminder",
+  "version": "0.1.0",
+  "description": "Reminds you at turn end when source files changed but no test command ran since.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

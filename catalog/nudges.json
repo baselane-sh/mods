@@ -1,0 +1,20 @@
+{
+  "engine": "nudge",
+  "mods": [
+    {
+      "name": "test-reminder",
+      "description": "Reminds you at turn end when source files changed but no test command ran since.",
+      "rules": ["test-reminder"]
+    },
+    {
+      "name": "ctx-nudge",
+      "description": "Reminds you to /clear or /compact when the context window passes 75 percent.",
+      "rules": ["ctx-nudge"]
+    },
+    {
+      "name": "nudge-pack",
+      "description": "Every Baselane turn-end reminder in one mod.",
+      "rules": ["test-reminder", "ctx-nudge"]
+    }
+  ]
+}

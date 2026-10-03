@@ -1,11 +1,10 @@
 import type { GuardRule } from '../engine'
-import { SECRET_NAME, SECRET_NAME_SAFE } from '../patterns'
+import { isSecretName } from '../patterns'
 
 // The native Read deny rules cannot see shell reads (cat, grep, cp, scp).
 // This rule can. It asks rather than denies, so a recursive grep that walks
 // past a .env still works after one confirmation.
-export const touchesSecretFile = (command: string): boolean =>
-  SECRET_NAME.test(command.replace(SECRET_NAME_SAFE, ''))
+export const touchesSecretFile = isSecretName
 
 export const rule: GuardRule = {
   id: 'secret-filename-guard',

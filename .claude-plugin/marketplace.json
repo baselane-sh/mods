@@ -47,9 +47,79 @@
       }
     },
     {
+      "name": "secret-commit-guard",
+      "source": "./plugins/secret-commit-guard",
+      "description": "Asks before a git commit that would record a credential or a secret-named file.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "protect-main",
+      "source": "./plugins/protect-main",
+      "description": "Asks before a commit, push or merge while you are on main or master.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "gitignore-check",
+      "source": "./plugins/gitignore-check",
+      "description": "Asks before git add or commit when secret-looking files are not ignored or are already tracked.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "secret-output-guard",
+      "source": "./plugins/secret-output-guard",
+      "description": "Tells Claude not to repeat a credential that showed up in command or file output, and names the source to rotate.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "guard-pack",
       "source": "./plugins/guard-pack",
       "description": "Every Baselane guard in one mod.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "test-reminder",
+      "source": "./plugins/test-reminder",
+      "description": "Reminds you at turn end when source files changed but no test command ran since.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "ctx-nudge",
+      "source": "./plugins/ctx-nudge",
+      "description": "Reminds you to /clear or /compact when the context window passes 75 percent.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "nudge-pack",
+      "source": "./plugins/nudge-pack",
+      "description": "Every Baselane turn-end reminder in one mod.",
       "version": "0.1.0",
       "author": {
         "name": "Baselane",

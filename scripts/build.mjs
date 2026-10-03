@@ -19,18 +19,38 @@ const write = (path, text) => {
   writeFileSync(path, text)
 }
 
-const registerSource = rules =>
+// What each engine ships and how a mod's register.ts wires its rules in.
+// A guard rule module exports `rule`; a nudge module exports `create`,
+// since each nudge keeps its own per-session state.
+const ENGINES = {
+  guard: {
+    hooks: ['engine.ts', 'patterns.ts', 'git.ts'],
+    tests: ['probe.ts', 'fixtures.ts', 'engine.test.ts'],
+    register: 'registerGuards',
+    importRule: id => `import { rule as ${camel(id)} } from './rules/${id}'`,
+    useRule: id => camel(id),
+  },
+  nudge: {
+    hooks: ['engine.ts'],
+    tests: ['probe.ts', 'engine.test.ts'],
+    register: 'registerNudges',
+    importRule: id => `import { create as ${camel(id)} } from './rules/${id}'`,
+    useRule: id => `${camel(id)}()`,
+  },
+}
+
+const registerSource = (engine, rules) =>
   [
     "import type { Register } from 'claude-code'",
     '',
-    "import { registerGuards } from './engine'",
-    ...rules.map(id => `import { rule as ${camel(id)} } from './rules/${id}'`),
+    `import { ${engine.register} } from './engine'`,
+    ...rules.map(engine.importRule),
     '',
-    `export const register: Register = on => registerGuards(on, [${rules.map(camel).join(', ')}])`,
+    `export const register: Register = on => ${engine.register}(on, [${rules.map(engine.useRule).join(', ')}])`,
     '',
   ].join('\n')
 
-const buildGuardMod = (engineDir, mod, outDir) => {
+const buildMod = (engine, engineDir, mod, outDir) => {
   for (const id of mod.rules) {
     if (!existsSync(join(engineDir, 'hooks/rules', `${id}.ts`))) {
       throw new Error(`${mod.name}: no rule named ${id}`)
@@ -45,12 +65,12 @@ const buildGuardMod = (engineDir, mod, outDir) => {
   )
   cpSync(join(ROOT, 'LICENSE'), join(outDir, 'LICENSE'))
   write(join(outDir, 'hooks/hooks.json'), '{ "modules": ["./register.ts"] }\n')
-  write(join(outDir, 'hooks/register.ts'), registerSource(mod.rules))
+  write(join(outDir, 'hooks/register.ts'), registerSource(engine, mod.rules))
 
-  for (const file of ['engine.ts', 'patterns.ts']) {
+  for (const file of engine.hooks) {
     cpSync(join(engineDir, 'hooks', file), join(outDir, 'hooks', file))
   }
-  for (const file of ['probe.ts', 'fixtures.ts', 'engine.test.ts']) {
+  for (const file of engine.tests) {
     cpSync(join(engineDir, 'tests', file), join(outDir, 'tests', file))
   }
   for (const id of mod.rules) {
@@ -59,17 +79,15 @@ const buildGuardMod = (engineDir, mod, outDir) => {
   }
 }
 
-const BUILDERS = { guard: buildGuardMod }
-
 const catalogs = readdirSync(join(ROOT, 'catalog'))
   .filter(file => file.endsWith('.json'))
   .map(file => JSON.parse(readFileSync(join(ROOT, 'catalog', file), 'utf8')))
 
 const mods = catalogs.flatMap(catalog => {
-  const build = BUILDERS[catalog.engine]
-  if (build === undefined) throw new Error(`unknown engine ${catalog.engine}`)
+  const engine = ENGINES[catalog.engine]
+  if (engine === undefined) throw new Error(`unknown engine ${catalog.engine}`)
   return catalog.mods.map(mod => {
-    build(join(ROOT, 'engines', catalog.engine), mod, join(ROOT, 'plugins', mod.name))
+    buildMod(engine, join(ROOT, 'engines', catalog.engine), mod, join(ROOT, 'plugins', mod.name))
     return mod
   })
 })

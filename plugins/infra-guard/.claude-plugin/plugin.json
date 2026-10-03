@@ -1,0 +1,10 @@
+{
+  "name": "infra-guard",
+  "version": "0.1.0",
+  "description": "Asks before terraform destroy, kubectl delete, force-push, DROP TABLE or rm -rf.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

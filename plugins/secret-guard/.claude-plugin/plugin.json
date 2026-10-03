@@ -1,0 +1,10 @@
+{
+  "name": "secret-guard",
+  "version": "0.1.0",
+  "description": "Asks before a live API key, token or private key is written, edited or run.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

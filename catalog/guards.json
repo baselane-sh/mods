@@ -1,0 +1,30 @@
+{
+  "engine": "guard",
+  "mods": [
+    {
+      "name": "secret-filename-guard",
+      "description": "Asks before a Bash command touches a secret-looking file (.env, private keys, credentials).",
+      "rules": ["secret-filename"]
+    },
+    {
+      "name": "secret-guard",
+      "description": "Asks before a live API key, token or private key is written, edited or run.",
+      "rules": ["secret-value"]
+    },
+    {
+      "name": "env-exfil-guard",
+      "description": "Asks before a command prints your environment, echoes a secret variable or sends local data to a remote host.",
+      "rules": ["env-exfil"]
+    },
+    {
+      "name": "infra-guard",
+      "description": "Asks before terraform destroy, kubectl delete, force-push, DROP TABLE or rm -rf.",
+      "rules": ["infra"]
+    },
+    {
+      "name": "guard-pack",
+      "description": "Every Baselane guard in one mod.",
+      "rules": ["secret-filename", "secret-value", "env-exfil", "infra"]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "name": "baselane-mods",
+  "description": "Baselane mods for Claude Code: guards, panes and tools you pick and combine.",
+  "owner": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "plugins": [
+    {
+      "name": "secret-filename-guard",
+      "source": "./plugins/secret-filename-guard",
+      "description": "Asks before a Bash command touches a secret-looking file (.env, private keys, credentials).",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "secret-guard",
+      "source": "./plugins/secret-guard",
+      "description": "Asks before a live API key, token or private key is written, edited or run.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "env-exfil-guard",
+      "source": "./plugins/env-exfil-guard",
+      "description": "Asks before a command prints your environment, echoes a secret variable or sends local data to a remote host.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "infra-guard",
+      "source": "./plugins/infra-guard",
+      "description": "Asks before terraform destroy, kubectl delete, force-push, DROP TABLE or rm -rf.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "guard-pack",
+      "source": "./plugins/guard-pack",
+      "description": "Every Baselane guard in one mod.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    }
+  ]
+}

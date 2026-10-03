@@ -1,0 +1,10 @@
+{
+  "name": "guard-pack",
+  "version": "0.1.0",
+  "description": "Every Baselane guard in one mod.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

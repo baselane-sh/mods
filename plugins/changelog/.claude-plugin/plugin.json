@@ -1,0 +1,11 @@
+{
+  "name": "changelog",
+  "version": "0.1.0",
+  "description": "Adds /changelog: commits since the last tag (or the last 30), grouped by conventional-commit type, as Markdown.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

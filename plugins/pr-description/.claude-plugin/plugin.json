@@ -1,0 +1,11 @@
+{
+  "name": "pr-description",
+  "version": "0.1.0",
+  "description": "Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

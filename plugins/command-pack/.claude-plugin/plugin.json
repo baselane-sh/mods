@@ -1,0 +1,11 @@
+{
+  "name": "command-pack",
+  "version": "0.1.0",
+  "description": "Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

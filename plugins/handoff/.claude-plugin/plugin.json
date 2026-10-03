@@ -1,0 +1,11 @@
+{
+  "name": "handoff",
+  "version": "0.1.0",
+  "description": "Adds /handoff: writes a session summary to .claude/handoff.md (never overwriting) and answers with the path.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

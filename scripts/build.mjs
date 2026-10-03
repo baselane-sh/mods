@@ -3,7 +3,7 @@
 // files, so each one gets its own copy of the engine and the rules it uses.
 //
 //   node scripts/build.mjs
-import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = new URL('..', import.meta.url).pathname
@@ -32,6 +32,12 @@ const write = (path, text) => {
 //               its own rules only.
 //   types       optional: a contract .d.ts (the plugin's `$.state` shape),
 //               copied to the mod at the same path and named in plugin.json
+//   stateOwner  optional. { name, files }: only the plugin that owns a `$.state`
+//               value may write it, and the owner is the mod's name. The engine
+//               source writes `name` as the owner (a literal, which the host
+//               requires); in each listed file (paths under the engine folder)
+//               the build swaps `'name'` and a bare `name` for the mod's name.
+//               For a mod called `name` nothing changes.
 const loadEngine = name => {
   const config = JSON.parse(readFileSync(join(ROOT, 'engines', name, 'engine.json'), 'utf8'))
   const isFactory = config.ruleExport === 'create'
@@ -60,6 +66,23 @@ const registerSource = (engine, rules) => {
 
 const userConfigFor = (engine, rules) =>
   Object.assign({}, ...rules.map(id => engine.userConfig?.[id] ?? {}))
+
+// A name that is not a valid identifier (`command-pack`) needs quotes as a key.
+const asKey = name => (/^[A-Za-z_$][\w$]*$/.test(name) ? name : `'${name}'`)
+
+const withOwner = (engine, modName, file, source) => {
+  if (engine.stateOwner === undefined || !engine.stateOwner.files.includes(file)) return source
+  const owner = engine.stateOwner.name
+  const pattern = new RegExp(`'${owner}'|\\b${owner}\\b`, 'g')
+  let swaps = 0
+  const swapped = source.replace(pattern, found => {
+    swaps += 1
+    return found.startsWith("'") ? `'${modName}'` : asKey(modName)
+  })
+  // A file that never named the owner would ship with a state owner that is not the mod.
+  if (swaps === 0) throw new Error(`${modName}: ${file} never names the state owner '${owner}'`)
+  return swapped
+}
 
 const buildMod = (engine, engineDir, mod, outDir) => {
   for (const id of mod.rules) {
@@ -91,12 +114,13 @@ const buildMod = (engine, engineDir, mod, outDir) => {
   write(join(outDir, 'hooks/hooks.json'), '{ "modules": ["./register.ts"] }\n')
   write(join(outDir, 'hooks/register.ts'), registerSource(engine, mod.rules))
 
-  if (engine.types !== undefined) cpSync(join(engineDir, engine.types), join(outDir, engine.types))
-  for (const file of engine.hooks) {
-    // copyFileSync follows a symlink: a shared file may link into another engine
-    mkdirSync(join(outDir, 'hooks'), { recursive: true })
-    copyFileSync(join(engineDir, 'hooks', file), join(outDir, 'hooks', file))
+  const copyShared = (file) => {
+    // readFileSync follows a symlink: a shared file may link into another engine
+    const source = readFileSync(join(engineDir, file), 'utf8')
+    write(join(outDir, file), withOwner(engine, mod.name, file, source))
   }
+  if (engine.types !== undefined) copyShared(engine.types)
+  for (const file of engine.hooks) copyShared(join('hooks', file))
   for (const file of engine.tests) {
     cpSync(join(engineDir, 'tests', file), join(outDir, 'tests', file))
   }

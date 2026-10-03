@@ -72,3 +72,14 @@ test('firewall view: the outcome mark is colored and still reads without color',
     await ui.unmount()
   }
 })
+
+test('firewall view: counters read singular for one', async ($, on) => {
+  const session = probe($, on)
+  await session.bash('npm run lint', 'error')
+  for (const surface of SURFACES) {
+    const ui = await session.mount(surface)
+    expect((await ui.find({ key: 'count-calls' }))?.text).toBe('1 call')
+    expect((await ui.find({ key: 'count-errors' }))?.text).toBe('1 error')
+    await ui.unmount()
+  }
+})

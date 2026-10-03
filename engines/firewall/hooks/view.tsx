@@ -47,12 +47,13 @@ export const rowCells = (row: FirewallRow, columns: number) => {
   return { time, mark, tool, summary }
 }
 
-const COUNTERS: readonly { key: string; field: keyof FirewallCounts; word: string; color?: string }[] = [
-  { key: 'count-calls', field: 'calls', word: 'calls' },
+// `one` is the word for a count of exactly one, where it differs.
+const COUNTERS: readonly { key: string; field: keyof FirewallCounts; word: string; one?: string; color?: string }[] = [
+  { key: 'count-calls', field: 'calls', word: 'calls', one: 'call' },
   { key: 'count-ran', field: 'ran', word: 'ran', color: 'green' },
   { key: 'count-asked', field: 'asked', word: 'asked', color: 'cyan' },
   { key: 'count-blocked', field: 'blocked', word: 'blocked', color: 'red' },
-  { key: 'count-errors', field: 'errors', word: 'errors', color: 'yellow' },
+  { key: 'count-errors', field: 'errors', word: 'errors', one: 'error', color: 'yellow' },
 ]
 
 export const paneTree = (
@@ -66,7 +67,7 @@ export const paneTree = (
       <Text bold>Agent Firewall</Text>
       {COUNTERS.map(counter => (
         <Box key={counter.key}>
-          <Text bold {...(counter.color === undefined ? {} : { color: counter.color })}>{`${counts[counter.field]} ${counter.word}`}</Text>
+          <Text bold {...(counter.color === undefined ? {} : { color: counter.color })}>{`${counts[counter.field]} ${counts[counter.field] === 1 ? (counter.one ?? counter.word) : counter.word}`}</Text>
         </Box>
       ))}
     </Box>

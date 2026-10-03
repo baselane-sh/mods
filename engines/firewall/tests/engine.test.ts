@@ -23,7 +23,7 @@ test('firewall: each outcome is counted and the counters add up', async ($, on) 
   expect(await counter('count-ran')).toBe('2 ran')
   expect(await counter('count-asked')).toBe('1 asked')
   expect(await counter('count-blocked')).toBe('1 blocked')
-  expect(await counter('count-errors')).toBe('1 errors')
+  expect(await counter('count-errors')).toBe('1 error')
   await ui.unmount()
 })
 

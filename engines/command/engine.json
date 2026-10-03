@@ -1,7 +1,8 @@
 {
-  "hooks": ["engine.ts", "tracker.ts", "render.ts", "patterns.ts"],
+  "hooks": ["engine.ts", "tracker.ts", "render.ts", "patterns.ts", "helpers.ts"],
   "tests": ["probe.ts", "fixtures.ts", "engine.test.ts"],
   "register": "registerCommands",
   "ruleExport": "rule",
-  "types": "types/index.d.ts"
+  "types": "types/index.d.ts",
+  "stateOwner": { "name": "receipt", "files": ["hooks/engine.ts", "types/index.d.ts"] }
 }

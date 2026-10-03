@@ -3,7 +3,7 @@
 // files, so each one gets its own copy of the engine and the rules it uses.
 //
 //   node scripts/build.mjs
-import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = new URL('..', import.meta.url).pathname
@@ -37,6 +37,12 @@ const write = (path, text) => {
 //               mod's name. `$.state` allows only the owning plugin to write
 //               a value, and its `plugin` must be a literal in source, so an
 //               engine whose mods share one source writes the token there.
+//   stateOwner  optional. { name, files }: only the plugin that owns a `$.state`
+//               value may write it, and the owner is the mod's name. The engine
+//               source writes `name` as the owner (a literal, which the host
+//               requires); in each listed file (paths under the engine folder)
+//               the build swaps `'name'` and a bare `name` for the mod's name.
+//               For a mod called `name` nothing changes.
 const loadEngine = name => {
   const config = JSON.parse(readFileSync(join(ROOT, 'engines', name, 'engine.json'), 'utf8'))
   const isFactory = config.ruleExport === 'create'
@@ -66,14 +72,31 @@ const registerSource = (engine, rules) => {
 const userConfigFor = (engine, rules) =>
   Object.assign({}, ...rules.map(id => engine.userConfig?.[id] ?? {}))
 
-// Copies one file into a mod. Without a nameToken it is a plain copy.
-const place = (engine, mod, from, to) => {
-  if (engine.nameToken === undefined) {
-    mkdirSync(join(to, '..'), { recursive: true })
-    copyFileSync(from, to)
-    return
-  }
-  write(to, readFileSync(from, 'utf8').replaceAll(engine.nameToken, mod.name))
+// A name that is not a valid identifier (`command-pack`) needs quotes as a key.
+const asKey = name => (/^[A-Za-z_$][\w$]*$/.test(name) ? name : `'${name}'`)
+
+const withOwner = (engine, modName, file, source) => {
+  if (engine.stateOwner === undefined || !engine.stateOwner.files.includes(file)) return source
+  const owner = engine.stateOwner.name
+  const pattern = new RegExp(`'${owner}'|\\b${owner}\\b`, 'g')
+  let swaps = 0
+  const swapped = source.replace(pattern, found => {
+    swaps += 1
+    return found.startsWith("'") ? `'${modName}'` : asKey(modName)
+  })
+  // A file that never named the owner would ship with a state owner that is not the mod.
+  if (swaps === 0) throw new Error(`${modName}: ${file} never names the state owner '${owner}'`)
+  return swapped
+}
+
+// Copies one engine file (a path under the engine folder) into a mod at the
+// same path, swapping the nameToken and the state owner where the engine
+// asks for it. readFileSync follows a symlink: a shared file may link into
+// another engine.
+const place = (engine, mod, engineDir, outDir, file) => {
+  const source = readFileSync(join(engineDir, file), 'utf8')
+  const named = engine.nameToken === undefined ? source : source.replaceAll(engine.nameToken, mod.name)
+  write(join(outDir, file), withOwner(engine, mod.name, file, named))
 }
 
 const buildMod = (engine, engineDir, mod, outDir) => {
@@ -106,17 +129,13 @@ const buildMod = (engine, engineDir, mod, outDir) => {
   write(join(outDir, 'hooks/hooks.json'), '{ "modules": ["./register.ts"] }\n')
   write(join(outDir, 'hooks/register.ts'), registerSource(engine, mod.rules))
 
-  // place() uses copyFileSync, which follows a symlink: a shared file may link into another engine
-  if (engine.types !== undefined) place(engine, mod, join(engineDir, engine.types), join(outDir, engine.types))
-  for (const file of engine.hooks) {
-    place(engine, mod, join(engineDir, 'hooks', file), join(outDir, 'hooks', file))
-  }
-  for (const file of engine.tests) {
-    place(engine, mod, join(engineDir, 'tests', file), join(outDir, 'tests', file))
-  }
+  const copy = file => place(engine, mod, engineDir, outDir, file)
+  if (engine.types !== undefined) copy(engine.types)
+  for (const file of engine.hooks) copy(join('hooks', file))
+  for (const file of engine.tests) copy(join('tests', file))
   for (const id of mod.rules) {
-    place(engine, mod, join(engineDir, 'hooks/rules', `${id}.ts`), join(outDir, 'hooks/rules', `${id}.ts`))
-    place(engine, mod, join(engineDir, 'tests', `${id}.test.ts`), join(outDir, 'tests', `${id}.test.ts`))
+    copy(join('hooks/rules', `${id}.ts`))
+    copy(join('tests', `${id}.test.ts`))
   }
 }
 

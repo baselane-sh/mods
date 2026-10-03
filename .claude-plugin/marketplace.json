@@ -67,6 +67,56 @@
       }
     },
     {
+      "name": "standup",
+      "source": "./plugins/standup",
+      "description": "Adds /standup: Yesterday, Today and Blockers from your git log and this session's record, printed and copied.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "changelog",
+      "source": "./plugins/changelog",
+      "description": "Adds /changelog: commits since the last tag (or the last 30), grouped by conventional-commit type, as Markdown.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "pr-description",
+      "source": "./plugins/pr-description",
+      "description": "Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "handoff",
+      "source": "./plugins/handoff",
+      "description": "Adds /handoff: writes a session summary to .claude/handoff.md (never overwriting) and answers with the path.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "command-pack",
+      "source": "./plugins/command-pack",
+      "description": "Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "secret-filename-guard",
       "source": "./plugins/secret-filename-guard",
       "description": "Asks before a Bash command touches a secret-looking file (.env, private keys, credentials).",

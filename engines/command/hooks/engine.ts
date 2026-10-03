@@ -14,17 +14,38 @@ export type Facts = {
   costUsd?: number
 }
 
+// What a rule may reach beyond the record, as closures over the host calls
+// (a rule never holds `$`). A rule that needs none of it ignores the argument.
+export type CommandTools = {
+  // The session's working directory.
+  cwd: () => Promise<string>
+  // `git -C <cwd> <args>`: stdout, or undefined when git exits non-zero (which
+  // is also what a directory outside any repo answers). Output past the host's
+  // 4 MiB cap, or a git that times out, throws.
+  git: (...args: string[]) => Promise<string | undefined>
+  exists: (path: string) => Promise<boolean>
+  // Creates the file and its directories.
+  write: (path: string, text: string) => Promise<void>
+}
+
+// What a rule answers: text to print and copy, or `{ text, copy: false }` for
+// a message that is not a result (an error must not replace the clipboard).
+export type Composed = string | { text: string; copy: false }
+
 // One slash command: its name and description, and how it turns the session
-// record into the text it prints. Pure, so a rule is a table of strings.
+// record into the text it prints. Pure unless it uses `tools`.
 export type CommandRule = {
   name: string
   description: string
-  compose: (record: CommandRecord, facts: Facts) => string
+  compose: (record: CommandRecord, facts: Facts, tools: CommandTools) => Composed | Promise<Composed>
 }
 
+const GIT_TIMEOUT_MS = 15_000
+
 // A state value is written only by the plugin that owns it, and the owner is
-// the mod's name. The only mod on this engine is `receipt`; a mod with another
-// name needs its own owner here and in types/index.d.ts.
+// the mod's name. The host wants the owner as a literal, so this source writes
+// the first mod's name and scripts/build.mjs swaps in each mod's own name
+// (engine.json, stateOwner). The same swap runs in types/index.d.ts.
 const record = atom({ plugin: 'receipt', key: 'record' } as const, EMPTY)
 
 const attempt = async <T>(read: () => Promise<T>): Promise<T | undefined> => {
@@ -73,12 +94,27 @@ export const registerCommands = (on: On, rules: readonly CommandRule[]): void =>
         ...(usage?.cost === undefined ? {} : { costUsd: usage.cost.usd }),
       }
 
-      let text: string
+      const tools: CommandTools = {
+        cwd: () => $.session.cwd(),
+        git: async (...args) => {
+          const dir = await $.session.cwd()
+          const ran = await $.process.run(['git', '-C', dir, ...args], { cwd: dir, timeoutMs: GIT_TIMEOUT_MS })
+          if (ran.isStdoutTruncated) throw new Error(`git ${args[0]} output passed the 4 MiB cap`)
+          return ran.exitCode === 0 ? ran.stdout : undefined
+        },
+        exists: path => $.fs.exists(path),
+        write: (path, text) => $.fs.write(path, text),
+      }
+
+      let composed: Composed
       try {
-        text = rule.compose(kept ?? EMPTY, facts)
+        composed = await rule.compose(kept ?? EMPTY, facts, tools)
       } catch (error) {
         return { text: `${rule.name}: failed, ${error instanceof Error ? error.message : String(error)}` }
       }
+
+      if (typeof composed !== 'string') return { text: composed.text }
+      const text = composed
 
       const copy = await attempt(() => $.ui.copy({ text }))
       const note =

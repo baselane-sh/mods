@@ -5,6 +5,31 @@
       "name": "receipt",
       "description": "Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied.",
       "rules": ["receipt"]
+    },
+    {
+      "name": "standup",
+      "description": "Adds /standup: Yesterday, Today and Blockers from your git log and this session's record, printed and copied.",
+      "rules": ["standup"]
+    },
+    {
+      "name": "changelog",
+      "description": "Adds /changelog: commits since the last tag (or the last 30), grouped by conventional-commit type, as Markdown.",
+      "rules": ["changelog"]
+    },
+    {
+      "name": "pr-description",
+      "description": "Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master.",
+      "rules": ["pr-description"]
+    },
+    {
+      "name": "handoff",
+      "description": "Adds /handoff: writes a session summary to .claude/handoff.md (never overwriting) and answers with the path.",
+      "rules": ["handoff"]
+    },
+    {
+      "name": "command-pack",
+      "description": "Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff.",
+      "rules": ["receipt", "standup", "changelog", "pr-description", "handoff"]
     }
   ]
 }

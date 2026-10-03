@@ -5,3 +5,6 @@ export const FAKE = {
   anthropic: 'sk-ant-' + 'api03-abcdefghijklmnopqrstuvwxyz',
   postgres: 'postgres:' + '//app:S3cretPass@db.example.com:5432/prod',
 } as const
+
+// The one git answer every command needs to see a repo.
+export const IN_REPO = { 'rev-parse --is-inside-work-tree': 'true\n' } as const

@@ -1,0 +1,10 @@
+{
+  "name": "prod-db-guard",
+  "version": "0.1.0",
+  "description": "Asks before destructive SQL runs in a command: TRUNCATE, DELETE or UPDATE with no WHERE.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

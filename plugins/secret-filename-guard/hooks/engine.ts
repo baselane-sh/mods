@@ -1,9 +1,13 @@
 import type { On, PreToolUseResult, ProcessRunResult, ToolCallEnvelope, ToolCallResult } from 'claude-code'
 
-// What a rule may use beyond the call itself: the session's directory and a
-// host command (git, for the rules that inspect the repo).
+// What a rule may use beyond the call itself: the session's directory, a
+// host command (git, for the rules that inspect the repo) and where a path
+// really lands.
 export type GuardTools = {
   cwd: () => Promise<string>
+  // The absolute path with every symbolic link followed, or undefined when
+  // the path does not exist.
+  realPath: (path: string) => Promise<string | undefined>
   run: (argv: readonly string[], cwd: string) => Promise<ProcessRunResult>
 }
 
@@ -81,6 +85,7 @@ export const registerGuards = (on: On, rules: readonly GuardRule[]): void => {
   on('classic.PreToolUse', async ($, e, next) => {
     const tools: GuardTools = {
       cwd: () => $.session.cwd(),
+      realPath: path => $.fs.stat(path, { resolve: true }).then(stat => stat.realPath, () => undefined),
       run: (argv, cwd) => $.process.run(argv, { cwd, timeoutMs: RUN_TIMEOUT_MS }),
     }
     return (await evaluate(rules, e, tools)) ?? next(e)

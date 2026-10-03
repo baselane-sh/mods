@@ -11,11 +11,21 @@ export const CWD = '/repo'
 // --is-inside-work-tree` to stand for a directory outside any repo.
 export type GitAnswers = Readonly<Record<string, string>>
 
-// `truncated` names git answers that come back cut at the host's cap.
-export type ProbeOptions = { git?: GitAnswers; truncated?: readonly string[]; output?: string }
+// `truncated` names git answers that come back cut at the host's cap. `fs`
+// maps each path that exists to where it really lands (a symbolic link maps
+// to its target); any other path is missing and `fs.stat` rejects for it.
+export type ProbeOptions = {
+  git?: GitAnswers
+  truncated?: readonly string[]
+  output?: string
+  fs?: Readonly<Record<string, string>>
+}
+
+type ToolArgs = Parameters<Engine['tool']['call']>[0]
 
 export type Probe = {
   answered: (command: string) => Promise<boolean>
+  answeredTool: (args: ToolArgs) => Promise<boolean>
   run: (command: string) => Promise<ToolCallResult>
 }
 
@@ -41,6 +51,11 @@ export const probe = ($: Engine, on: OnFn, options: ProbeOptions = {}): Probe =>
     const key = command.startsWith(prefix) ? command.slice(prefix.length) : command
     return { value: processResult(options.git?.[key], options.truncated?.includes(key) ?? false) }
   })
+  on('fs.stat', (_$, e) => {
+    const realPath = options.fs?.[e.path]
+    if (realPath === undefined) throw new Error(`ENOENT: ${e.path}`)
+    return { value: { kind: 'dir', size: 0, mtimeMs: 0, isLink: false, realPath } }
+  })
   on('classic.PreToolUse', ($, e, next) => {
     reached += 1
     return next(e)
@@ -49,12 +64,15 @@ export const probe = ($: Engine, on: OnFn, options: ProbeOptions = {}): Probe =>
 
   const run = (command: string) => $.tool.call({ tool: 'Bash', command })
 
+  const answeredTool = async (args: ToolArgs) => {
+    const before = reached
+    await $.tool.call(args)
+    return reached === before
+  }
+
   return {
     run,
-    answered: async command => {
-      const before = reached
-      await run(command)
-      return reached === before
-    },
+    answeredTool,
+    answered: command => answeredTool({ tool: 'Bash', command }),
   }
 }

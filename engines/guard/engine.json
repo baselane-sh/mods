@@ -1,6 +1,6 @@
 {
-  "hooks": ["engine.ts", "patterns.ts", "git.ts"],
-  "tests": ["probe.ts", "fixtures.ts", "engine.test.ts"],
+  "hooks": ["engine.ts", "patterns.ts", "git.ts", "shell.ts"],
+  "tests": ["probe.ts", "fixtures.ts", "engine.test.ts", "shell.test.ts"],
   "register": "registerGuards",
   "ruleExport": "rule"
 }

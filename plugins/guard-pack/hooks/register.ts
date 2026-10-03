@@ -9,5 +9,12 @@ import { rule as secretCommit } from './rules/secret-commit'
 import { rule as protectMain } from './rules/protect-main'
 import { rule as gitignore } from './rules/gitignore'
 import { rule as secretOutput } from './rules/secret-output'
+import { rule as curlPipe } from './rules/curl-pipe'
+import { rule as sudo } from './rules/sudo'
+import { rule as noVerify } from './rules/no-verify'
+import { rule as lockfile } from './rules/lockfile'
+import { rule as newPackage } from './rules/new-package'
+import { rule as prodDb } from './rules/prod-db'
+import { rule as pathJail } from './rules/path-jail'
 
-export const register: Register = on => registerGuards(on, [secretFilename, secretValue, envExfil, infra, secretCommit, protectMain, gitignore, secretOutput])
+export const register: Register = on => registerGuards(on, [secretFilename, secretValue, envExfil, infra, secretCommit, protectMain, gitignore, secretOutput, curlPipe, sudo, noVerify, lockfile, newPackage, prodDb, pathJail])

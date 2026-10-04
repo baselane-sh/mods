@@ -72,7 +72,7 @@ export const goDeps = (text: string): Dep[] => {
     const line = row.trim()
     if (inBlock && line === ')') inBlock = false
     else if (/^require\s*\($/.test(line)) inBlock = true
-    else {
+    else if (!line.startsWith('//')) {
       const hit = (inBlock ? /^(\S+)\s+(\S+)(.*)$/ : /^require\s+(\S+)\s+(\S+)(.*)$/).exec(line)
       if (hit !== null && !/\/\/\s*indirect/.test(hit[3] ?? '')) found.push(dep(hit[1] ?? '', hit[2] ?? '*'))
     }

@@ -1,5 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
+import { redact } from '../hooks/patterns'
 import { EMPTY, observe } from '../hooks/tracker'
 import { FAKE } from './fixtures'
 import { DENY_WORD, FAIL_WORD, probe } from './probe'
@@ -80,4 +81,23 @@ test('engine: session.start registers every rule as a slash command', async ($, 
   await session.start()
   expect(session.registered().length).toBeGreaterThan(0)
   expect(session.registered().every(c => c.name.length > 0 && c.description.length > 0)).toBe(true)
+})
+
+// Spliced so this file does not match the shape it carries.
+const URL_CREDENTIAL = 'https://user:' + 'tok3n@git.example.com/org/lib.git'
+
+test('patterns: a URL that carries a user and a password is redacted', () => {
+  expect(redact(`clone ${URL_CREDENTIAL} now`)).toBe('clone [REDACTED]git.example.com/org/lib.git now')
+  expect(redact('git+' + 'https://gitlab-ci-token:' + 'abc123@gitlab.com/x.git')).not.toContain('abc123')
+})
+
+test('patterns: URLs with no credentials are left alone', () => {
+  for (const url of [
+    'https://example.com/path?q=1',
+    'https://example.com:8443/path',
+    'ssh://git@github.com/org/repo.git',
+    'http://localhost:3000/@scope/pkg',
+    'https://example.com/a:b@c',
+    'mailto:ada@example.com',
+  ]) expect(redact(url)).toBe(url)
 })

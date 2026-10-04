@@ -65,3 +65,17 @@ test('slack-notify: a refused post does not break the notification', { options: 
   expect(session.fetched().length).toBe(1)
   expect(session.logs()).toEqual(['slack-notify: skipped, the push was refused (HTTP 404)'])
 })
+
+test('slack-notify: a notification that waits for nobody (auth_success) posts nothing', { options: { slackWebhookUrl: HOOK } }, async ($, on) => {
+  const session = probe($, on)
+  await session.needsInput('/work/myproj', 'auth_success')
+  expect(session.fetched()).toEqual([])
+  expect(session.logs()).toEqual([])
+})
+
+test('slack-notify: idle and elicitation prompts still post', { options: { slackWebhookUrl: HOOK } }, async ($, on) => {
+  const session = probe($, on)
+  await session.needsInput('/work/myproj', 'idle_prompt')
+  await session.needsInput('/work/myproj', 'elicitation_dialog')
+  expect(session.fetched().length).toBe(2)
+})

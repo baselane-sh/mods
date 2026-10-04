@@ -150,3 +150,30 @@ test('auto-lint: an unknown extension stays silent', async ($, on) => {
   await session.edit('/proj/notes.md')
   expect(linters(session)).toEqual([])
 })
+
+// golangci-lint --fix rewrites any file of the package, not only the edited one.
+const GO_PROJECT = { '/proj/.golangci.yml': '', '/proj/go.mod': 'module x\n', '/proj/svc/a.go': 'package svc\n', '/proj/svc/b.go': 'package svc\n' }
+const GOLANGCI = { 'golangci-lint': '/bin/golangci-lint' }
+
+test('auto-lint: golangci-lint names a sibling file it rewrote, not only the edited one', async ($, on) => {
+  const fixSibling = (_argv: readonly string[], files: Map<string, string>): Formatted => {
+    files.set('/proj/svc/b.go', 'package svc // fixed\n')
+    return { exitCode: 0 }
+  }
+  const session = probe($, on, { ...PROJ, files: GO_PROJECT, onPath: GOLANGCI, format: fixSibling })
+  const note = ((await session.edit('/proj/svc/a.go')).context ?? []).join(' ')
+  expect(note).toContain('auto-lint: golangci-lint fixed /proj/svc/b.go.')
+  expect(note).toMatch(/Re-read/)
+  expect(note).not.toContain('fixed /proj/svc/a.go')
+})
+
+test('auto-lint: golangci-lint problems are reported for the package, not the edited file', async ($, on) => {
+  const session = probe($, on, { ...PROJ, files: GO_PROJECT, onPath: GOLANGCI, format: () => ({ exitCode: 1, stdout: 'b.go:3:1: unused (unused)' }) })
+  const note = ((await session.edit('/proj/svc/a.go')).context ?? []).join(' ')
+  expect(note).toContain('auto-lint: golangci-lint found problems it could not fix in the package /proj/svc: b.go:3:1: unused (unused)')
+})
+
+test('auto-lint: golangci-lint that changes nothing stays silent', async ($, on) => {
+  const session = probe($, on, { ...PROJ, files: GO_PROJECT, onPath: GOLANGCI, format: () => ({ exitCode: 0 }) })
+  expect((await session.edit('/proj/svc/a.go')).context ?? []).toEqual([])
+})

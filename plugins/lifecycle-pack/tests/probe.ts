@@ -33,7 +33,8 @@ export type ProbeOptions = {
 export type Probe = {
   edit: (file_path: string, tookMs?: number) => ReturnType<Engine['tool']['call']>
   bash: (command: string, tookMs?: number) => ReturnType<Engine['tool']['call']>
-  needsInput: (cwd?: string) => Promise<unknown>
+  // `type` is the Notification's notification_type (default permission_prompt).
+  needsInput: (cwd?: string, type?: string) => Promise<unknown>
   sessionEnd: (reason?: 'other' | 'clear' | 'logout', cwd?: string) => Promise<unknown>
   turnEnd: (durationMs: number, extra?: { isAborted?: boolean; agentId?: string }) => Promise<unknown>
   files: () => ReadonlyMap<string, string>
@@ -129,8 +130,8 @@ export const probe = ($: Engine, on: OnFn, options: ProbeOptions = {}): Probe =>
       tookMs = ms
       return $.tool.call({ tool: 'Bash', command })
     },
-    needsInput: (cwd = '/work/myproj') =>
-      $.classic.Notification({ message: 'Claude needs your permission to use Bash', notification_type: 'permission_prompt', cwd }),
+    needsInput: (cwd = '/work/myproj', type = 'permission_prompt') =>
+      $.classic.Notification({ message: 'Claude needs your permission to use Bash', notification_type: type, cwd }),
     sessionEnd: (reason = 'other', cwd = '/work/myproj') => $.classic.SessionEnd({ reason, cwd }),
     turnEnd: async (durationMs, extra = {}) => {
       turns += 1

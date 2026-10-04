@@ -4,27 +4,56 @@
     {
       "name": "cost-meter",
       "description": "A band above the prompt with the session cost so far and what the last turn cost.",
-      "rules": ["cost-meter"]
+      "rules": [
+        "cost-meter"
+      ]
     },
     {
       "name": "latte-meter",
       "description": "A band above the prompt that counts the session cost in lattes. Set the latte price in the plugin options.",
-      "rules": ["latte-meter"]
+      "rules": [
+        "latte-meter"
+      ]
     },
     {
       "name": "context-meter",
       "description": "A band above the prompt with a 10 cell bar of the context window used, yellow from 60 percent, red from 80.",
-      "rules": ["context-meter"]
+      "rules": [
+        "context-meter"
+      ]
     },
     {
       "name": "daily-spend",
       "description": "A band above the prompt with today's total cost across all your sessions.",
-      "rules": ["daily-spend"]
+      "rules": [
+        "daily-spend"
+      ]
+    },
+    {
+      "name": "pomodoro",
+      "description": "A band above the prompt with a 25/5 focus timer (focus 18:42, break 03:10). Start and stop it with /pomodoro; a toast marks each switch.",
+      "rules": [
+        "pomodoro"
+      ]
+    },
+    {
+      "name": "mood-ring",
+      "description": "A band above the prompt with a colored dot and a word for the error and block rate of your last 20 tool calls: calm (green) under 10 percent, tense (yellow) under 30, stormy (red) from 30.",
+      "rules": [
+        "mood-ring"
+      ]
     },
     {
       "name": "band-pack",
-      "description": "Every Baselane band meter in one row above the prompt: session cost, lattes, context bar and today's spend.",
-      "rules": ["cost-meter", "latte-meter", "context-meter", "daily-spend"]
+      "description": "Every Baselane band meter in one row above the prompt: session cost, lattes, context bar, today's spend, the focus timer and the mood ring.",
+      "rules": [
+        "cost-meter",
+        "latte-meter",
+        "context-meter",
+        "daily-spend",
+        "pomodoro",
+        "mood-ring"
+      ]
     }
   ]
 }

@@ -7,6 +7,7 @@
     { "name": "reply-language", "description": "Answers in the language you set (English by default). Code, identifiers and commands stay as they are.", "rules": ["reply-language"] },
     { "name": "no-sycophancy", "description": "No flattery or filler. Disagreement is stated plainly, with the reason.", "rules": ["no-sycophancy"] },
     { "name": "no-em-dash", "description": "Never writes the em-dash character. Uses a comma, colon, period or parentheses.", "rules": ["no-em-dash"] },
-    { "name": "pirate-mode", "description": "Talks like a pirate in prose, never inside code, commands or file contents.", "rules": ["pirate-mode"] }
+    { "name": "pirate-mode", "description": "Talks like a pirate in prose, never inside code, commands or file contents.", "rules": ["pirate-mode"] },
+    { "name": "haiku-commits", "description": "Commit messages get a normal conventional-commit first line, then a 5-7-5 haiku about the change in the body.", "rules": ["haiku-commits"] }
   ]
 }

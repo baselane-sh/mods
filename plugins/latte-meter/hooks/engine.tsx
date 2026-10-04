@@ -1,15 +1,21 @@
 import { atom, read, update } from 'claude-code'
 import type { On, PluginOptions } from 'claude-code'
 
-import type { Reading } from '../types'
+import type { Outcome, Pomodoro, Reading } from '../types'
 import { localDate } from './date'
 import type { BandRule, Segment } from './rule'
 import { bandTree, fitSegments } from './view'
+import { watchOutcomes, watchTickers } from './watch'
 
 // The build writes the mod's own name in place of the token: `$.state` is
 // written only by the plugin that owns it, and the scan wants the atoms here.
 const reading = atom({ plugin: 'latte-meter', key: 'reading' } as const, null)
 const turnStartUsd = atom({ plugin: 'latte-meter', key: 'turnStartUsd' } as const, null)
+// The state scan wants each atom spelled in the file that reads or writes it,
+// so watch.ts spells the same two. A turn end replaces `reading` whole, which
+// is why these live apart from it.
+const outcomes = atom({ plugin: 'latte-meter', key: 'outcomes' } as const, [] as readonly Outcome[])
+const pomodoro = atom({ plugin: 'latte-meter', key: 'pomodoro' } as const, null as Pomodoro | null)
 
 const failed = (where: string, error: unknown): string =>
   `band: ${where} skipped, ${error instanceof Error ? error.message : String(error)}`
@@ -29,6 +35,9 @@ const clampPercent = (percent: number | undefined): number | undefined =>
   percent === undefined || !Number.isFinite(percent) ? undefined : Math.min(100, Math.max(0, percent))
 
 export const registerBand = (on: On, rules: readonly BandRule[], options: PluginOptions): void => {
+  watchOutcomes(on, rules)
+  watchTickers(on, rules)
+
   // The cost as the turn begins: what this turn's cost is measured from.
   on('turn.start', async ($, e, next) => {
     try {
@@ -81,11 +90,12 @@ export const registerBand = (on: On, rules: readonly BandRule[], options: Plugin
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    const current = await read($, reading)
-    if (e.props.hasSurvey || current === null) return next(e)
-
+    if (e.props.hasSurvey) return next(e)
+    // A rule may draw from live state before the first turn ends.
+    const current = (await read($, reading)) ?? {}
     const date = localDate(await $.clock.now())
-    const segments = fitSegments(segmentsOf(rules, { reading: current, options, date }), e.props.bodyColumns)
+    const live = { outcomes: await read($, outcomes), pomodoro: await read($, pomodoro) }
+    const segments = fitSegments(segmentsOf(rules, { reading: current, options, date, ...live }), e.props.bodyColumns)
     if (segments.length === 0) return next(e)
 
     const { Box, Text } = $.ui.resolve(e)

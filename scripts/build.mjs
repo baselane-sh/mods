@@ -27,6 +27,9 @@ const write = (path, text) => {
 //               called once per load, for rules that keep session state)
 //   options     optional. true passes the plugin's userConfig values to
 //               register as a third argument: register(on, rules, options)
+//   optionsFor  optional. [ruleId]: like `options`, but only for a mod that
+//               uses one of these rules, so the mods that do not keep the
+//               register file they had.
 //   userConfig  optional. { ruleId: { field: spec } }: the userConfig fields
 //               each rule reads. A mod's plugin.json carries the fields of
 //               its own rules only.
@@ -59,7 +62,8 @@ const loadEngine = name => {
 
 const registerSource = (engine, rules) => {
   const list = `[${rules.map(engine.useRule).join(', ')}]`
-  const call = engine.options
+  const takesOptions = engine.options || rules.some(id => engine.optionsFor?.includes(id))
+  const call = takesOptions
     ? `(on, options) => ${engine.register}(on, ${list}, options)`
     : `on => ${engine.register}(on, ${list})`
   return [

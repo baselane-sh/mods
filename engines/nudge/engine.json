@@ -1,6 +1,24 @@
 {
-  "hooks": ["engine.ts"],
-  "tests": ["probe.ts", "engine.test.ts"],
+  "hooks": [
+    "engine.ts"
+  ],
+  "tests": [
+    "probe.ts",
+    "engine.test.ts"
+  ],
   "register": "registerNudges",
-  "ruleExport": "create"
+  "ruleExport": "create",
+  "optionsFor": [
+    "sports-narrator"
+  ],
+  "userConfig": {
+    "sports-narrator": {
+      "enabled": {
+        "type": "boolean",
+        "title": "Enable the narrator",
+        "description": "Turn the sports narrator on. It makes one small model call at the end of each turn that used tools, so it spends tokens. Off by default.",
+        "default": false
+      }
+    }
+  }
 }

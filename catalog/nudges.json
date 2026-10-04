@@ -4,17 +4,38 @@
     {
       "name": "test-reminder",
       "description": "Reminds you at turn end when source files changed but no test command ran since.",
-      "rules": ["test-reminder"]
+      "rules": [
+        "test-reminder"
+      ]
     },
     {
       "name": "ctx-nudge",
       "description": "Reminds you to /clear or /compact when the context window passes 75 percent.",
-      "rules": ["ctx-nudge"]
+      "rules": [
+        "ctx-nudge"
+      ]
+    },
+    {
+      "name": "clippy",
+      "description": "One helpful toast per session per trigger, in the classic paperclip voice: when you edit a migrations folder, a Dockerfile or a GitHub workflow, or run rm -rf. At most one toast per turn.",
+      "rules": [
+        "clippy"
+      ]
+    },
+    {
+      "name": "sports-narrator",
+      "description": "At turn end, one line of sports play-by-play about what Claude just did. OFF by default: it spends tokens (one small haiku call per turn that used tools), so turn it on with the enabled option in the plugin config. It sends tool names and file names, never commands' arguments or file contents.",
+      "rules": [
+        "sports-narrator"
+      ]
     },
     {
       "name": "nudge-pack",
       "description": "Every Baselane turn-end reminder in one mod.",
-      "rules": ["test-reminder", "ctx-nudge"]
+      "rules": [
+        "test-reminder",
+        "ctx-nudge"
+      ]
     }
   ]
 }

@@ -6,8 +6,10 @@ type OnFn = Parameters<TestBody>[1]
 
 export type NudgeProbe = {
   bash: (command: string) => Promise<unknown>
-  write: (file_path: string) => Promise<unknown>
-  edit: (file_path: string) => Promise<unknown>
+  write: (file_path: string, content?: string) => Promise<unknown>
+  edit: (file_path: string, new_string?: string, old_string?: string) => Promise<unknown>
+  // Moves the host clock (`$.clock.now`); the session started at 0.
+  setNow: (ms: number) => void
   stop: () => Promise<readonly string[]>
   // Every request that reached `model.complete`.
   asked: () => readonly ModelCompleteRequest[]
@@ -39,8 +41,10 @@ export const probe = ($: Engine, on: OnFn, percent = 10, model: ModelFake = 'And
   let toasts: string[] = []
   let asked: ModelCompleteRequest[] = []
   let logs: string[] = []
+  let now = 0
 
   on('session.usage', () => ({ value: { startedAt: 0, context: { tokens: percent * 2000, window: 200_000, percent }, rateLimits: [] } }))
+  on('clock.now', () => ({ value: now }))
   on('ui.toast', (_$, e) => {
     toasts = [...toasts, e.text]
     return { value: undefined }
@@ -63,8 +67,11 @@ export const probe = ($: Engine, on: OnFn, percent = 10, model: ModelFake = 'And
 
   return {
     bash: command => $.tool.call({ tool: 'Bash', command }),
-    write: file_path => $.tool.call({ tool: 'Write', file_path, content: 'x' }),
-    edit: file_path => $.tool.call({ tool: 'Edit', file_path, old_string: 'a', new_string: 'b' }),
+    write: (file_path, content = 'x') => $.tool.call({ tool: 'Write', file_path, content }),
+    edit: (file_path, new_string = 'b', old_string = 'a') => $.tool.call({ tool: 'Edit', file_path, old_string, new_string }),
+    setNow: ms => {
+      now = ms
+    },
     asked: () => asked,
     logs: () => logs,
     stop: async () => {

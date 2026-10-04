@@ -1,0 +1,10 @@
+{
+  "name": "todo-nudge",
+  "version": "0.2.0",
+  "description": "At turn end, one toast with the count of TODO, FIXME and HACK lines your edits added this turn. Quiet when none were added.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

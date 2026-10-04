@@ -1,0 +1,10 @@
+{
+  "name": "break-nudge",
+  "version": "0.2.0",
+  "description": "Suggests a short break once the session has run 90 minutes, and again every 90 minutes after that.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

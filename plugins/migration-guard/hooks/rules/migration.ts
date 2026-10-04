@@ -19,15 +19,21 @@ export const inMigrationsFolder = (path: string): boolean =>
     return name === 'migrations' || (parent === 'db' && UNDER_DB.has(name)) || (parent === 'alembic' && name === 'versions')
   })
 
+// Folders above the project do not count: a repo cloned into ~/migrations
+// holds no migrations by that name alone.
+const insideOf = (path: string, dir: string): string => (path.startsWith(`${dir}/`) ? path.slice(dir.length + 1) : path)
+
 export const rule: GuardRule = {
   id: 'migration-guard',
   decision: 'ask',
   check: async (e, tools) => {
     if (!WATCHED.has(String(e.tool)) || !('file_path' in e) || typeof e.file_path !== 'string') return undefined
-    const path = e.file_path.startsWith('/') ? e.file_path : `${await tools.cwd()}/${e.file_path}`
+    const cwd = await tools.cwd()
+    const path = e.file_path.startsWith('/') ? e.file_path : `${cwd}/${e.file_path}`
     const real = await tools.realPath(path)
     if (real === undefined) return undefined
-    return inMigrationsFolder(path) || inMigrationsFolder(real)
+    const realCwd = (await tools.realPath(cwd)) ?? cwd
+    return inMigrationsFolder(insideOf(path, cwd)) || inMigrationsFolder(insideOf(real, realCwd))
       ? `${e.file_path} is a migration that already exists and may have run elsewhere. Add a new migration instead of changing it.`
       : undefined
   },

@@ -22,6 +22,11 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['helm un shop --keep-history', 'helm uninstall'],
   ['helm list | grep old; helm uninstall old', 'helm uninstall'],
   ['bash -c "helm uninstall shop"', 'helm uninstall'],
+  ['kubectl --client-certificate c.crt drain node-1', 'kubectl drain'],
+  ['kubectl --certificate-authority ca.crt -n prod delete ns prod', 'kubectl delete'],
+  ['kubectl --username admin --password pw drain node-1', 'kubectl drain'],
+  // A plain `kubectl delete` elsewhere in the line does not hide this one.
+  ["kubectl -n prod delete ns prod && echo 'kubectl delete done'", 'kubectl delete'],
 ]
 const MISSES = [
   'kubectl get pods',

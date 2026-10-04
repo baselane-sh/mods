@@ -24,12 +24,16 @@ const MAX_DEPTH = 3
 
 export const base = (word: string): string => word.slice(word.lastIndexOf('/') + 1)
 
-// `sudo -E npm i x` reads as `npm i x` for a rule about the command that runs.
+// sudo and doas options whose value is the next word. `-h` stays out: alone
+// it means help.
+const SUDO_VALUE_FLAGS = new Set(['-u', '-g', '-C', '-D', '-p', '-r', '-t', '-T', '-U', '--user', '--group', '--close-from', '--chdir', '--prompt', '--role', '--type', '--command-timeout', '--other-user'])
+
+// `sudo -E npm i x` and `sudo -u deploy npm i x` read as `npm i x` for a rule
+// about the command that runs.
 export const withoutSudo = (argv: readonly string[]): readonly string[] => {
   if (argv[0] === undefined || !['sudo', 'doas'].includes(base(argv[0]))) return argv
-  const rest = argv.slice(1)
-  const at = rest.findIndex(word => !word.startsWith('-'))
-  return at < 0 ? [] : rest.slice(at)
+  const { sub, args } = subcommandOf(argv, SUDO_VALUE_FLAGS)
+  return sub === undefined ? [] : [sub, ...args]
 }
 
 const tokenize = (text: string, prefix: string): Raw[] => {

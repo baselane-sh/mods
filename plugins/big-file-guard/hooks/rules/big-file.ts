@@ -4,9 +4,10 @@ import { base, commandsOf, subcommandOf } from '../shell'
 
 // A big file bloats the context when Claude writes it and bloats the repo
 // for good once git records it. Asks before a Write of more than 1 MiB of
-// content, and before `git add` names a file of more than 5 MiB. Folders,
-// `.`, `-A` and paths that do not exist (a staged deletion, a quoted
-// pathspec) pass: only named files are measured.
+// content, and before `git add` names a file of more than 5 MiB. A glob in
+// the last segment (`media/*.mp4`) is measured one folder deep. Folders,
+// `.`, `-A`, a glob in a folder name (`*/x.bin`) and paths that do not exist
+// (a staged deletion) pass: only named files are measured.
 export const WRITE_LIMIT = 1024 * 1024
 const ADD_LIMIT = 5 * 1024 * 1024
 
@@ -37,11 +38,27 @@ export const addedPathsIn = (command: string, cwd: string): readonly string[] =>
     return pathArgs(args).map(path => resolve(path, dir))
   })
 
-// find's `-size +Nc` counts exact bytes and reads the same on BSD and GNU.
+const GLOB = /[*?[]/
+const OVER_LIMIT = ['-type', 'f', '-size', `+${ADD_LIMIT}c`]
+
+// The find call that lists the big files a path names, or undefined when it
+// names none that can be measured. A path that exists is measured as it is,
+// even with glob characters in its name. find's `-size +Nc` counts exact
+// bytes and reads the same on BSD and GNU.
+const sizeProbe = async (path: string, tools: GuardTools): Promise<readonly string[] | undefined> => {
+  if ((await tools.realPath(path)) !== undefined) return ['find', path, '-maxdepth', '0', ...OVER_LIMIT]
+  const slash = path.lastIndexOf('/')
+  const dir = path.slice(0, slash) || '/'
+  const name = path.slice(slash + 1)
+  if (!GLOB.test(name) || GLOB.test(dir) || (await tools.realPath(dir)) === undefined) return undefined
+  return ['find', dir, '-maxdepth', '1', '-name', name, ...OVER_LIMIT]
+}
+
 // A probe that fails or is cut throws, and the engine asks.
 const isBigFile = async (path: string, tools: GuardTools): Promise<boolean> => {
-  if ((await tools.realPath(path)) === undefined) return false
-  const ran = await tools.run(['find', path, '-maxdepth', '0', '-type', 'f', '-size', `+${ADD_LIMIT}c`], await tools.cwd())
+  const argv = await sizeProbe(path, tools)
+  if (argv === undefined) return false
+  const ran = await tools.run(argv, await tools.cwd())
   if (ran.exitCode !== 0 || ran.isStdoutTruncated) throw new Error(`cannot measure ${path}`)
   return ran.stdout.trim().length > 0
 }

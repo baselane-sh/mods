@@ -5,7 +5,9 @@ import { base, commandsOf, hasShortFlag } from '../shell'
 // write (777, a+w, o+w), and chmod or chown -R on a broad path. A broad path
 // is /, a top-level folder, a home folder, or any folder two levels down
 // outside /tmp (/usr/local, /Users/me). Project folders pass.
-const OCTAL = /^[0-7]{3,4}$/
+const OCTAL = /^[0-7]{1,4}$/
+// A mode that starts with a dash (`-w`). No chmod option uses these letters.
+const DASH_MODE = /^-[rwxXst]+$/
 const OTHERS_WRITE = new Set(['2', '3', '6', '7'])
 const HOME = /^(~[^/]*|\$HOME|\$\{HOME\})$/
 
@@ -31,7 +33,7 @@ const isRecursive = (word: string): boolean => word === '--recursive' || hasShor
 // chmod and chown share one shape: options, then a mode or an owner, then
 // the paths.
 const dangersOf = (name: string, args: readonly string[]): string[] => {
-  const [lead, ...paths] = args.filter(arg => !arg.startsWith('-'))
+  const [lead, ...paths] = args.filter(arg => !arg.startsWith('-') || (name === 'chmod' && DASH_MODE.test(arg)))
   if (lead === undefined) return []
   const open = name === 'chmod' && worldWritable(lead) ? [`world-writable chmod ${lead}`] : []
   const broad = args.some(isRecursive) ? paths.filter(isBroad).map(path => `recursive ${name} on ${path}`) : []

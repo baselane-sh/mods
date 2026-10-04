@@ -407,6 +407,66 @@
       }
     },
     {
+      "name": "commit-nudge",
+      "source": "./plugins/commit-nudge",
+      "description": "Suggests a commit at turn end after 8 or more file edits since the last git commit. One toast per batch of edits; a successful git commit resets the count.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "todo-nudge",
+      "source": "./plugins/todo-nudge",
+      "description": "At turn end, one toast with the count of TODO, FIXME and HACK lines your edits added this turn. Quiet when none were added.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "break-nudge",
+      "source": "./plugins/break-nudge",
+      "description": "Suggests a short break once the session has run 90 minutes, and again every 90 minutes after that.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "docs-nudge",
+      "source": "./plugins/docs-nudge",
+      "description": "At turn end, one toast when edits added exported code (an export statement in .ts or .js, or a public function signature) and no README or docs file was edited this session.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "debug-print-nudge",
+      "source": "./plugins/debug-print-nudge",
+      "description": "At turn end, one toast naming the count of console.log, print(, debugger and dbg! lines your edits added this turn. Only code files count.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "focus-pack",
+      "source": "./plugins/focus-pack",
+      "description": "Three quiet nudges in one mod: commit after 8 edits, TODO/FIXME/HACK lines added, and debug prints added.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "agent-firewall",
       "source": "./plugins/agent-firewall",
       "description": "A live pane of every tool call the agent makes: green when it ran, red when it was blocked, with counters. Open it with /firewall.",

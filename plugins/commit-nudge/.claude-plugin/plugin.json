@@ -1,0 +1,10 @@
+{
+  "name": "commit-nudge",
+  "version": "0.2.0",
+  "description": "Suggests a commit at turn end after 8 or more file edits since the last git commit. One toast per batch of edits; a successful git commit resets the count.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

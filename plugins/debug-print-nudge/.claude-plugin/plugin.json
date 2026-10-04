@@ -1,0 +1,10 @@
+{
+  "name": "debug-print-nudge",
+  "version": "0.2.0",
+  "description": "At turn end, one toast naming the count of console.log, print(, debugger and dbg! lines your edits added this turn. Only code files count.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

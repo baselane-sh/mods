@@ -1,0 +1,49 @@
+{
+  "engine": "nudge",
+  "mods": [
+    {
+      "name": "commit-nudge",
+      "description": "Suggests a commit at turn end after 8 or more file edits since the last git commit. One toast per batch of edits; a successful git commit resets the count.",
+      "rules": [
+        "commit-nudge"
+      ]
+    },
+    {
+      "name": "todo-nudge",
+      "description": "At turn end, one toast with the count of TODO, FIXME and HACK lines your edits added this turn. Quiet when none were added.",
+      "rules": [
+        "todo-nudge"
+      ]
+    },
+    {
+      "name": "break-nudge",
+      "description": "Suggests a short break once the session has run 90 minutes, and again every 90 minutes after that.",
+      "rules": [
+        "break-nudge"
+      ]
+    },
+    {
+      "name": "docs-nudge",
+      "description": "At turn end, one toast when edits added exported code (an export statement in .ts or .js, or a public function signature) and no README or docs file was edited this session.",
+      "rules": [
+        "docs-nudge"
+      ]
+    },
+    {
+      "name": "debug-print-nudge",
+      "description": "At turn end, one toast naming the count of console.log, print(, debugger and dbg! lines your edits added this turn. Only code files count.",
+      "rules": [
+        "debug-print-nudge"
+      ]
+    },
+    {
+      "name": "focus-pack",
+      "description": "Three quiet nudges in one mod: commit after 8 edits, TODO/FIXME/HACK lines added, and debug prints added.",
+      "rules": [
+        "commit-nudge",
+        "todo-nudge",
+        "debug-print-nudge"
+      ]
+    }
+  ]
+}

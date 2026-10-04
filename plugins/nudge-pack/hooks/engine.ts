@@ -4,6 +4,9 @@ import type { ModelCompleteRequest, ModelCompleteResult, On, PluginOptions, Tool
 // itself, so it hands over these functions instead.
 export type NudgeTools = {
   contextPercent: () => Promise<number | undefined>
+  // The host clock and the session start, both in milliseconds since the epoch.
+  now: () => Promise<number>
+  sessionStartedAt: () => Promise<number>
   // One model call. It resolves with `isAnswered: false` instead of throwing
   // when the model gives no text, so a nudge checks that before it speaks.
   complete: (request: ModelCompleteRequest) => Promise<ModelCompleteResult>
@@ -40,6 +43,8 @@ export const registerNudges = (on: On, nudges: readonly Nudge[], options: Plugin
   on('classic.Stop', async ($, e, next) => {
     const tools: NudgeTools = {
       contextPercent: async () => (await $.session.usage()).context.percent,
+      now: () => $.clock.now(),
+      sessionStartedAt: async () => (await $.session.usage()).startedAt,
       complete: request => $.model.complete(request),
     }
     for (const nudge of nudges) {

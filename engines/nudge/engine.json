@@ -1,6 +1,7 @@
 {
   "hooks": [
-    "engine.ts"
+    "engine.ts",
+    "edits.ts"
   ],
   "tests": [
     "probe.ts",

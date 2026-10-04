@@ -1,0 +1,11 @@
+{
+  "name": "port-watch",
+  "version": "0.2.0",
+  "description": "A live side pane of the local TCP ports that listen, with the process name and pid, refreshed every 10 seconds while open. Reads lsof (macOS, most Linux). Open it with /ports.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

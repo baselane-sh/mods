@@ -1,0 +1,8 @@
+{
+  "hooks": ["engine.tsx", "view.tsx", "rule.ts", "lines.ts", "patterns.ts"],
+  "tests": ["probe.ts", "engine.test.ts", "view.test.ts"],
+  "register": "registerPanes",
+  "ruleExport": "rule",
+  "types": "types/index.d.ts",
+  "nameToken": "pane-mods"
+}

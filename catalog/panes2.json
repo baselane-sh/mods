@@ -1,0 +1,20 @@
+{
+  "engine": "pane",
+  "mods": [
+    {
+      "name": "git-pane",
+      "description": "A live side pane with the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. It refreshes after git commands and file edits. Open it with /git.",
+      "rules": ["git-pane"]
+    },
+    {
+      "name": "test-pane",
+      "description": "A live side pane with the last test run: runner, pass, fail and skip counts, duration and the first failing tests, read from vitest, jest, pytest, go test, cargo test, bun test and claude plugin test output. Open it with /tests.",
+      "rules": ["test-pane"]
+    },
+    {
+      "name": "port-watch",
+      "description": "A live side pane of the local TCP ports that listen, with the process name and pid, refreshed every 10 seconds while open. Reads lsof (macOS, most Linux). Open it with /ports.",
+      "rules": ["port-watch"]
+    }
+  ]
+}

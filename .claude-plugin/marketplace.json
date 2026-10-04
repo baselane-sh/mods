@@ -805,6 +805,66 @@
         "name": "Baselane",
         "url": "https://baselane.sh"
       }
+    },
+    {
+      "name": "shakespeare-mode",
+      "source": "./plugins/shakespeare-mode",
+      "description": "Prose in Early Modern English flair. Code, commands, commit messages and error text stay exact.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "caveman-mode",
+      "source": "./plugins/caveman-mode",
+      "description": "Prose in short caveman speech (\"Fix bug. Test pass.\"), still accurate. Code and commands stay exact.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "eli5-mode",
+      "source": "./plugins/eli5-mode",
+      "description": "Explains like the reader is new: analogies first, no jargon without a one-line definition.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "code-only",
+      "source": "./plugins/code-only",
+      "description": "Replies with the code or command first and at most two short sentences of prose, unless asked to explain.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "gitmoji-commits",
+      "source": "./plugins/gitmoji-commits",
+      "description": "Commit messages start with the matching gitmoji (✨ feat, 🐛 fix). Composes with conventional-commits: emoji goes before the type.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "fun-pack",
+      "source": "./plugins/fun-pack",
+      "description": "Fun habits in one install: caveman prose and gitmoji commit messages. They compose: caveman never touches commit messages.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
     }
   ]
 }

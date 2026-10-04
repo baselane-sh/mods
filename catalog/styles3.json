@@ -1,0 +1,11 @@
+{
+  "engine": "style",
+  "mods": [
+    { "name": "shakespeare-mode", "description": "Prose in Early Modern English flair. Code, commands, commit messages and error text stay exact.", "rules": ["shakespeare-mode"] },
+    { "name": "caveman-mode", "description": "Prose in short caveman speech (\"Fix bug. Test pass.\"), still accurate. Code and commands stay exact.", "rules": ["caveman-mode"] },
+    { "name": "eli5-mode", "description": "Explains like the reader is new: analogies first, no jargon without a one-line definition.", "rules": ["eli5-mode"] },
+    { "name": "code-only", "description": "Replies with the code or command first and at most two short sentences of prose, unless asked to explain.", "rules": ["code-only"] },
+    { "name": "gitmoji-commits", "description": "Commit messages start with the matching gitmoji (✨ feat, 🐛 fix). Composes with conventional-commits: emoji goes before the type.", "rules": ["gitmoji-commits"] },
+    { "name": "fun-pack", "description": "Fun habits in one install: caveman prose and gitmoji commit messages. They compose: caveman never touches commit messages.", "rules": ["caveman-mode", "gitmoji-commits"] }
+  ]
+}

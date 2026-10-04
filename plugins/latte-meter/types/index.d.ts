@@ -15,12 +15,27 @@ export type Reading = {
   dailyDate?: string
 }
 
+// How one tool call ended: it ran, it errored, or a hook denied it.
+export type Outcome = 'ok' | 'error' | 'block'
+
+// The running pomodoro. `now` is the clock at the last tick: the drawing
+// counts down to `endsAt` from it, so a tick is what redraws the band.
+export type Pomodoro = {
+  phase: 'focus' | 'break'
+  endsAt: number
+  now: number
+}
+
 declare module 'claude-code' {
   interface PluginState {
     'latte-meter': {
       reading: Reading | null
       // The session cost when the running turn began: the base of its delta.
       turnStartUsd: number | null
+      // The outcomes of the last tool calls, oldest first.
+      outcomes: readonly Outcome[]
+      // The running pomodoro, or null when none runs.
+      pomodoro: Pomodoro | null
     }
   }
 }

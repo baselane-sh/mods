@@ -6,6 +6,7 @@ const FULL = { usd: 1.42, percent: 62 }
 
 test('band: one row joins the segments with two spaces', async ($, on) => {
   const session = probe($, on, { usd: 1.34, percent: 50 })
+  await session.wake()
   await session.turn(FULL)
   for (const surface of SURFACES) {
     const ui = await session.mount(surface)
@@ -18,6 +19,7 @@ test('band: one row joins the segments with two spaces', async ($, on) => {
 
 test('band: the row fits the width, dropping whole segments from the right', async ($, on) => {
   const session = probe($, on, { usd: 1.34, percent: 50 })
+  await session.wake()
   await session.turn(FULL)
   const wide = await session.mount('terminal', 200)
   const full = (await session.segments(wide)).map(segment => segment.text)

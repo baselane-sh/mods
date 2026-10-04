@@ -47,9 +47,29 @@
       }
     },
     {
+      "name": "pomodoro",
+      "source": "./plugins/pomodoro",
+      "description": "A band above the prompt with a 25/5 focus timer (focus 18:42, break 03:10). Start and stop it with /pomodoro; a toast marks each switch.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "mood-ring",
+      "source": "./plugins/mood-ring",
+      "description": "A band above the prompt with a colored dot and a word for the error and block rate of your last 20 tool calls: calm (green) under 10 percent, tense (yellow) under 30, stormy (red) from 30.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "band-pack",
       "source": "./plugins/band-pack",
-      "description": "Every Baselane band meter in one row above the prompt: session cost, lattes, context bar and today's spend.",
+      "description": "Every Baselane band meter in one row above the prompt: session cost, lattes, context bar, today's spend, the focus timer and the mood ring.",
       "version": "0.2.0",
       "author": {
         "name": "Baselane",
@@ -347,6 +367,26 @@
       }
     },
     {
+      "name": "clippy",
+      "source": "./plugins/clippy",
+      "description": "One helpful toast per session per trigger, in the classic paperclip voice: when you edit a migrations folder, a Dockerfile or a GitHub workflow, or run rm -rf. At most one toast per turn.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "sports-narrator",
+      "source": "./plugins/sports-narrator",
+      "description": "At turn end, one line of sports play-by-play about what Claude just did. OFF by default: it spends tokens (one small haiku call per turn that used tools), so turn it on with the enabled option in the plugin config. It sends tool names and file names, never commands' arguments or file contents.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "nudge-pack",
       "source": "./plugins/nudge-pack",
       "description": "Every Baselane turn-end reminder in one mod.",
@@ -430,6 +470,16 @@
       "name": "pirate-mode",
       "source": "./plugins/pirate-mode",
       "description": "Talks like a pirate in prose, never inside code, commands or file contents.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "haiku-commits",
+      "source": "./plugins/haiku-commits",
+      "description": "Commit messages get a normal conventional-commit first line, then a 5-7-5 haiku about the change in the body.",
       "version": "0.2.0",
       "author": {
         "name": "Baselane",

@@ -29,6 +29,11 @@ export const bandProps = (bodyColumns: number, hasSurvey = false) =>
 
 export type Reading = { usd?: number; percent?: number }
 
+// A Bash command containing this word is denied beneath the mod; one
+// containing FAIL runs and comes back as an error.
+export const DENY_WORD = 'DENYME'
+export const FAIL_WORD = 'FAILME'
+
 export type Segment = { key: string; text: string; color?: unknown }
 
 export type BandProbe = {
@@ -44,6 +49,20 @@ export type BandProbe = {
   // What the mod wrote to its store, by key, as written.
   writes: () => Readonly<Record<string, unknown>>
   breakUsage: () => void
+  // One Bash call: it passes, or fails or is denied by the word it holds.
+  bash: (command: string) => Promise<unknown>
+  // Raises session.start, the way the session does.
+  start: () => Promise<void>
+  // Runs `/<name>` and answers its output text.
+  run: (name: string) => Promise<string>
+  toasts: () => readonly string[]
+  registered: () => readonly string[]
+  // How many times the mod wrote the state value `key` (any owner).
+  stateWrites: (key: string) => number
+  // Gives a mod that draws from live activity something to show: a few tool
+  // calls, and /pomodoro where the mod has it. A mod without that command
+  // has nothing to run, which is not a failure.
+  wake: () => Promise<void>
 }
 
 // Stands in for the engine beneath the mod: the clock and store are the
@@ -59,6 +78,9 @@ export const probe = (
   let logs: string[] = []
   let turns = 0
   let written: Record<string, unknown> = {}
+  let toasts: string[] = []
+  let registered: string[] = []
+  let writes: Record<string, number> = {}
 
   const clock = mock.clock(on, { now: NOON })
   // The kit's mock.store answers the same four calls from memory, but only
@@ -86,6 +108,35 @@ export const probe = (
         ...(now.usd === undefined ? {} : { cost: { usd: now.usd } }),
       },
     }
+  })
+  // The state is the test's own so each write can be counted.
+  const state = new Map<string, { value: unknown; version: number }>()
+  on('state.get', (_$, e) => {
+    const held = state.get(`${e.plugin}.${e.key}`)
+    return { value: { value: held?.value, version: held?.version ?? 0 } }
+  })
+  on('state.set', (_$, e) => {
+    const name = `${e.plugin}.${e.key}`
+    const version = state.get(name)?.version ?? 0
+    if (e.ifVersion !== undefined && e.ifVersion !== version) return { value: { isSet: false as const, version } }
+    state.set(name, { value: e.value, version: version + 1 })
+    writes = { ...writes, [e.key]: (writes[e.key] ?? 0) + 1 }
+    return { value: { isSet: true as const, version: version + 1 } }
+  })
+  on('session.start', (_$, e) => ({ cwd: e.cwd }))
+  on('command.register', (_$, e) => {
+    registered = [...registered, e.name]
+    return { value: { command: e.name } }
+  })
+  on('ui.toast', (_$, e) => {
+    toasts = [...toasts, e.text]
+    return { value: undefined }
+  })
+  on('tool.call', (_$, e) => {
+    const command = e.tool === 'Bash' ? e.command : ''
+    if (command.includes(DENY_WORD)) return { deny: 'blocked by test' }
+    if (command.includes(FAIL_WORD)) return { result: {}, isError: true }
+    return { result: {} }
   })
   on('ui.log', (_$, e) => {
     logs = [...logs, e.text]
@@ -117,6 +168,24 @@ export const probe = (
         .map(box => ({ key: box.key ?? '', text: box.text, color: texts.find(text => text.text === box.text)?.props.color }))
     },
     advance: ms => clock.advance(ms),
+    bash: command => $.tool.call({ tool: 'Bash', command }),
+    start: async () => {
+      await $.session.start({ cwd: '/repo', surface: null, isInteractive: true })
+    },
+    run: async name =>
+      (await $.command.run({ command: name, args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })).text ??
+      '',
+    wake: async () => {
+      await $.tool.call({ tool: 'Bash', command: 'ls' })
+      try {
+        await $.command.run({ command: 'pomodoro', args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })
+      } catch {
+        // No /pomodoro in this mod.
+      }
+    },
+    toasts: () => toasts,
+    registered: () => registered,
+    stateWrites: key => writes[key] ?? 0,
     logs: () => logs,
     writes: () => written,
     breakUsage: () => {

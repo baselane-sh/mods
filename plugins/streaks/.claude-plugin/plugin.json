@@ -1,0 +1,11 @@
+{
+  "name": "streaks",
+  "version": "0.2.0",
+  "description": "Counts consecutive days you used Claude Code: a Day N streak toast at session start, and /streak to ask.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

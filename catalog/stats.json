@@ -1,0 +1,25 @@
+{
+  "engine": "stats",
+  "mods": [
+    {
+      "name": "wrapped",
+      "description": "Adds /wrapped: a screenshot-ready Claude Code Wrapped for the last 7 days (or /wrapped month for 30), printed and copied.",
+      "rules": ["wrapped"]
+    },
+    {
+      "name": "streaks",
+      "description": "Counts consecutive days you used Claude Code: a Day N streak toast at session start, and /streak to ask.",
+      "rules": ["streaks"]
+    },
+    {
+      "name": "achievements",
+      "description": "Unlocks eight badges once each (first session, first green test run, 100 and 1,000 tool calls, 7-day streak, 10 blocked calls, a 2 hour session, night owl), with a toast and /achievements.",
+      "rules": ["achievements"]
+    },
+    {
+      "name": "stats-pack",
+      "description": "Every Baselane stats mod in one: /wrapped, streaks and achievements on one shared daily rollup.",
+      "rules": ["wrapped", "streaks", "achievements"]
+    }
+  ]
+}

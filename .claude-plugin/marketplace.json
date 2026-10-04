@@ -367,6 +367,46 @@
       }
     },
     {
+      "name": "wrapped",
+      "source": "./plugins/wrapped",
+      "description": "Adds /wrapped: a screenshot-ready Claude Code Wrapped for the last 7 days (or /wrapped month for 30), printed and copied.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "streaks",
+      "source": "./plugins/streaks",
+      "description": "Counts consecutive days you used Claude Code: a Day N streak toast at session start, and /streak to ask.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "achievements",
+      "source": "./plugins/achievements",
+      "description": "Unlocks eight badges once each (first session, first green test run, 100 and 1,000 tool calls, 7-day streak, 10 blocked calls, a 2 hour session, night owl), with a toast and /achievements.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "stats-pack",
+      "source": "./plugins/stats-pack",
+      "description": "Every Baselane stats mod in one: /wrapped, streaks and achievements on one shared daily rollup.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "terse-mode",
       "source": "./plugins/terse-mode",
       "description": "Short answers: no preamble, no recap.",

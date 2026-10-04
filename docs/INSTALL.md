@@ -8,7 +8,7 @@ Every command is a `claude plugin` command from Claude Code 2.1.288 or later, wi
 claude plugin marketplace add baselane-sh/mods-catalog
 ```
 
-This adds the Baselane gallery as a marketplace named `baselane-mods`. The gallery pins each mod to a reviewed commit. Browse it at https://mods.baselane.sh. To make sure, run:
+This adds the Baselane gallery as a marketplace named `baselane-mods`. The gallery pins each mod to a reviewed commit. Browse it at https://baselane-sh.github.io/mods-catalog/. To make sure, run:
 
 ```sh
 claude plugin marketplace list

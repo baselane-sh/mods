@@ -16,7 +16,7 @@ claude plugin install receipt@baselane-mods
 
 Start Claude Code. Now it asks before harsh commands, and `/receipt` prints a receipt of the session.
 
-Browse every mod at https://mods.baselane.sh. The gallery (`baselane-mods`) pins each mod to a reviewed commit. For update, uninstall, options and starter sets, read [docs/INSTALL.md](docs/INSTALL.md).
+Browse every mod at https://baselane-sh.github.io/mods-catalog/. The gallery (`baselane-mods`) pins each mod to a reviewed commit. For update, uninstall, options and starter sets, read [docs/INSTALL.md](docs/INSTALL.md).
 
 This repo also has a development marketplace, `baselane-mods-dev`, that tracks `main`. Use it only to try changes that are not released yet:
 

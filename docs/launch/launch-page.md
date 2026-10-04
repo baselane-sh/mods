@@ -1,4 +1,4 @@
-# Launch page copy: baselane.sh/mods
+# Launch page copy: https://baselane-sh.github.io/mods-catalog/
 
 Copy for the Baselane mods page. Every claim here is true of the catalog today. Do not add user counts, stars or quotes until they are real.
 
@@ -52,7 +52,7 @@ Record in one terminal, at a large font size. Install these mods before you star
 | 9 to 15 s | Ask Claude to run the tests. The retro coin plays when they pass. | Sounds for passing and failing tests. |
 | 15 to 22 s | Ask Claude to clean up with `rm -rf build`. The guard stops and asks. Choose no. Open `/firewall` and show the refused call in the list. | Guards ask before harsh commands. |
 | 22 to 28 s | Run `/receipt`. The receipt prints. | A receipt for every session. |
-| 28 to 30 s | Logo and the install line. | 100+ mods. Pick and combine. baselane.sh/mods |
+| 28 to 30 s | Logo and the install line. | 100+ mods. Pick and combine. https://baselane-sh.github.io/mods-catalog/ |
 
 Notes for the recording:
 

@@ -61,4 +61,4 @@ Nothing leaves your machine unless you set a destination, like an ntfy topic for
 Needs Claude Code 2.1.288+ with mods.
 
 Install: https://github.com/baselane-sh/mods
-Catalog: baselane.sh/mods
+Catalog: https://baselane-sh.github.io/mods-catalog/

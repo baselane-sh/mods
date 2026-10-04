@@ -6,10 +6,14 @@ type OnFn = Parameters<TestBody>[1]
 
 export type NudgeProbe = {
   bash: (command: string) => Promise<unknown>
-  write: (file_path: string, content?: string) => Promise<unknown>
+  // `originalFile` is what the file held before, as the host reports it for
+  // a Write over an existing file; leave it out for a new file.
+  write: (file_path: string, content?: string, originalFile?: string) => Promise<unknown>
   edit: (file_path: string, new_string?: string, old_string?: string) => Promise<unknown>
   // Moves the host clock (`$.clock.now`); the session started at 0.
   setNow: (ms: number) => void
+  // The session cwd (`$.session.cwd`); it starts as DEFAULT_CWD.
+  setCwd: (path: string) => void
   stop: () => Promise<readonly string[]>
   // The text `.env.example` holds, or undefined for a project without one.
   setEnvExample: (text: string | undefined) => void
@@ -25,6 +29,8 @@ export type NudgeProbe = {
 // containing FAIL runs and comes back as an error.
 export const DENY_WORD = 'DENYME'
 export const FAIL_WORD = 'FAILME'
+
+export const DEFAULT_CWD = '/repo'
 
 export const USAGE = { input_tokens: 10, output_tokens: 5, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
 
@@ -51,9 +57,12 @@ export const probe = ($: Engine, on: OnFn, percent = 10, model: ModelFake = 'And
   let now = 0
   let envExample: string | undefined
   let reads: string[] = []
+  let cwd = DEFAULT_CWD
+  let originals: Readonly<Record<string, string>> = {}
 
   on('session.usage', () => ({ value: { startedAt: 0, context: { tokens: percent * 2000, window: 200_000, percent }, rateLimits: [] } }))
   on('clock.now', () => ({ value: now }))
+  on('session.cwd', () => ({ value: cwd }))
   on('ui.toast', (_$, e) => {
     toasts = [...toasts, e.text]
     return { value: undefined }
@@ -72,7 +81,8 @@ export const probe = ($: Engine, on: OnFn, percent = 10, model: ModelFake = 'And
     const command = e.tool === 'Bash' ? e.command : ''
     if (command.includes(DENY_WORD)) return { deny: 'blocked by test' }
     if (command.includes(FAIL_WORD)) return { result: {}, isError: true }
-    return { result: {} }
+    const original = e.tool === 'Write' ? originals[e.file_path] : undefined
+    return { result: original === undefined ? {} : { originalFile: original } }
   })
   on('model.complete', (_$, e) => {
     asked = [...asked, e]
@@ -81,10 +91,16 @@ export const probe = ($: Engine, on: OnFn, percent = 10, model: ModelFake = 'And
 
   return {
     bash: command => $.tool.call({ tool: 'Bash', command }),
-    write: (file_path, content = 'x') => $.tool.call({ tool: 'Write', file_path, content }),
+    write: (file_path, content = 'x', originalFile) => {
+      if (originalFile !== undefined) originals = { ...originals, [file_path]: originalFile }
+      return $.tool.call({ tool: 'Write', file_path, content })
+    },
     edit: (file_path, new_string = 'b', old_string = 'a') => $.tool.call({ tool: 'Edit', file_path, old_string, new_string }),
     setNow: ms => {
       now = ms
+    },
+    setCwd: path => {
+      cwd = path
     },
     setEnvExample: text => {
       envExample = text

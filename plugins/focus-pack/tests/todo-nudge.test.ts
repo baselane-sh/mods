@@ -34,3 +34,11 @@ test('todo-nudge: a word that only contains the marker does not count', async ($
   await session.write('src/a.ts', 'const TODOS = []\nconst hackathon = 1')
   expect(await session.stop()).toEqual([])
 })
+
+test('todo-nudge: a Write over an existing file counts only the markers it added', async ($, on) => {
+  const session = probe($, on)
+  await session.write('src/a.ts', '// TODO old\nconst a = 2', '// TODO old\nconst a = 1')
+  expect(await session.stop()).toEqual([])
+  await session.write('src/a.ts', '// TODO old\nconst a = 2\n// FIXME new', '// TODO old\nconst a = 2')
+  expect(await session.stop()).toEqual(['todo-nudge: 1 TODO/FIXME/HACK line added this turn. Resolve or track them.'])
+})

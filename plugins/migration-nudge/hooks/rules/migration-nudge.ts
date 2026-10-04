@@ -1,5 +1,5 @@
 import type { Nudge } from '../engine'
-import { fileEdit, inCommand, ranOk } from '../edits'
+import { fileEdit, inCommand, ranOk, repoPath } from '../edits'
 
 const MIGRATION_FILE = [
   /(^|\/)migrations?\//, /(^|\/)alembic\/versions\//, /(^|\/)db\/migrate\//, /(^|\/)drizzle\/[^/]+\.sql$/,
@@ -27,11 +27,12 @@ export const create = (): Nudge => {
 
   return {
     id: 'migration-nudge',
-    observe: (e, ran) => {
+    observe: (e, ran, cwd) => {
       const edit = fileEdit(e, ran)
       if (edit !== undefined) {
-        if (e.tool === 'Write' && matches(MIGRATION_FILE, edit.path)) migrated = true
-        else if (matches(SCHEMA_FILE, edit.path) && !schemas.includes(edit.path)) schemas = [...schemas, edit.path]
+        const path = repoPath(edit.path, cwd)
+        if (e.tool === 'Write' && matches(MIGRATION_FILE, path)) migrated = true
+        else if (matches(SCHEMA_FILE, path) && !schemas.includes(edit.path)) schemas = [...schemas, edit.path]
       }
       if (e.tool === 'Bash' && ranOk(ran) && MIGRATION_COMMAND.test(e.command)) migrated = true
     },

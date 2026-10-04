@@ -70,3 +70,21 @@ test('migration-nudge: one toast per batch, several schema files named together'
   expect(await session.stop()).toEqual([NUDGE('prisma/schema.prisma, app/models.py')])
   expect(await session.stop()).toEqual([])
 })
+
+test('migration-nudge: a repo inside a folder named migration still nudges', async ($, on) => {
+  const session = probe($, on)
+  session.setCwd('/home/x/migration/app')
+  await session.edit('/home/x/migration/app/prisma/schema.prisma')
+  await session.write('/home/x/migration/app/src/util.ts')
+  expect(await session.stop()).toEqual([NUDGE('/home/x/migration/app/prisma/schema.prisma')])
+  await session.edit('/home/x/migration/app/prisma/schema.prisma')
+  await session.write('/home/x/migration/app/prisma/migrations/1_add/migration.sql')
+  expect(await session.stop()).toEqual([])
+})
+
+test('migration-nudge: a repo inside a schema folder does not make every sql file a schema', async ($, on) => {
+  const session = probe($, on)
+  session.setCwd('/home/x/schema/app')
+  await session.edit('/home/x/schema/app/queries/users.sql')
+  expect(await session.stop()).toEqual([])
+})

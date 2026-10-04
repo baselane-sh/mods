@@ -1,5 +1,5 @@
 import type { Nudge } from '../engine'
-import { addedLines, extension, fileEdit } from '../edits'
+import { addedLines, extension, fileEdit, repoPath } from '../edits'
 
 const JS = /^\s*export\s/
 const SIGNATURES: Readonly<Record<string, RegExp>> = {
@@ -21,12 +21,13 @@ export const create = (): Nudge => {
 
   return {
     id: 'docs-nudge',
-    observe: (e, ran) => {
+    observe: (e, ran, cwd) => {
       const edit = fileEdit(e, ran)
       if (edit === undefined) return
-      if (isDocsFile(edit.path)) docsEdited = true
-      const signature = SIGNATURES[extension(edit.path)]
-      if (signature !== undefined && !TEST_FILE.test(edit.path) && addedLines(edit, signature) > 0) apiTouched = true
+      const path = repoPath(edit.path, cwd)
+      if (isDocsFile(path)) docsEdited = true
+      const signature = SIGNATURES[extension(path)]
+      if (signature !== undefined && !TEST_FILE.test(path) && addedLines(edit, signature) > 0) apiTouched = true
     },
     atStop: () => {
       const touched = apiTouched

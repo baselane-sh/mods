@@ -120,3 +120,29 @@ test('lockfile-nudge: several manifests are named together', async ($, on) => {
   await session.edit('Cargo.toml', 'serde = "1.0"')
   expect(await session.stop()).toEqual([NUDGE('package.json, Cargo.toml')])
 })
+
+test('lockfile-nudge: a Write over package.json that keeps its dependencies stays quiet', async ($, on) => {
+  const session = probe($, on)
+  const deps = '  "dependencies": {\n    "left-pad": "1.3.0"\n  }\n}'
+  await session.write('package.json', `{\n  "private": true,\n${deps}`, `{\n  "private": false,\n${deps}`)
+  expect(await session.stop()).toEqual([])
+})
+
+test('lockfile-nudge: package fields and scripts that only look like versions or links stay quiet', async ($, on) => {
+  const session = probe($, on)
+  await session.edit('package.json', '    "prepare": "git config core.hooksPath .githooks",')
+  await session.edit('package.json', '  "homepage": "https://example.com",')
+  await session.edit('package.json', '  "repository": "github:me/repo",')
+  await session.edit('package.json', '    "url": "git+https://github.com/me/repo.git"')
+  await session.edit('package.json', '  "description": "3 helpers",')
+  await session.edit('package.json', '  "name": "git-tools",')
+  expect(await session.stop()).toEqual([])
+})
+
+for (const line of ['    "foo": "git+https://github.com/me/foo.git",', '    "foo": "github:me/foo",', '    "foo": "git://github.com/me/foo.git",', '    "url": "^0.11.0",']) {
+  test(`lockfile-nudge: the dependency ${line.trim()} still counts`, async ($, on) => {
+    const session = probe($, on)
+    await session.edit('package.json', line)
+    expect(await session.stop()).toEqual([NUDGE('package.json')])
+  })
+}

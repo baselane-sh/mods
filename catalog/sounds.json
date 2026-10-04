@@ -1,0 +1,20 @@
+{
+  "engine": "sound",
+  "mods": [
+    {
+      "name": "sounds-retro",
+      "description": "8-bit sounds: a coin when tests pass, a buzz when they fail, a chime when a turn ends.",
+      "rules": ["retro"]
+    },
+    {
+      "name": "sounds-office",
+      "description": "Quiet office sounds: a soft click when tests pass, a low thud when they fail, paper when a call is blocked.",
+      "rules": ["office"]
+    },
+    {
+      "name": "sounds-scifi",
+      "description": "Sci-fi console sounds: a beep when tests pass, an alarm when they fail, a warp when a turn ends.",
+      "rules": ["scifi"]
+    }
+  ]
+}

@@ -11,12 +11,16 @@ const FS = {
   '/repo/sub/big.bin': '/repo/sub/big.bin',
   '/repo/docs': '/repo/docs',
   '/repo/odd.bin': '/repo/odd.bin',
+  '/repo/media': '/repo/media',
 }
+const GLOB = (dir: string, pattern: string) => `find ${dir} -maxdepth 1 -name ${pattern} -type f -size +5242880c`
 const SIZES = {
   [BIG('/repo/big.bin')]: '/repo/big.bin\n',
   [BIG('/repo/small.txt')]: '',
   [BIG('/repo/sub/big.bin')]: '/repo/sub/big.bin\n',
   [BIG('/repo/docs')]: '',
+  [GLOB('/repo/media', '*.mp4')]: '/repo/media/clip.mp4\n',
+  [GLOB('/repo/media', '*.txt')]: '',
 }
 
 const write = (content: string) => ({ tool: 'Write', file_path: '/repo/out.txt', content }) as const
@@ -60,6 +64,15 @@ test('big-file-guard: small files, folders, missing paths and other commands pas
   for (const command of ['git add small.txt', 'git add .', 'git add -A', 'git add docs', 'git add gone.txt', 'git status', 'echo "git add big.bin"']) {
     expect({ command, answered: await guard.answered(command) }).toEqual({ command, answered: false })
   }
+})
+
+test('big-file-guard: measures a glob in the last path segment', async ($, on) => {
+  const guard = probe($, on, { fs: FS, git: SIZES })
+  expect(await guard.answered('git add media/*.mp4')).toBe(true)
+  expect(await guard.answered('git add media/*.txt')).toBe(false)
+  expect(await guard.answered('git add gone/*.mp4')).toBe(false)
+  // A glob in a folder name is not measured.
+  expect(await guard.answered('git add */big.bin')).toBe(false)
 })
 
 test('big-file-guard: a size probe that fails asks', async ($, on) => {

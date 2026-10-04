@@ -1,6 +1,7 @@
 import { expect, test } from 'claude-code/testing'
 
-import { inMigrationsFolder } from '../hooks/rules/migration'
+import { inMigrationsFolder, rule } from '../hooks/rules/migration'
+import { NO_TOOLS } from './fixtures'
 import { probe } from './probe'
 
 // The files that exist, by path, each with where it really lands.
@@ -68,4 +69,13 @@ test('migration-guard: reads and shell commands pass', async ($, on) => {
   const guard = probe($, on, { fs: EXISTING })
   expect(await guard.answeredTool({ tool: 'Read', file_path: '/repo/db/migrations/001_init.sql' })).toBe(false)
   expect(await guard.answered('cat db/migrations/001_init.sql')).toBe(false)
+})
+
+test('migration-guard: only folders inside the project count', async () => {
+  // Every path exists, in a repo cloned into a folder named migrations.
+  const tools = { ...NO_TOOLS, cwd: async () => '/home/me/migrations', realPath: async (path: string) => path }
+  const edit = (file_path: string) => ({ tool: 'Edit', tool_use_id: 't', file_path, old_string: 'a', new_string: 'b' }) as const
+  expect(await rule.check(edit('src/app.ts'), tools)).toBeUndefined()
+  expect(await rule.check(edit('/home/me/migrations/src/app.ts'), tools)).toBeUndefined()
+  expect(await rule.check(edit('db/migrations/001_init.sql'), tools)).toBeDefined()
 })

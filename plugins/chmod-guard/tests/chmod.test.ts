@@ -24,6 +24,11 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['chown -R me $HOME', 'recursive chown on $HOME'],
   ['chown -hR me /home/me', 'recursive chown on /home/me'],
   ['sudo chown -R root /etc', 'recursive chown on /etc'],
+  ['sudo -u root chown -R me /', 'recursive chown on /'],
+  ['sudo -u www-data chmod -R 777 /var/www/app', 'world-writable chmod 777'],
+  ['chmod -R -w ~', 'recursive chmod on ~'],
+  ['chmod 77 shared.db', 'world-writable chmod 77'],
+  ['chmod 7 shared.db', 'world-writable chmod 7'],
 ]
 const MISSES = [
   'chmod +x run.sh',
@@ -31,6 +36,8 @@ const MISSES = [
   'chmod 755 bin/run',
   'chmod 644 README.md',
   'chmod 775 shared',
+  'chmod 70 private.db',
+  'chmod -w notes.txt',
   'chmod go-w notes.txt',
   'chmod o-rwx notes.txt',
   'chmod -R 755 ./dist',

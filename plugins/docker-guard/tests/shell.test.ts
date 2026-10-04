@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { blankQuotes, segmentsOf } from '../hooks/shell'
+import { blankQuotes, commandsOf, segmentsOf, withoutSudo } from '../hooks/shell'
 
 const argvs = (command: string) => segmentsOf(command).map(segment => segment.argv.join(' '))
 
@@ -30,4 +30,13 @@ test('shell: follows sh -c and skips heredoc bodies and comments', () => {
 
 test('shell: blankQuotes hides quoted text only', () => {
   expect(blankQuotes('echo "sudo x" && sudo y')).toBe('echo "______" && sudo y')
+})
+
+test('shell: sudo and doas options that take a value are skipped', () => {
+  expect(withoutSudo(['sudo', '-E', 'npm', 'i', 'x'])).toEqual(['npm', 'i', 'x'])
+  expect(withoutSudo(['sudo', '-u', 'root', 'chown', '-R', 'me', '/'])).toEqual(['chown', '-R', 'me', '/'])
+  expect(withoutSudo(['sudo', '--user=deploy', '-g', 'staff', 'ls'])).toEqual(['ls'])
+  expect(withoutSudo(['doas', '-u', 'www', 'ls'])).toEqual(['ls'])
+  expect(withoutSudo(['sudo', '-u', 'root'])).toEqual([])
+  expect(commandsOf('sudo -u deploy docker system prune -af')).toEqual([['docker', 'system', 'prune', '-af']])
 })

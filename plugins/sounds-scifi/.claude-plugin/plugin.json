@@ -1,0 +1,26 @@
+{
+  "name": "sounds-scifi",
+  "version": "0.2.0",
+  "description": "Sci-fi console sounds: a beep when tests pass, an alarm when they fail, a warp when a turn ends.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "volume": {
+      "type": "number",
+      "title": "Volume",
+      "description": "Playback gain for every sound: 1 is the file as recorded, 0 is silent, 2 is twice as loud.",
+      "default": 1,
+      "min": 0,
+      "max": 2
+    },
+    "quiet": {
+      "type": "boolean",
+      "title": "Quiet turn end",
+      "description": "Turn off the sound that plays when a turn finishes. Test and blocked-call sounds stay on.",
+      "default": false
+    }
+  }
+}

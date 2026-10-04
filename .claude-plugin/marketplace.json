@@ -367,6 +367,36 @@
       }
     },
     {
+      "name": "sounds-retro",
+      "source": "./plugins/sounds-retro",
+      "description": "8-bit sounds: a coin when tests pass, a buzz when they fail, a chime when a turn ends.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "sounds-office",
+      "source": "./plugins/sounds-office",
+      "description": "Quiet office sounds: a soft click when tests pass, a low thud when they fail, paper when a call is blocked.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "sounds-scifi",
+      "source": "./plugins/sounds-scifi",
+      "description": "Sci-fi console sounds: a beep when tests pass, an alarm when they fail, a warp when a turn ends.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "terse-mode",
       "source": "./plugins/terse-mode",
       "description": "Short answers: no preamble, no recap.",

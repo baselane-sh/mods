@@ -37,6 +37,10 @@ const write = (path, text) => {
 //               mod's name. `$.state` allows only the owning plugin to write
 //               a value, and its `plugin` must be a literal in source, so an
 //               engine whose mods share one source writes the token there.
+//   assets      optional: a folder of binary files under the engine folder.
+//               Each rule's own subfolder (<assets>/<ruleId>) is copied
+//               byte for byte into the mod at the same path; a rule with no
+//               subfolder fails the build.
 //   stateOwner  optional. { name, files }: only the plugin that owns a `$.state`
 //               value may write it, and the owner is the mod's name. The engine
 //               source writes `name` as the owner (a literal, which the host
@@ -99,6 +103,16 @@ const place = (engine, mod, engineDir, outDir, file) => {
   write(join(outDir, file), withOwner(engine, mod.name, file, named))
 }
 
+// A plain recursive copy: the files are binary, so they never go through
+// place(), which reads and rewrites text.
+const copyAssets = (engine, mod, engineDir, outDir) => {
+  for (const id of mod.rules) {
+    const from = join(engineDir, engine.assets, id)
+    if (!existsSync(from)) throw new Error(`${mod.name}: no assets folder ${join(engine.assets, id)}`)
+    cpSync(from, join(outDir, engine.assets, id), { recursive: true })
+  }
+}
+
 const buildMod = (engine, engineDir, mod, outDir) => {
   for (const id of mod.rules) {
     if (!existsSync(join(engineDir, 'hooks/rules', `${id}.ts`))) {
@@ -137,6 +151,7 @@ const buildMod = (engine, engineDir, mod, outDir) => {
     copy(join('hooks/rules', `${id}.ts`))
     copy(join('tests', `${id}.test.ts`))
   }
+  if (engine.assets !== undefined) copyAssets(engine, mod, engineDir, outDir)
 }
 
 const catalogs = readdirSync(join(ROOT, 'catalog'))

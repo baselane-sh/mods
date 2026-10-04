@@ -6,5 +6,6 @@
     "name": "Baselane",
     "url": "https://baselane.sh"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "types": "./types/index.d.ts"
 }

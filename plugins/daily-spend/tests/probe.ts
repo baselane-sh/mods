@@ -49,6 +49,8 @@ export type BandProbe = {
   mount: (surface: Surface, bodyColumns?: number, hasSurvey?: boolean) => Promise<Mounted<Surface, 'AbovePrompt'>>
   segments: (ui: Mounted<Surface, 'AbovePrompt'>) => Promise<Segment[]>
   advance: (ms: number) => Promise<void>
+  // Lets what is under way run as far as it can, the clock where it is.
+  settle: () => Promise<void>
   logs: () => readonly string[]
   // What the mod wrote to its store, by key, as written.
   writes: () => Readonly<Record<string, unknown>>
@@ -57,6 +59,8 @@ export type BandProbe = {
   bash: (command: string) => Promise<unknown>
   // Raises session.start, the way the session does.
   start: () => Promise<void>
+  // Raises session.end, the way the session does.
+  end: (reason?: 'clear' | 'other') => Promise<void>
   // One call of any tool (Edit, Write, Read...): it passes.
   tool: (name: string) => Promise<unknown>
   // Every later call of this tool comes back as an error.
@@ -65,12 +69,20 @@ export type BandProbe = {
   setGit: (output: string | null) => void
   // How many times the mod ran git.
   gitRuns: () => number
+  // The next git run answers `output` (null is not a repository) once the
+  // clock has moved `ms` on: a slow git, asleep on the test's clock.
+  slowGit: (ms: number, output: string | null) => void
+  // Writes a state value of the mod's beneath it, as a value it held before.
+  seedState: (key: string, value: unknown) => void
   // Runs `/<name>` and answers its output text.
   run: (name: string) => Promise<string>
   toasts: () => readonly string[]
   registered: () => readonly string[]
   // How many times the mod wrote the state value `key` (any owner).
   stateWrites: (key: string) => number
+  // How many times the mod read the state value `key` (any owner). A read
+  // while the band draws is what makes a later write draw it again.
+  stateReads: (key: string) => number
   // Gives a mod that draws from live activity something to show: a few tool
   // calls, and /pomodoro where the mod has it. A mod without that command
   // has nothing to run, which is not a failure.
@@ -89,6 +101,8 @@ export const probe = (
   let isBroken = false
   let gitOutput: string | null = GIT_DEFAULT
   let gitRuns = 0
+  // Slow git runs to come, oldest first.
+  let slow: readonly { ms: number; output: string | null }[] = []
   let failing: readonly string[] = []
   let logs: string[] = []
   let turns = 0
@@ -96,6 +110,7 @@ export const probe = (
   let toasts: string[] = []
   let registered: string[] = []
   let writes: Record<string, number> = {}
+  let reads: Record<string, number> = {}
 
   const clock = mock.clock(on, { now: NOON })
   // The kit's mock.store answers the same four calls from memory, but only
@@ -128,6 +143,7 @@ export const probe = (
   // The state is the test's own so each write can be counted.
   const state = new Map<string, { value: unknown; version: number }>()
   on('state.get', (_$, e) => {
+    reads = { ...reads, [e.key]: (reads[e.key] ?? 0) + 1 }
     const held = state.get(`${e.plugin}.${e.key}`)
     return { value: { value: held?.value, version: held?.version ?? 0 } }
   })
@@ -140,13 +156,19 @@ export const probe = (
     return { value: { isSet: true as const, version: version + 1 } }
   })
   on('session.model', () => ({ value: now.model ?? '' }))
-  on('process.run', (_$, e) => {
+  on('process.run', async (_$, e) => {
     const isGit = e.argv[0] === 'git'
     if (isGit) gitRuns += 1
+    const late = isGit ? slow[0] : undefined
+    if (late !== undefined) {
+      slow = slow.slice(1)
+      await clock.sleep(late.ms)
+    }
+    const output = late === undefined ? gitOutput : late.output
     return {
       value: {
-        exitCode: isGit && gitOutput !== null ? 0 : 128,
-        stdout: gitOutput ?? '',
+        exitCode: isGit && output !== null ? 0 : 128,
+        stdout: output ?? '',
         stderr: '',
         isStdoutTruncated: false,
         isStderrTruncated: false,
@@ -154,6 +176,7 @@ export const probe = (
     }
   })
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
+  on('session.end', (_$, e) => ({ sessionId: e.sessionId }))
   on('command.register', (_$, e) => {
     registered = [...registered, e.name]
     return { value: { command: e.name } }
@@ -199,10 +222,21 @@ export const probe = (
         .map(box => ({ key: box.key ?? '', text: box.text, color: texts.find(text => text.text === box.text)?.props.color }))
     },
     advance: ms => clock.advance(ms),
-    bash: command => $.tool.call({ tool: 'Bash', command }),
+    settle: () => clock.settle(),
+    // Each call settles after it, so what it set going (a git read) is done
+    // unless it sleeps on the clock.
+    bash: async command => {
+      const ran = await $.tool.call({ tool: 'Bash', command })
+      await clock.settle()
+      return ran
+    },
     // The tool name is free text here: the kit's `tool.call` types by name, so
     // the call goes in loose, as the engine would see any tool.
-    tool: name => $.tool.call({ tool: name, ...(name === 'Bash' ? { command: 'ls' } : {}) } as Parameters<typeof $.tool.call>[0]),
+    tool: async name => {
+      const ran = await $.tool.call({ tool: name, ...(name === 'Bash' ? { command: 'ls' } : {}) } as Parameters<typeof $.tool.call>[0])
+      await clock.settle()
+      return ran
+    },
     failTool: name => {
       failing = [...failing, name]
     },
@@ -210,8 +244,18 @@ export const probe = (
       gitOutput = output
     },
     gitRuns: () => gitRuns,
+    slowGit: (ms, output) => {
+      slow = [...slow, { ms, output }]
+    },
+    seedState: (key, value) => {
+      const name = `${PLUGIN}.${key}`
+      state.set(name, { value, version: (state.get(name)?.version ?? 0) + 1 })
+    },
     start: async () => {
       await $.session.start({ cwd: '/repo', surface: null, isInteractive: true })
+    },
+    end: async (reason = 'other') => {
+      await $.session.end({ reason, sessionId: 's', resume: { id: 's' } })
     },
     run: async name =>
       (await $.command.run({ command: name, args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })).text ??
@@ -227,6 +271,7 @@ export const probe = (
     toasts: () => toasts,
     registered: () => registered,
     stateWrites: key => writes[key] ?? 0,
+    stateReads: key => reads[key] ?? 0,
     logs: () => logs,
     writes: () => written,
     breakUsage: () => {

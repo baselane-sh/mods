@@ -4,7 +4,7 @@ import { parseMarkers } from '../hooks/rules/todo-pane'
 import { CWD, SURFACES, probe } from './probe'
 import type { Answer } from './probe'
 
-const GREP = `git --no-optional-locks -C ${CWD} grep -z -n -I -w -E -e TODO|FIXME|HACK`
+const GREP = `git --no-optional-locks -C ${CWD} grep --no-color -z -n -I -w -E -e TODO|FIXME|HACK`
 
 // `git grep -z -n` output: path, NUL, line number, NUL, the line. A path may
 // hold a colon or a space, which is why the pane asks for -z.
@@ -75,6 +75,18 @@ test('todo-pane: the marker word carries a color, and the word says it without o
   expect(await colors('TODO')).toContain('yellow')
   expect(await colors('FIXME')).toContain('red')
   expect(await colors('HACK')).toContain('magenta')
+  await ui.unmount()
+})
+
+test('todo-pane: a git set to color its output (color.ui=always) still reads clean', async ($, on) => {
+  // What git grep prints with color on and no --no-color: each field in escape codes.
+  const paint = (code: string, text: string): string => `\u001b[${code}m${text}\u001b[m`
+  const colored = `${paint('35', 'a.ts')}${paint('36', '\u0000')}${paint('32', '12')}${paint('36', '\u0000')}  // ${paint('1;31', 'TODO')} fix\n`
+  const uncolored = GREP.replace(' --no-color', '')
+  const session = probe($, on, { [uncolored]: { stdout: colored }, [GREP]: { stdout: `${hit('a.ts', 12, '  // TODO fix')}\n` } })
+  await session.command('todo-pane')
+  const ui = await session.mount('terminal', 'todo')
+  expect(await session.lines(ui)).toEqual(['1 marker in 1 file  TODO 1', 'a.ts', '  12  TODO fix'])
   await ui.unmount()
 })
 

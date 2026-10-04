@@ -67,6 +67,10 @@ const attempt = async <T>(run: () => Promise<T>): Promise<T | undefined> => {
 
 const isEmpty = (p: Pending): boolean => p.calls === 0
 
+// The start of this run: a resumed session keeps its first start, and the
+// time it was away is not this run's.
+const runStartOf = (startedAt: number, memo: SessionMemo): number => Math.max(startedAt, memo.since ?? startedAt)
+
 // The rollup as it stands, with nothing added.
 const load = async (host: Host): Promise<Rolled> => {
   const now = await host.now()
@@ -158,7 +162,8 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
       })
       const rolled = await flush(host, { sessions: 0, turns: 1, ...(spent === undefined ? {} : { usd: spent }) })
       if (rolled === undefined) return next(e)
-      const sessionCalls = (await read($, session)).calls ?? 0
+      const latest = await read($, session)
+      const sessionCalls = latest.calls ?? 0
 
       for (const rule of rules) {
         if (rule.after === undefined) continue
@@ -169,7 +174,7 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
             event: 'turn',
             sessionCalls,
             promptAt: rolled.now - e.durationMs,
-            ...(usage === undefined ? {} : { startedAt: usage.startedAt }),
+            ...(usage === undefined ? {} : { startedAt: usage.startedAt, runStartedAt: runStartOf(usage.startedAt, latest) }),
           })
           for (const line of lines) await $.ui.toast(line)
         } catch (error) {
@@ -193,6 +198,9 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
         store: { get: key => $.store.get(key), set: (key, value) => $.store.set(key, value) },
       })
       await flush(host, { sessions: 0, turns: 0 })
+      // A /clear goes on in this process as a new session with no session.start,
+      // so its tool calls count from 0 again once the ending one is judged.
+      const isClear = e.reason === 'clear'
       const enders = rules.filter(rule => rule.ended !== undefined)
       if (enders.length > 0) {
         const rolled = await load(host)
@@ -213,6 +221,7 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
           }
         }
       }
+      if (isClear) await update($, session, memo => ({ ...memo, calls: 0 }))
     } catch (error) {
       await $.ui.log(failed('session end', error))
     }
@@ -232,15 +241,18 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
         now: () => $.clock.now(),
         store: { get: key => $.store.get(key), set: (key, value) => $.store.set(key, value) },
       })
-      // A session is counted once, however often session.start is raised.
+      // A session is counted once, however often session.start is raised. The
+      // first start this process sees is where this run began.
+      const startNow = await $.clock.now()
       let isNew = true
       await update($, session, memo => {
         isNew = !memo.counted
-        return isNew ? { ...memo, counted: true } : memo
+        return isNew ? { ...memo, counted: true, since: memo.since ?? startNow } : memo
       })
       const rolled = (isNew ? await flush(host, { sessions: 1, turns: 0 }) : undefined) ?? (await load(host))
       const usage = await attempt(() => $.session.usage())
-      const sessionCalls = (await read($, session)).calls ?? 0
+      const memo = await read($, session)
+      const sessionCalls = memo.calls ?? 0
 
       for (const rule of rules) {
         if (rule.after === undefined) continue
@@ -250,7 +262,7 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
             store: host.store,
             event: 'session',
             sessionCalls,
-            ...(usage === undefined ? {} : { startedAt: usage.startedAt }),
+            ...(usage === undefined ? {} : { startedAt: usage.startedAt, runStartedAt: runStartOf(usage.startedAt, memo) }),
           })
           for (const line of lines) await $.ui.toast(line)
         } catch (error) {

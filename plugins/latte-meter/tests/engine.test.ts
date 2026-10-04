@@ -1,8 +1,8 @@
 import { expect, test } from 'claude-code/testing'
 
-import { SURFACES, probe } from './probe'
+import { HOUR, NOON, SURFACES, probe } from './probe'
 
-const FULL = { usd: 1.42, percent: 62 }
+const FULL = { usd: 1.42, percent: 62, startedAt: NOON - HOUR, model: 'claude-opus-4-1' }
 
 test('band: one row joins the segments with two spaces', async ($, on) => {
   const session = probe($, on, { usd: 1.34, percent: 50 })

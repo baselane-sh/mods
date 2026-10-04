@@ -1,5 +1,5 @@
 {
-  "hooks": ["engine.tsx", "view.tsx", "rule.ts", "money.ts", "date.ts", "watch.ts"],
+  "hooks": ["engine.tsx", "view.tsx", "rule.ts", "money.ts", "date.ts", "watch.ts", "git.ts", "tally.ts"],
   "tests": ["probe.ts", "engine.test.ts"],
   "register": "registerBand",
   "ruleExport": "rule",

@@ -1,0 +1,11 @@
+{
+  "name": "session-clock",
+  "version": "0.2.0",
+  "description": "A band above the prompt with the wall clock and how long the session has run (14:05 · 1h 12m).",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

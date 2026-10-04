@@ -1,0 +1,11 @@
+{
+  "name": "dev-band",
+  "version": "0.2.0",
+  "description": "The developer band in one row above the prompt: git branch and changed files, wall clock and session age, tool counts, and failed tool calls.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

@@ -13,6 +13,10 @@ export type Reading = {
   // Today's total across sessions, and the local date (YYYY-MM-DD) it is for.
   dailyUsd?: number
   dailyDate?: string
+  // When the session began (epoch milliseconds, the clock's own).
+  startedAt?: number
+  // The main loop's model, as /model shows it.
+  model?: string
 }
 
 // How one tool call ended: it ran, it errored, or a hook denied it.
@@ -26,6 +30,21 @@ export type Pomodoro = {
   now: number
 }
 
+// Tool calls this session, by tool (an MCP tool by its last name segment),
+// with how many failed (an error or a deny) and which tool failed last.
+export type Tally = {
+  calls: Readonly<Record<string, number>>
+  failures: number
+  lastFailed?: string
+}
+
+// The repository the session works in: its branch and how many files differ
+// from HEAD (modified, staged, deleted or untracked).
+export type GitState = {
+  branch: string
+  changed: number
+}
+
 declare module 'claude-code' {
   interface PluginState {
     'cost-meter': {
@@ -36,6 +55,9 @@ declare module 'claude-code' {
       outcomes: readonly Outcome[]
       // The running pomodoro, or null when none runs.
       pomodoro: Pomodoro | null
+      tally: Tally
+      // Null when the session is not in a repository, or before the first read.
+      git: GitState | null
     }
   }
 }

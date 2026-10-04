@@ -1,0 +1,11 @@
+{
+  "name": "tool-counter",
+  "version": "0.2.0",
+  "description": "A band above the prompt with your tool calls this session, the top three by tool (Bash 41 · Edit 18 · Read 12).",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

@@ -77,6 +77,66 @@
       }
     },
     {
+      "name": "session-clock",
+      "source": "./plugins/session-clock",
+      "description": "A band above the prompt with the wall clock and how long the session has run (14:05 · 1h 12m).",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "branch-band",
+      "source": "./plugins/branch-band",
+      "description": "A band above the prompt with the git branch and the count of changed files, refreshed after each Bash call and file edit.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "tool-counter",
+      "source": "./plugins/tool-counter",
+      "description": "A band above the prompt with your tool calls this session, the top three by tool (Bash 41 · Edit 18 · Read 12).",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "error-meter",
+      "source": "./plugins/error-meter",
+      "description": "A band above the prompt with how many tool calls failed this session (an error or a deny) and which tool failed last. Red from the first failure.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "model-badge",
+      "source": "./plugins/model-badge",
+      "description": "A band above the prompt with the current model name and the context percent (opus-4-1 · 62%).",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "dev-band",
+      "source": "./plugins/dev-band",
+      "description": "The developer band in one row above the prompt: git branch and changed files, wall clock and session age, tool counts, and failed tool calls.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "receipt",
       "source": "./plugins/receipt",
       "description": "Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied.",

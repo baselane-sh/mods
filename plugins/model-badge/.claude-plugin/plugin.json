@@ -1,0 +1,11 @@
+{
+  "name": "model-badge",
+  "version": "0.2.0",
+  "description": "A band above the prompt with the current model name and the context percent (opus-4-1 · 62%).",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

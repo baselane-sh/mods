@@ -27,7 +27,11 @@ export const bandProps = (bodyColumns: number, hasSurvey = false) =>
     view: {},
   }) as const
 
-export type Reading = { usd?: number; percent?: number }
+// `startedAt` and `model` are what the session reports besides its usage.
+export type Reading = { usd?: number; percent?: number; startedAt?: number; model?: string }
+
+// What a `git status --porcelain -b` answers by default: main, two files changed.
+export const GIT_DEFAULT = '## main...origin/main\n M a.ts\n?? b.ts\n'
 
 // A Bash command containing this word is denied beneath the mod; one
 // containing FAIL runs and comes back as an error.
@@ -53,6 +57,14 @@ export type BandProbe = {
   bash: (command: string) => Promise<unknown>
   // Raises session.start, the way the session does.
   start: () => Promise<void>
+  // One call of any tool (Edit, Write, Read...): it passes.
+  tool: (name: string) => Promise<unknown>
+  // Every later call of this tool comes back as an error.
+  failTool: (name: string) => void
+  // What `git status --porcelain -b` answers from now on; null is not a repository.
+  setGit: (output: string | null) => void
+  // How many times the mod ran git.
+  gitRuns: () => number
   // Runs `/<name>` and answers its output text.
   run: (name: string) => Promise<string>
   toasts: () => readonly string[]
@@ -75,6 +87,9 @@ export const probe = (
 ): BandProbe => {
   let now: Reading = start
   let isBroken = false
+  let gitOutput: string | null = GIT_DEFAULT
+  let gitRuns = 0
+  let failing: readonly string[] = []
   let logs: string[] = []
   let turns = 0
   let written: Record<string, unknown> = {}
@@ -102,7 +117,8 @@ export const probe = (
     if (isBroken) throw new Error('usage is down')
     return {
       value: {
-        startedAt: 0,
+        // NaN stands for a session that reports no start: the engine leaves it out.
+        startedAt: now.startedAt ?? Number.NaN,
         context: { window: 200_000, ...(now.percent === undefined ? {} : { tokens: now.percent * 2000, percent: now.percent }) },
         rateLimits: [],
         ...(now.usd === undefined ? {} : { cost: { usd: now.usd } }),
@@ -123,6 +139,20 @@ export const probe = (
     writes = { ...writes, [e.key]: (writes[e.key] ?? 0) + 1 }
     return { value: { isSet: true as const, version: version + 1 } }
   })
+  on('session.model', () => ({ value: now.model ?? '' }))
+  on('process.run', (_$, e) => {
+    const isGit = e.argv[0] === 'git'
+    if (isGit) gitRuns += 1
+    return {
+      value: {
+        exitCode: isGit && gitOutput !== null ? 0 : 128,
+        stdout: gitOutput ?? '',
+        stderr: '',
+        isStdoutTruncated: false,
+        isStderrTruncated: false,
+      },
+    }
+  })
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
   on('command.register', (_$, e) => {
     registered = [...registered, e.name]
@@ -133,6 +163,7 @@ export const probe = (
     return { value: undefined }
   })
   on('tool.call', (_$, e) => {
+    if (failing.includes(e.tool)) return { result: {}, isError: true }
     const command = e.tool === 'Bash' ? e.command : ''
     if (command.includes(DENY_WORD)) return { deny: 'blocked by test' }
     if (command.includes(FAIL_WORD)) return { result: {}, isError: true }
@@ -169,6 +200,16 @@ export const probe = (
     },
     advance: ms => clock.advance(ms),
     bash: command => $.tool.call({ tool: 'Bash', command }),
+    // The tool name is free text here: the kit's `tool.call` types by name, so
+    // the call goes in loose, as the engine would see any tool.
+    tool: name => $.tool.call({ tool: name, ...(name === 'Bash' ? { command: 'ls' } : {}) } as Parameters<typeof $.tool.call>[0]),
+    failTool: name => {
+      failing = [...failing, name]
+    },
+    setGit: output => {
+      gitOutput = output
+    },
+    gitRuns: () => gitRuns,
     start: async () => {
       await $.session.start({ cwd: '/repo', surface: null, isInteractive: true })
     },

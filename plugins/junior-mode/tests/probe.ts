@@ -30,3 +30,12 @@ export const compose = async ($: Engine, on: OnFn, existing: readonly PromptComp
   on('prompt.compose', () => ({ sections: existing }))
   return (await $.prompt.compose(FACTS)).sections
 }
+
+// The section a rule added, found by id, so a test holds in a pack where
+// several rules add sections. Its position is checked against the sections
+// that came before it.
+export const ourSection = async ($: Engine, on: OnFn, id: string) => {
+  const sections = await compose($, on)
+  const index = sections.findIndex(section => section.id === `${id}:style`)
+  return { sections, index, section: sections[index], text: sections[index]?.text ?? '' }
+}

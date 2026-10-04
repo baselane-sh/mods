@@ -1,0 +1,10 @@
+{
+  "name": "security-mode",
+  "version": "0.2.0",
+  "description": "Checks each change for injection, secrets, authorization and unsafe input, and states the risks it checked.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

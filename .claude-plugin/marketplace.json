@@ -685,6 +685,66 @@
         "name": "Baselane",
         "url": "https://baselane.sh"
       }
+    },
+    {
+      "name": "conventional-commits",
+      "source": "./plugins/conventional-commits",
+      "description": "Commit messages follow Conventional Commits: type(scope): subject, imperative, under 72 characters.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "tdd-mode",
+      "source": "./plugins/tdd-mode",
+      "description": "Writes a failing test first, watches it fail, then implements.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "ste-mode",
+      "source": "./plugins/ste-mode",
+      "description": "Replies in ASD-STE100 Simplified Technical English: approved words, short sentences, one instruction each, active voice.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "security-mode",
+      "source": "./plugins/security-mode",
+      "description": "Checks each change for injection, secrets, authorization and unsafe input, and states the risks it checked.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "yoda-mode",
+      "source": "./plugins/yoda-mode",
+      "description": "Speaks like Yoda in prose. Code, commands and commit messages stay normal.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "team-pack",
+      "source": "./plugins/team-pack",
+      "description": "Team habits in one install: Conventional Commits, test-first work and a security check on every change.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
     }
   ]
 }

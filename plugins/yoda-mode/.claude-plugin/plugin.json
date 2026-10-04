@@ -1,0 +1,10 @@
+{
+  "name": "yoda-mode",
+  "version": "0.2.0",
+  "description": "Speaks like Yoda in prose. Code, commands and commit messages stay normal.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

@@ -6,8 +6,11 @@ type OnFn = Parameters<TestBody>[1]
 
 export type Fetched = { url: string; method?: string; headers?: Record<string, string>; body?: string }
 
-// What a fake formatter did: its exit code, stderr, and what it wrote.
-export type Formatted = { exitCode: number; stderr?: string }
+// What a fake formatter or linter did: its exit code, output, and what it wrote.
+export type Formatted = { exitCode: number; stdout?: string; stderr?: string }
+
+// One started program and the directory it was started in (undefined: the session's).
+export type Started = { argv: readonly string[]; cwd?: string }
 
 export type ProbeOptions = {
   // Files by absolute path. A directory exists when a file lies beneath it.
@@ -18,9 +21,13 @@ export type ProbeOptions = {
   format?: (argv: readonly string[], files: Map<string, string>) => Formatted
   home?: string
   cwd?: string
+  // The session's project root; defaults to `cwd`.
+  root?: string
   now?: number
-  // Make the ntfy server answer this status.
+  // Make the push server (ntfy or a webhook) answer this status.
   ntfyStatus?: number
+  // What `uname -s` prints. Absent, `uname` is missing (as on Windows) and the run rejects.
+  uname?: string
 }
 
 export type Probe = {
@@ -28,9 +35,12 @@ export type Probe = {
   bash: (command: string, tookMs?: number) => ReturnType<Engine['tool']['call']>
   needsInput: (cwd?: string) => Promise<unknown>
   sessionEnd: (reason?: 'other' | 'clear' | 'logout', cwd?: string) => Promise<unknown>
+  turnEnd: (durationMs: number, extra?: { isAborted?: boolean; agentId?: string }) => Promise<unknown>
   files: () => ReadonlyMap<string, string>
   fetched: () => readonly Fetched[]
   started: () => readonly (readonly string[])[]
+  runs: () => readonly Started[]
+  logs: () => readonly string[]
 }
 
 const parent = (path: string): string => path.slice(0, path.lastIndexOf('/')) || '/'
@@ -42,6 +52,9 @@ export const probe = ($: Engine, on: OnFn, options: ProbeOptions = {}): Probe =>
   const files = new Map(Object.entries(options.files ?? {}))
   let fetched: Fetched[] = []
   let started: (readonly string[])[] = []
+  let runs: Started[] = []
+  let logs: string[] = []
+  let turns = 0
   let tookMs = 0
   const clock = mock.clock(on, { now: options.now ?? 1_700_000_000_000 })
   const dirs = (): Set<string> => {
@@ -53,8 +66,12 @@ export const probe = ($: Engine, on: OnFn, options: ProbeOptions = {}): Probe =>
   }
 
   on('session.cwd', () => ({ value: options.cwd ?? '/repo' }))
+  on('session.root', () => ({ value: options.root ?? options.cwd ?? '/repo' }))
   on('env.get', (_$, e) => ({ value: e.name === 'HOME' ? options.home : undefined }))
-  on('ui.log', () => ({ value: undefined }))
+  on('ui.log', (_$, e) => {
+    logs = [...logs, e.text]
+    return { value: undefined }
+  })
   on('fs.exists', (_$, e) => ({ value: files.has(e.path) || dirs().has(e.path) }))
   on('fs.read', (_$, e) => {
     const text = files.get(e.path)
@@ -77,12 +94,17 @@ export const probe = ($: Engine, on: OnFn, options: ProbeOptions = {}): Probe =>
   })
   on('process.run', (_$, e) => {
     started = [...started, e.argv]
+    runs = [...runs, { argv: e.argv, cwd: e.init?.cwd }]
+    if (e.argv[0] === 'uname') {
+      if (options.uname === undefined) throw new Error('uname: no such program')
+      return { value: { exitCode: 0, stdout: `${options.uname}\n`, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
+    }
     if (e.argv[0] === 'which') {
       const found = options.onPath?.[e.argv[1] ?? '']
       return { value: { exitCode: found === undefined ? 1 : 0, stdout: found ?? '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
     }
     const done = options.format?.(e.argv, files) ?? { exitCode: 0 }
-    return { value: { exitCode: done.exitCode, stdout: '', stderr: done.stderr ?? '', isStdoutTruncated: false, isStderrTruncated: false } }
+    return { value: { exitCode: done.exitCode, stdout: done.stdout ?? '', stderr: done.stderr ?? '', isStdoutTruncated: false, isStderrTruncated: false } }
   })
   on('http.fetch', (_$, e) => {
     fetched = [...fetched, { url: e.url, method: e.init?.method, headers: e.init?.headers, body: e.init?.body }]
@@ -95,6 +117,8 @@ export const probe = ($: Engine, on: OnFn, options: ProbeOptions = {}): Probe =>
   })
   on('classic.Notification', () => ({}))
   on('classic.SessionEnd', () => ({}))
+  on('turn.start', (_$, e) => ({ turnId: e.turnId }))
+  on('turn.complete', () => ({ text: '' }))
 
   return {
     edit: (file_path, ms = 0) => {
@@ -108,8 +132,22 @@ export const probe = ($: Engine, on: OnFn, options: ProbeOptions = {}): Probe =>
     needsInput: (cwd = '/work/myproj') =>
       $.classic.Notification({ message: 'Claude needs your permission to use Bash', notification_type: 'permission_prompt', cwd }),
     sessionEnd: (reason = 'other', cwd = '/work/myproj') => $.classic.SessionEnd({ reason, cwd }),
+    turnEnd: async (durationMs, extra = {}) => {
+      turns += 1
+      const isAborted = extra.isAborted ?? false
+      return $.turn.complete({
+        answer: '',
+        durationMs,
+        isAborted,
+        turnId: `t${turns}`,
+        reason: isAborted ? 'aborted' : 'answer',
+        ...(extra.agentId === undefined ? {} : { agentId: extra.agentId }),
+      })
+    },
     files: () => files,
     fetched: () => fetched,
     started: () => started,
+    runs: () => runs,
+    logs: () => logs,
   }
 }

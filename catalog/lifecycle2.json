@@ -1,0 +1,35 @@
+{
+  "engine": "lifecycle",
+  "mods": [
+    {
+      "name": "desktop-notify",
+      "description": "Shows a desktop notification when Claude Code needs your input: osascript on macOS, notify-send elsewhere when it is installed. The text is the project name and a short status only.",
+      "rules": ["desktop-notify"]
+    },
+    {
+      "name": "slack-notify",
+      "description": "Posts to a Slack incoming webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL.",
+      "rules": ["slack-notify"]
+    },
+    {
+      "name": "discord-notify",
+      "description": "Posts to a Discord webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL.",
+      "rules": ["discord-notify"]
+    },
+    {
+      "name": "say-done",
+      "description": "On macOS, says \"Claude is done\" when a turn ends after more than 30 seconds. Does nothing on other platforms.",
+      "rules": ["say-done"]
+    },
+    {
+      "name": "auto-lint",
+      "description": "Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits inside the project, only when the project has that linter's config, and tells Claude what is left.",
+      "rules": ["auto-lint"]
+    },
+    {
+      "name": "notify-pack",
+      "description": "Local alerts in one: a desktop notification when Claude Code needs your input, and a spoken line on macOS when a long turn ends.",
+      "rules": ["desktop-notify", "say-done"]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "hooks": ["engine.ts", "patterns.ts", "ntfy.ts"],
+  "hooks": ["engine.ts", "patterns.ts", "ntfy.ts", "notify.ts", "webhook.ts"],
   "tests": ["probe.ts", "engine.test.ts"],
   "register": "registerLifecycle",
   "ruleExport": "rule",
@@ -28,6 +28,24 @@
         "description": "A Bash command that runs at least this long sends a push.",
         "default": 60,
         "min": 1
+      }
+    },
+    "slack-notify": {
+      "slackWebhookUrl": {
+        "type": "string",
+        "title": "Slack webhook URL",
+        "description": "A Slack incoming webhook URL (https://hooks.slack.com/...). Anyone who has it can post to your channel. Empty means nothing is sent.",
+        "default": "",
+        "sensitive": true
+      }
+    },
+    "discord-notify": {
+      "discordWebhookUrl": {
+        "type": "string",
+        "title": "Discord webhook URL",
+        "description": "A Discord webhook URL (https://discord.com/api/webhooks/...). Anyone who has it can post to your channel. Empty means nothing is sent.",
+        "default": "",
+        "sensitive": true
       }
     }
   }

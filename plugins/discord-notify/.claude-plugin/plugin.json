@@ -1,0 +1,19 @@
+{
+  "name": "discord-notify",
+  "version": "0.2.0",
+  "description": "Posts to a Discord webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "discordWebhookUrl": {
+      "type": "string",
+      "title": "Discord webhook URL",
+      "description": "A Discord webhook URL (https://discord.com/api/webhooks/...). Anyone who has it can post to your channel. Empty means nothing is sent.",
+      "default": "",
+      "sensitive": true
+    }
+  }
+}

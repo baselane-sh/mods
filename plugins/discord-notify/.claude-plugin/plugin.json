@@ -1,6 +1,6 @@
 {
   "name": "discord-notify",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Posts to a Discord webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL.",
   "author": {
     "name": "Baselane",

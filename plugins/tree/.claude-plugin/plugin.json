@@ -1,6 +1,6 @@
 {
   "name": "tree",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Adds /tree: tracked files as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only.",
   "author": {
     "name": "Baselane",

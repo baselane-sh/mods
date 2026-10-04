@@ -1,6 +1,6 @@
 # Show HN
 
-Replace `<github-url>` before you post. Post the title with the GitHub URL as the link, then post the first comment at once.
+Post the title with the GitHub URL as the link, then post the first comment at once.
 
 ## Title
 

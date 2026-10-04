@@ -1,6 +1,6 @@
 {
   "name": "code-only",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Replies with the code or command first and at most two short sentences of prose, unless asked to explain.",
   "author": {
     "name": "Baselane",

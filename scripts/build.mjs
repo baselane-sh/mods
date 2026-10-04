@@ -9,7 +9,7 @@ import { join } from 'node:path'
 const ROOT = new URL('..', import.meta.url).pathname
 const AUTHOR = { name: 'Baselane', url: 'https://baselane.sh' }
 const MARKER = '.generated'
-const VERSION = '0.2.0'
+const VERSION = '0.3.0'
 const LICENSE = 'MIT'
 
 const camel = id => id.replace(/-(\w)/g, (_, c) => c.toUpperCase())
@@ -180,7 +180,7 @@ write(
   join(ROOT, '.claude-plugin/marketplace.json'),
   `${JSON.stringify(
     {
-      name: 'baselane-mods',
+      name: 'baselane-mods-dev',
       description: 'Baselane mods for Claude Code: guards, panes and tools you pick and combine.',
       owner: AUTHOR,
       plugins: mods.map(mod => ({

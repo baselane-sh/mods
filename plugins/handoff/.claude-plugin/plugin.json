@@ -1,6 +1,6 @@
 {
   "name": "handoff",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Adds /handoff: writes a session summary to .claude/handoff.md (never overwriting) and answers with the path.",
   "author": {
     "name": "Baselane",

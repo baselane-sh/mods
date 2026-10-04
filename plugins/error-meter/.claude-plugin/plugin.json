@@ -1,6 +1,6 @@
 {
   "name": "error-meter",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A band above the prompt with how many tool calls failed this session (an error or a deny) and which tool failed last. Red from the first failure.",
   "author": {
     "name": "Baselane",

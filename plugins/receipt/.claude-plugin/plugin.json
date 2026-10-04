@@ -1,6 +1,6 @@
 {
   "name": "receipt",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied.",
   "author": {
     "name": "Baselane",

@@ -12,7 +12,7 @@ Mods for Claude Code. Pick them. Combine them.
 
 100+ small, free, open-source mods for Claude Code: guards that ask before `rm -rf`, live panes, cost meters, sounds, stats and new voices for Claude. Each mod does one thing. Install the ones you want.
 
-**Primary button:** Install from GitHub (`<github-url>`)
+**Primary button:** Install from GitHub (`https://github.com/baselane-sh/mods`)
 **Second button:** See the catalog
 
 ---

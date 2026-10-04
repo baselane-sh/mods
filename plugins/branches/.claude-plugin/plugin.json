@@ -1,6 +1,6 @@
 {
   "name": "branches",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list. Never deletes.",
   "author": {
     "name": "Baselane",

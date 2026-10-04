@@ -1,6 +1,6 @@
 {
   "name": "personal-bests",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Tracks your records across sessions (longest session, most tool calls in a session, most files edited in a day, cheapest session over 30 minutes), toasts a new one, and lists them with /bests.",
   "author": {
     "name": "Baselane",

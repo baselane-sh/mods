@@ -1,6 +1,6 @@
 # r/ClaudeAI post
 
-Replace `<github-url>` before you post. Use the flair for tools or projects. Attach the demo video or a screenshot of `/wrapped` or `/receipt`.
+Use the flair for tools or projects. Attach the demo video or a screenshot of `/wrapped` or `/receipt`.
 
 ## Title
 
@@ -29,8 +29,7 @@ Claude Code 2.1.288 and later can run mods: plugins made of function hooks. We b
 **Install (from a clone)**
 
 ```sh
-git clone <github-url> baselane-mods
-claude plugin marketplace add "$PWD/baselane-mods"
+claude plugin marketplace add baselane-sh/mods-catalog
 claude plugin install guard-essentials@baselane-mods
 claude plugin install yoda-mode@baselane-mods
 ```

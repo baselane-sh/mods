@@ -1,17 +1,14 @@
 # Install Baselane mods
 
-This guide uses a local clone of the repository. Every command is a `claude plugin` command from Claude Code 2.1.288 or later, with mods.
-
-In the commands below, `/path/to/baselane-mods` is the folder of your clone. Use the full path.
+Every command is a `claude plugin` command from Claude Code 2.1.288 or later, with mods. Inside Claude Code you can type the same commands as `/plugin ...`.
 
 ## 1. Get the catalog
 
 ```sh
-git clone <github-url> /path/to/baselane-mods
-claude plugin marketplace add /path/to/baselane-mods
+claude plugin marketplace add baselane-sh/mods-catalog
 ```
 
-The second command adds the catalog as a marketplace named `baselane-mods`. To make sure, run:
+This adds the Baselane gallery as a marketplace named `baselane-mods`. The gallery pins each mod to a reviewed commit. Browse it at https://mods.baselane.sh. To make sure, run:
 
 ```sh
 claude plugin marketplace list
@@ -94,10 +91,9 @@ Paste `{"slackWebhookUrl": "<your webhook URL>"}` (or `discordWebhookUrl` for `d
 
 ## 4. Update
 
-Get the new version of the catalog, then update each mod:
+Get the new version of the gallery, then update each mod:
 
 ```sh
-git -C /path/to/baselane-mods pull
 claude plugin marketplace update baselane-mods
 claude plugin update guard-essentials@baselane-mods
 ```

@@ -1,6 +1,6 @@
 {
   "name": "lockfile-guard",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Asks before a lockfile is written or edited by hand; the package manager should change it.",
   "author": {
     "name": "Baselane",

@@ -1,6 +1,6 @@
 {
   "name": "command-pack",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff.",
   "author": {
     "name": "Baselane",

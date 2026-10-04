@@ -1,6 +1,6 @@
 # X thread
 
-Six posts. Each one is under 280 characters. Attach the 30-second demo video to post 1, and a screenshot to the posts that say so. Replace `<github-url>` before you post.
+Six posts. Each one is under 280 characters. Attach the 30-second demo video to post 1, and a screenshot to the posts that say so. 
 
 ---
 
@@ -60,5 +60,5 @@ Nothing leaves your machine unless you set a destination, like an ntfy topic for
 
 Needs Claude Code 2.1.288+ with mods.
 
-Install: <github-url>
+Install: https://github.com/baselane-sh/mods
 Catalog: baselane.sh/mods

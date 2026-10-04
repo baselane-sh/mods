@@ -1,6 +1,6 @@
 {
   "name": "json-pretty",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Bash output that is one long line of JSON is drawn pretty-printed, folded after 30 lines. Display only: Claude reads the output as it was.",
   "author": {
     "name": "Baselane",

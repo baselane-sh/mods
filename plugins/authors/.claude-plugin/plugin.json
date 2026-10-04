@@ -1,6 +1,6 @@
 {
   "name": "authors",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Adds /authors: the top 15 contributors by commit count with their last commit date. Names only, never email addresses. Read-only.",
   "author": {
     "name": "Baselane",

@@ -597,6 +597,66 @@
       }
     },
     {
+      "name": "time-badge",
+      "source": "./plugins/time-badge",
+      "description": "Tool rows show how long the call ran, for example 2.4s, when it took over one second. The time is the tool's own run time, without permission prompts.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "exit-badge",
+      "source": "./plugins/exit-badge",
+      "description": "A failed Bash row shows a small red badge with its exit code, for example exit 2.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "json-pretty",
+      "source": "./plugins/json-pretty",
+      "description": "Bash output that is one long line of JSON is drawn pretty-printed, folded after 30 lines. Display only: Claude reads the output as it was.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "url-links",
+      "source": "./plugins/url-links",
+      "description": "https links (and http://localhost) in tool output are listed as clickable links under the result, up to five. Display only: Claude reads the output as it was.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "size-badge",
+      "source": "./plugins/size-badge",
+      "description": "Read and Write rows show how much was read or written: the line count, for example 312 lines, or the file size for images and PDFs.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "render-plus",
+      "source": "./plugins/render-plus",
+      "description": "Three row badges in one: time-badge, exit-badge and size-badge.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "sounds-retro",
       "source": "./plugins/sounds-retro",
       "description": "8-bit sounds: a coin when tests pass, a buzz when they fail, a chime when a turn ends.",

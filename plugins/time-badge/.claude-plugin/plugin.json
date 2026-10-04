@@ -1,0 +1,11 @@
+{
+  "name": "time-badge",
+  "version": "0.2.0",
+  "description": "Tool rows show how long the call ran, for example 2.4s, when it took over one second. The time is the tool's own run time, without permission prompts.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

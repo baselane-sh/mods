@@ -1,0 +1,11 @@
+{
+  "name": "exit-badge",
+  "version": "0.2.0",
+  "description": "A failed Bash row shows a small red badge with its exit code, for example exit 2.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "url-links",
+  "version": "0.2.0",
+  "description": "https links (and http://localhost) in tool output are listed as clickable links under the result, up to five. Display only: Claude reads the output as it was.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

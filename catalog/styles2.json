@@ -1,0 +1,11 @@
+{
+  "engine": "style",
+  "mods": [
+    { "name": "conventional-commits", "description": "Commit messages follow Conventional Commits: type(scope): subject, imperative, under 72 characters.", "rules": ["conventional-commits"] },
+    { "name": "tdd-mode", "description": "Writes a failing test first, watches it fail, then implements.", "rules": ["tdd-mode"] },
+    { "name": "ste-mode", "description": "Replies in ASD-STE100 Simplified Technical English: approved words, short sentences, one instruction each, active voice.", "rules": ["ste-mode"] },
+    { "name": "security-mode", "description": "Checks each change for injection, secrets, authorization and unsafe input, and states the risks it checked.", "rules": ["security-mode"] },
+    { "name": "yoda-mode", "description": "Speaks like Yoda in prose. Code, commands and commit messages stay normal.", "rules": ["yoda-mode"] },
+    { "name": "team-pack", "description": "Team habits in one install: Conventional Commits, test-first work and a security check on every change.", "rules": ["conventional-commits", "tdd-mode", "security-mode"] }
+  ]
+}

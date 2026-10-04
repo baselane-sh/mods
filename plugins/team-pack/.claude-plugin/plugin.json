@@ -1,0 +1,10 @@
+{
+  "name": "team-pack",
+  "version": "0.2.0",
+  "description": "Team habits in one install: Conventional Commits, test-first work and a security check on every change.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

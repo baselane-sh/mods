@@ -1,0 +1,10 @@
+{
+  "name": "tdd-mode",
+  "version": "0.2.0",
+  "description": "Writes a failing test first, watches it fail, then implements.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

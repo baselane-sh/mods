@@ -1,0 +1,10 @@
+{
+  "name": "big-diff-nudge",
+  "version": "0.2.0",
+  "description": "Suggests splitting the change once your edits added or removed more than 500 lines since the last git commit. A successful commit resets the count.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

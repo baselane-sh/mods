@@ -1,0 +1,10 @@
+{
+  "name": "quality-pack",
+  "version": "0.2.0",
+  "description": "Three quiet nudges in one mod: type check after TypeScript edits, lockfile after dependency edits, and a split suggestion past 500 changed lines.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

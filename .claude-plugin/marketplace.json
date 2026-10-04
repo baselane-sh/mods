@@ -527,6 +527,66 @@
       }
     },
     {
+      "name": "typecheck-nudge",
+      "source": "./plugins/typecheck-nudge",
+      "description": "At turn end, one toast when .ts or .tsx files were edited and no type check (tsc, vue-tsc, a typecheck script or a build) ran since the last edit.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "lockfile-nudge",
+      "source": "./plugins/lockfile-nudge",
+      "description": "At turn end, one toast when dependencies in package.json, pyproject.toml, Cargo.toml or go.mod changed and neither the matching lockfile was edited nor an install command ran.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "big-diff-nudge",
+      "source": "./plugins/big-diff-nudge",
+      "description": "Suggests splitting the change once your edits added or removed more than 500 lines since the last git commit. A successful commit resets the count.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "migration-nudge",
+      "source": "./plugins/migration-nudge",
+      "description": "At turn end, one toast when a schema file changed (schema.prisma, models.py, SQL under schema/, a drizzle schema) and no migration file was created this session.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "env-example-nudge",
+      "source": "./plugins/env-example-nudge",
+      "description": "At turn end, one toast when edits added a reference to an environment variable (process.env, os.environ, os.getenv, Deno.env) that .env.example does not list. Reads only the names in .env.example, never .env.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "quality-pack",
+      "source": "./plugins/quality-pack",
+      "description": "Three quiet nudges in one mod: type check after TypeScript edits, lockfile after dependency edits, and a split suggestion past 500 changed lines.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "agent-firewall",
       "source": "./plugins/agent-firewall",
       "description": "A live pane of every tool call the agent makes: green when it ran, red when it was blocked, with counters. Open it with /firewall.",

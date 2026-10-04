@@ -33,7 +33,7 @@ The catalog below marks each pack with "pack".
 ## Safety
 
 - **Guards ask. They do not block.** A guard stops a harsh command and asks you first. You decide. If a guard check fails, it asks you. It does not let the call through without a question.
-- **Your data stays on your machine.** No mod sends data out unless you set a destination yourself, such as an ntfy topic for `ntfy-notify` or `long-run-notify`. With a topic set, those mods send a short message only: a generic "needs input" text, or the project name and the seconds.
+- **Your data stays on your machine.** No mod sends data out unless you set a destination yourself, such as an ntfy topic for `ntfy-notify` or `long-run-notify`, or a webhook URL for `slack-notify` or `discord-notify`. With a destination set, those mods send a short message only: a generic "needs input" text with the project folder name, or the project name and the seconds.
 - **One mod can make a model call, and it is off by default.** `sports-narrator` makes one small model call at the end of a turn that used tools. It sends tool names and file names, never command arguments or file contents. It spends tokens, so you must turn it on.
 - **Display mods do not change what Claude reads.** The mods in "Display and render" change only how rows and replies look on your screen. Other families can add text for Claude: prompt styles change how Claude writes, `secret-output-guard` tells Claude not to repeat a credential, and `auto-format` tells Claude to read a file again.
 - **Stats stay local.** Streaks, achievements and `/wrapped` read records that the mods keep on your machine.
@@ -77,7 +77,7 @@ MIT. Copyright (c) 2026 Baselane, LLC. Read [LICENSE](LICENSE).
 
 <!-- catalog:start -->
 
-**112 mods** in 10 families.
+**130 mods** in 10 families.
 
 "needs setup" means the mod has options that you set with `claude plugin configure <mod>`. Its description tells you if it works before you set them. "pack" means one mod with several rules.
 
@@ -137,7 +137,7 @@ One quiet toast at turn end when something needs your attention.
 | `focus-pack` | Three quiet nudges in one mod: commit after 8 edits, TODO/FIXME/HACK lines added, and debug prints added. |  | pack |
 | `quality-pack` | Three quiet nudges in one mod: type check after TypeScript edits, lockfile after dependency edits, and a split suggestion past 500 changed lines. |  | pack |
 
-### Commands (12)
+### Commands (18)
 
 Slash commands that print a result and, where it helps, copy it.
 
@@ -153,8 +153,14 @@ Slash commands that print a result and, where it helps, copy it.
 | `hotspots` | Adds /hotspots: the 10 files changed most often in the last 90 days, with change counts. Read-only. | `/hotspots` |  |
 | `commit-msg` | Adds /commit-msg: a Conventional Commits message proposed from the staged diff. Heuristic, no model call, writes nothing. | `/commit-msg` |  |
 | `branches` | Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list. Never deletes. | `/branches` |  |
+| `tree` | Adds /tree: tracked files as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only. | `/tree` |  |
+| `deps` | Adds /deps: direct dependencies with versions from package.json, pyproject.toml, requirements.txt, go.mod and Cargo.toml at the repo root. No network, no audit. Read-only. | `/deps` |  |
+| `authors` | Adds /authors: the top 15 contributors by commit count with their last commit date. Names only, never email addresses. Read-only. | `/authors` |  |
+| `scripts` | Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts. Read-only. | `/scripts` |  |
+| `env-check` | Adds /env-check: variable names in .env.example against .env, listing missing and extra names. Reads names only, never a value. Read-only. | `/env-check` |  |
 | `command-pack` | Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. | `/receipt`, `/standup`, `/changelog`, `/pr-description`, `/handoff` | pack |
 | `repo-pack` | Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. | `/todos`, `/loc`, `/hotspots`, `/commit-msg`, `/branches` | pack |
+| `explore-pack` | Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. | `/tree`, `/deps`, `/authors`, `/scripts`, `/env-check` | pack |
 
 ### Band meters (13)
 
@@ -241,7 +247,7 @@ Local records of how you use Claude Code.
 | `personal-bests` | Tracks your records across sessions (longest session, most tool calls in a session, most files edited in a day, cheapest session over 30 minutes) with a toast when one is beaten, and /bests to list them. | `/bests` |  |
 | `stats-pack` | Every Baselane stats mod in one: /wrapped, streaks and achievements on one shared daily rollup. | `/wrapped`, `/streak`, `/achievements` | pack |
 
-### Display and render (3)
+### Display and render (9)
 
 Change how rows and replies look on your screen. What Claude reads does not change.
 
@@ -249,9 +255,15 @@ Change how rows and replies look on your screen. What Claude reads does not chan
 | --- | --- | --- | --- |
 | `diff-stats` | Edit and Write rows show a compact +12 -3 bar beside the file name: green for lines added, red for lines removed, up to 20 cells. |  |  |
 | `file-links` | In Claude's replies, path/to/file.ts:42 references to files in your project become links. Click one to put @path/to/file.ts in the prompt. |  |  |
+| `time-badge` | Tool rows show how long the call ran, for example 2.4s, when it took over one second. The time is the tool's own run time, without permission prompts. |  |  |
+| `exit-badge` | A failed Bash row shows a small red badge with its exit code, for example exit 2. |  |  |
+| `json-pretty` | Bash output that is one long line of JSON is drawn pretty-printed, folded after 30 lines. Display only: Claude reads the output as it was. |  |  |
+| `url-links` | https links (and http://localhost) in tool output are listed as clickable links under the result, up to five. Display only: Claude reads the output as it was. |  |  |
+| `size-badge` | Read and Write rows show how much was read or written: the line count, for example 312 lines, or the file size for images and PDFs. |  |  |
 | `render-pack` | Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies. |  | pack |
+| `render-plus` | Three row badges in one: time-badge, exit-badge and size-badge. |  | pack |
 
-### Lifecycle and notify (5)
+### Lifecycle and notify (11)
 
 Act on session events: format files, push a notification, keep a journal.
 
@@ -261,6 +273,12 @@ Act on session events: format files, push a notification, keep a journal.
 | `long-run-notify` | Sends a phone push through ntfy.sh when a Bash command ran longer than a threshold (60 seconds by default). Sends the project name and the seconds only. Does nothing until you set an ntfy topic. |  | needs setup |
 | `ntfy-notify` | Sends a phone push through ntfy.sh when Claude Code needs your input. The message is generic. Does nothing until you set an ntfy topic. |  | needs setup |
 | `session-journal` | Appends one line per session end (time, directory, reason) to ~/.claude/journal.log. |  |  |
+| `desktop-notify` | Shows a desktop notification when Claude Code needs your input: osascript on macOS, notify-send elsewhere when it is installed. The text is the project name and a short status only. |  |  |
+| `slack-notify` | Posts to a Slack incoming webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL. |  | needs setup |
+| `discord-notify` | Posts to a Discord webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL. |  | needs setup |
+| `say-done` | On macOS, says "Claude is done" when a turn ends after more than 30 seconds. Does nothing on other platforms. |  |  |
+| `auto-lint` | Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits inside the project, only when the project has that linter's config, and tells Claude what is left. |  |  |
 | `lifecycle-pack` | Every Baselane lifecycle mod in one: auto-format, long-run and input pushes, and the session journal. |  | needs setup, pack |
+| `notify-pack` | Local alerts in one: a desktop notification when Claude Code needs your input, and a spoken line on macOS when a long turn ends. |  | pack |
 
 <!-- catalog:end -->

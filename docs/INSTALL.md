@@ -47,6 +47,7 @@ Install a pack or its single mods, not both. Each mod runs its own copy of its r
 Some mods have options. The catalog marks them "needs setup". Most options have a default, and the mod works before you set them. Two kinds do nothing until you set them:
 
 - `ntfy-notify` and `long-run-notify` need an ntfy topic. In `lifecycle-pack`, the two push rules need a topic, and the other rules work at once.
+- `slack-notify` needs `slackWebhookUrl` (it must start with `https://hooks.slack.com/`). `discord-notify` needs `discordWebhookUrl` (it must start with `https://discord.com/api/webhooks/`).
 - `sports-narrator` needs `enabled` set to true. It spends tokens, so it is off by default.
 
 To see the options of a mod and which ones are not set:
@@ -80,6 +81,16 @@ claude plugin configure ntfy-notify@baselane-mods --values-stdin
 Paste `{"ntfyTopic": "your-long-random-topic"}`, then press Enter and Ctrl-D. You can also use `/plugin` inside Claude Code to set it.
 
 Choose a long, random topic name. Subscribe to the same topic in the ntfy app on your phone.
+
+### Webhook URLs are secrets
+
+Anyone with a Slack or Discord webhook URL can post to your channel. Set it the same way, on stdin:
+
+```sh
+claude plugin configure slack-notify@baselane-mods --values-stdin
+```
+
+Paste `{"slackWebhookUrl": "<your webhook URL>"}` (or `discordWebhookUrl` for `discord-notify`), then press Enter and Ctrl-D.
 
 ## 4. Update
 

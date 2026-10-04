@@ -76,7 +76,7 @@ Yes. The mods are open source under the MIT licence.
 Yes. That is the idea. Mods from different families work together. Install a pack or its single mods, not both, or a rule runs two times.
 
 **Do mods send my data anywhere?**
-Not unless you set a destination. `ntfy-notify` and `long-run-notify` send a short phone push through ntfy.sh, and only when you set a topic. `sports-narrator` makes one small model call per turn when you turn it on, with tool names and file names only.
+Not unless you set a destination. `ntfy-notify` and `long-run-notify` send a short phone push through ntfy.sh, and only when you set a topic. `slack-notify` and `discord-notify` post a short "needs your input" line with the project folder name, and only when you set a webhook URL. `sports-narrator` makes one small model call per turn when you turn it on, with tool names and file names only.
 
 **Do guards slow me down?**
 `guard-essentials` asks only before harsh or disaster commands. Daily commands pass with no question. For more guards, install `guard-pack` or single guards.

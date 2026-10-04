@@ -179,3 +179,32 @@ export const segmentsOf = (command: string): readonly Segment[] => segmentsAt(co
 // match text inside quotes.
 export const blankQuotes = (command: string): string =>
   command.replace(/'[^']*'|"(?:[^"\\]|\\.)*"/g, span => `${span[0]}${'_'.repeat(span.length - 2)}${span[0]}`)
+
+// A CLI call split at its subcommand: the global options in front, the
+// subcommand and the words after it. `valueFlags` names the options whose
+// value is the next word (`-C dir`); `--opt=value` is one word already.
+export type Subcommand = { globals: readonly string[]; sub: string | undefined; args: readonly string[] }
+
+export const subcommandOf = (argv: readonly string[], valueFlags: ReadonlySet<string>): Subcommand => {
+  let i = 1
+  while (i < argv.length && argv[i]!.startsWith('-')) i += valueFlags.has(argv[i]!) ? 2 : 1
+  return { globals: argv.slice(1, i), sub: argv[i], args: argv.slice(i + 1) }
+}
+
+const XARGS_VALUE_FLAGS = new Set(['-I', '-J', '-L', '-n', '-P', '-s', '-d', '-E', '-R', '-S', '-a', '--max-args', '--max-procs', '--max-lines', '--delimiter', '--arg-file', '--eof'])
+
+// `ls | xargs chmod 777` reads as `chmod 777` for a rule about the command
+// that runs.
+export const withoutXargs = (argv: readonly string[]): readonly string[] => {
+  if (argv[0] === undefined || base(argv[0]) !== 'xargs') return argv
+  const { sub, args } = subcommandOf(argv, XARGS_VALUE_FLAGS)
+  return sub === undefined ? [] : [sub, ...args]
+}
+
+// Every simple command in a command line as the argv that really runs, past
+// sudo and xargs.
+export const commandsOf = (command: string): ReadonlyArray<readonly string[]> =>
+  segmentsOf(command).map(({ argv }) => withoutSudo(withoutXargs(withoutSudo(argv))))
+
+// True when a short option cluster (`-fdx`) holds the letter.
+export const hasShortFlag = (word: string, letter: string): boolean => /^-[a-zA-Z]+$/.test(word) && word.includes(letter)

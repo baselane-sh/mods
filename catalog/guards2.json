@@ -1,0 +1,45 @@
+{
+  "engine": "guard",
+  "mods": [
+    {
+      "name": "docker-guard",
+      "description": "Asks before Docker commands that delete data: system, volume or image prune, rm -f, volume rm and compose down -v.",
+      "rules": ["docker"]
+    },
+    {
+      "name": "k8s-guard",
+      "description": "Asks before kubectl apply or replace with --force, kubectl drain, helm uninstall, and kubectl delete behind global flags (plain kubectl delete is infra-guard's).",
+      "rules": ["k8s"]
+    },
+    {
+      "name": "migration-guard",
+      "description": "Asks before Write or Edit changes a migration that already exists; new migration files pass.",
+      "rules": ["migration"]
+    },
+    {
+      "name": "ci-config-guard",
+      "description": "Asks before Write or Edit changes CI config: .github/workflows, .gitlab-ci.yml or .circleci/config.yml.",
+      "rules": ["ci-config"]
+    },
+    {
+      "name": "chmod-guard",
+      "description": "Asks before chmod makes files world-writable (777, a+w, o+w) or chmod or chown runs recursively on a broad path (/, a system folder, a home folder).",
+      "rules": ["chmod"]
+    },
+    {
+      "name": "git-history-guard",
+      "description": "Asks before git commands that throw away work or rewrite history: reset --hard, clean, rebase, filter-branch, filter-repo, push --delete, branch -D and stash clear.",
+      "rules": ["git-history"]
+    },
+    {
+      "name": "big-file-guard",
+      "description": "Asks before a Write creates content over 1 MB, or git add names a file over 5 MB.",
+      "rules": ["big-file"]
+    },
+    {
+      "name": "guard-devops",
+      "description": "Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, world-writable or broad recursive chmod and chown, and git commands that lose work or rewrite history. Add infra-guard for plain kubectl delete.",
+      "rules": ["docker", "k8s", "ci-config", "chmod", "git-history"]
+    }
+  ]
+}

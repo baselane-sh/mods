@@ -1,0 +1,7 @@
+{
+  "hooks": ["engine.ts", "diff.ts", "refs.ts"],
+  "tests": ["probe.ts"],
+  "register": "registerRender",
+  "ruleExport": "create",
+  "nameToken": "render-mods"
+}

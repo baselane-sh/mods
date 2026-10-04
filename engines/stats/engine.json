@@ -1,0 +1,8 @@
+{
+  "hooks": ["engine.ts", "date.ts", "rollup.ts", "streak.ts", "tracker.ts", "testcmd.ts", "rule.ts"],
+  "tests": ["probe.ts", "engine.test.ts"],
+  "register": "registerStats",
+  "ruleExport": "rule",
+  "types": "types/index.d.ts",
+  "nameToken": "stats-tracker"
+}

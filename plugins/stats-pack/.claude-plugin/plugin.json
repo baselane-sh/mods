@@ -1,0 +1,11 @@
+{
+  "name": "stats-pack",
+  "version": "0.2.0",
+  "description": "Every Baselane stats mod in one: /wrapped, streaks and achievements on one shared daily rollup.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

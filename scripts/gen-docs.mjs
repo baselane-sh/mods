@@ -6,9 +6,13 @@
 //   node scripts/build.mjs && node scripts/gen-docs.mjs
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const ROOT = new URL('..', import.meta.url).pathname
+// The repo folder above a file in scripts/. fileURLToPath decodes %20 and
+// other escapes, which URL.pathname keeps.
+export const rootOf = url => fileURLToPath(new URL('..', url))
+
+const ROOT = rootOf(import.meta.url)
 
 export const START = '<!-- catalog:start -->'
 export const END = '<!-- catalog:end -->'

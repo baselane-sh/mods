@@ -3,7 +3,7 @@ import { GIT_COMMIT, changedLines, fileEdit, ranOk } from '../edits'
 
 // Suggests splitting the change once more than this many lines were added or
 // removed since the last git commit. An edit's unchanged context cancels out.
-// A Write has no "before", so every line it writes counts as added.
+// A Write over an existing file counts only the lines it changed.
 export const THRESHOLD = 500
 
 export const create = (): Nudge => {

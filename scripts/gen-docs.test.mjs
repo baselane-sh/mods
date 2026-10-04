@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { END, START, commandsIn, describeMods, groupByFamily, renderCatalog, splice } from './gen-docs.mjs'
+import { END, START, commandsIn, describeMods, groupByFamily, readCatalogs, renderCatalog, rootOf, splice } from './gen-docs.mjs'
 
 const catalogs = [
   {
@@ -94,4 +94,19 @@ test('splice keeps the text outside the markers and is idempotent', () => {
 
 test('splice refuses a text with no markers', () => {
   assert.throws(() => splice('# no markers\n', 'x'), /catalog:start/)
+})
+
+test('rootOf decodes a checkout path with a space', () => {
+  assert.equal(rootOf('file:///Users/me/My%20Mods/mods/scripts/gen-docs.mjs'), '/Users/me/My Mods/mods/')
+})
+
+// The catalog table reads best with short descriptions. Only the nudge
+// catalogs are held to this here; other engines are trimmed on their own.
+test('nudge catalog descriptions are 200 characters or fewer', () => {
+  const long = readCatalogs(rootOf(import.meta.url))
+    .filter(catalog => catalog.engine === 'nudge')
+    .flatMap(catalog => catalog.mods)
+    .filter(mod => mod.description.length > 200)
+    .map(mod => `${mod.name} (${mod.description.length})`)
+  assert.deepEqual(long, [])
 })

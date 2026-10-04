@@ -122,7 +122,7 @@ One quiet toast at turn end when something needs your attention.
 | `test-reminder` | Reminds you at turn end when source files changed but no test command ran since. |  |  |
 | `ctx-nudge` | Reminds you to /clear or /compact when the context window passes 75 percent. |  |  |
 | `clippy` | One helpful toast per session per trigger, in the classic paperclip voice: when you edit a migrations folder, a Dockerfile or a GitHub workflow, or run rm -rf. At most one toast per turn. |  |  |
-| `sports-narrator` | At turn end, one line of sports play-by-play about what Claude just did. OFF by default: it spends tokens (one small haiku call per turn that used tools), so turn it on with the enabled option in the plugin config. It sends tool names and file names, never commands' arguments or file contents. |  | needs setup |
+| `sports-narrator` | At turn end, one line of sports play-by-play on what Claude did. OFF by default: it spends tokens (one haiku call per turn with tools). Turn on the enabled option. Sends only tool and file names. |  | needs setup |
 | `commit-nudge` | Suggests a commit at turn end after 8 or more file edits since the last git commit. One toast per batch of edits; a successful git commit resets the count. |  |  |
 | `todo-nudge` | At turn end, one toast with the count of TODO, FIXME and HACK lines your edits added this turn. Quiet when none were added. |  |  |
 | `break-nudge` | Suggests a short break once the session has run 90 minutes, and again every 90 minutes after that. |  |  |
@@ -132,7 +132,7 @@ One quiet toast at turn end when something needs your attention.
 | `lockfile-nudge` | At turn end, one toast when dependencies in package.json, pyproject.toml, Cargo.toml or go.mod changed and neither the matching lockfile was edited nor an install command ran. |  |  |
 | `big-diff-nudge` | Suggests splitting the change once your edits added or removed more than 500 lines since the last git commit. A successful commit resets the count. |  |  |
 | `migration-nudge` | At turn end, one toast when a schema file changed (schema.prisma, models.py, SQL under schema/, a drizzle schema) and no migration file was created this session. |  |  |
-| `env-example-nudge` | At turn end, one toast when edits added a reference to an environment variable (process.env, os.environ, os.getenv, Deno.env) that .env.example does not list. Reads only the names in .env.example, never .env. |  |  |
+| `env-example-nudge` | At turn end, one toast when edits add a reference to an environment variable (process.env, os.environ, os.getenv, Deno.env) that .env.example does not list. Reads only .env.example names, never .env. |  |  |
 | `nudge-pack` | Every Baselane turn-end reminder in one mod. |  | pack |
 | `focus-pack` | Three quiet nudges in one mod: commit after 8 edits, TODO/FIXME/HACK lines added, and debug prints added. |  | pack |
 | `quality-pack` | Three quiet nudges in one mod: type check after TypeScript edits, lockfile after dependency edits, and a split suggestion past 500 changed lines. |  | pack |

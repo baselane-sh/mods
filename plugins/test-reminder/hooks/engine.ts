@@ -18,10 +18,11 @@ export type NudgeTools = {
 // One nudge: it may watch each tool call once the tool answered, and when
 // the turn stops it may name a one-line reminder for the person. The engine
 // shows each reminder as a toast; the model never reads it. `options` are the
-// plugin's userConfig values, empty for a mod that declares none.
+// plugin's userConfig values, empty for a mod that declares none. `cwd` is
+// the session cwd ('' when the host gave none), for `repoPath`.
 export type Nudge = {
   id: string
-  observe?: (e: ToolCallEnvelope, ran: ToolCallResult) => void
+  observe?: (e: ToolCallEnvelope, ran: ToolCallResult, cwd: string) => void
   atStop: (tools: NudgeTools, options: PluginOptions) => string | undefined | Promise<string | undefined>
 }
 
@@ -41,9 +42,10 @@ export const registerNudges = (on: On, nudges: readonly Nudge[], options: Plugin
   if (nudges.some(nudge => nudge.observe !== undefined)) {
     on('tool.call', async ($, e, next) => {
       const ran = await next(e)
+      const cwd = await $.session.cwd().catch(() => '')
       for (const nudge of nudges) {
         try {
-          nudge.observe?.(e, ran)
+          nudge.observe?.(e, ran, cwd)
         } catch (error) {
           await $.ui.log(failed(nudge.id, error))
         }

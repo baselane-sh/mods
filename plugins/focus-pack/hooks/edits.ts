@@ -29,3 +29,36 @@ const CODE = new Set(['ts', 'tsx', 'js', 'jsx', 'mjs', 'cjs', 'py', 'rs', 'go', 
 export const isCode = (path: string): boolean => CODE.has(extension(path))
 
 export const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`
+
+const tally = (text: string): ReadonlyMap<string, number> => {
+  const counts = new Map<string, number>()
+  if (text === '') return counts // no text is no lines, not one empty line
+  for (const line of text.split('\n')) counts.set(line, (counts.get(line) ?? 0) + 1)
+  return counts
+}
+
+const surplus = (from: ReadonlyMap<string, number>, other: ReadonlyMap<string, number>): string[] =>
+  [...from].flatMap(([line, n]) => Array.from({ length: Math.max(0, n - (other.get(line) ?? 0)) }, () => line))
+
+// The lines an edit really changed: lines only in `after` were added, lines
+// only in `before` were removed. Unchanged context inside an Edit cancels out.
+export const changedLines = (edit: FileEdit): { added: string[]; removed: string[] } => {
+  const before = tally(edit.before)
+  const after = tally(edit.after)
+  return { added: surplus(after, before), removed: surplus(before, after) }
+}
+
+export const dirname = (path: string): string => path.split('/').slice(0, -1).join('/')
+
+export const basename = (path: string): string => path.split('/').pop() ?? ''
+
+// A command regex for `body` in command position, so `echo tsc` or
+// `cat package.json` never match. Package-runner prefixes are allowed.
+export const inCommand = (body: string): RegExp =>
+  new RegExp(`(^|[;&|] *)((npx|bunx|pnpm exec|pnpm dlx|yarn|uv run|poetry run) +)?(${body})( |$)`, 'm')
+
+// A Bash call that ran: not denied by a hook and not an error result.
+export const ranOk = (ran: ToolCallResult): boolean => ran.deny === undefined && !ran.isError
+
+// `git commit` in command position, so `echo git commit` and `git log` never count.
+export const GIT_COMMIT = /(^|[;&|] *)git +(-C +\S+ +)?commit( |$)/m

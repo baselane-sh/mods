@@ -1,0 +1,10 @@
+{
+  "name": "migration-nudge",
+  "version": "0.2.0",
+  "description": "At turn end, one toast when a schema file changed (schema.prisma, models.py, SQL under schema/, a drizzle schema) and no migration file was created this session.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

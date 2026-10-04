@@ -1,12 +1,11 @@
 import type { Nudge } from '../engine'
-import { fileEdit } from '../edits'
+import { GIT_COMMIT, fileEdit } from '../edits'
 
 // Suggests a commit at turn end once this many file edits piled up since the
 // last git commit. A commit that ran and succeeded resets the count.
 export const THRESHOLD = 8
 
-// `git commit` in command position, so `echo git commit` and `git log` never count.
-export const GIT_COMMIT = /(^|[;&|] *)git +(-C +\S+ +)?commit( |$)/m
+export { GIT_COMMIT }
 
 export const create = (): Nudge => {
   let edits = 0

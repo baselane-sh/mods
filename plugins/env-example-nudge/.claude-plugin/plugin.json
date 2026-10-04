@@ -1,0 +1,10 @@
+{
+  "name": "env-example-nudge",
+  "version": "0.2.0",
+  "description": "At turn end, one toast when edits added a reference to an environment variable (process.env, os.environ, os.getenv, Deno.env) that .env.example does not list. Reads only the names in .env.example, never .env.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

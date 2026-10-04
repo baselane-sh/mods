@@ -7,6 +7,9 @@ export type NudgeTools = {
   // The host clock and the session start, both in milliseconds since the epoch.
   now: () => Promise<number>
   sessionStartedAt: () => Promise<number>
+  // The variable NAMES listed in `.env.example` (never values, never `.env`),
+  // or undefined when the project has no `.env.example`.
+  envExampleNames: () => Promise<readonly string[] | undefined>
   // One model call. It resolves with `isAnswered: false` instead of throwing
   // when the model gives no text, so a nudge checks that before it speaks.
   complete: (request: ModelCompleteRequest) => Promise<ModelCompleteResult>
@@ -21,6 +24,15 @@ export type Nudge = {
   observe?: (e: ToolCallEnvelope, ran: ToolCallResult) => void
   atStop: (tools: NudgeTools, options: PluginOptions) => string | undefined | Promise<string | undefined>
 }
+
+const ENV_EXAMPLE = '.env.example'
+
+// Keeps only the NAME of each `NAME=value` line; the value is dropped here.
+export const envNames = (text: string): string[] =>
+  text.split('\n').flatMap(line => {
+    const name = /^\s*(?:export\s+)?([A-Za-z_]\w*)\s*=/.exec(line)?.[1]
+    return name === undefined ? [] : [name]
+  })
 
 const failed = (id: string, error: unknown): string =>
   `${id}: skipped, ${error instanceof Error ? error.message : String(error)}`
@@ -45,6 +57,7 @@ export const registerNudges = (on: On, nudges: readonly Nudge[], options: Plugin
       contextPercent: async () => (await $.session.usage()).context.percent,
       now: () => $.clock.now(),
       sessionStartedAt: async () => (await $.session.usage()).startedAt,
+      envExampleNames: async () => ((await $.fs.exists(ENV_EXAMPLE)) ? envNames(await $.fs.read(ENV_EXAMPLE)) : undefined),
       complete: request => $.model.complete(request),
     }
     for (const nudge of nudges) {

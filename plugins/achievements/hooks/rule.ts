@@ -24,6 +24,20 @@ export type After = View & {
   event: 'session' | 'turn'
   /** When the session began, if the host said. */
   startedAt?: number
+  /** Tool calls counted this session so far. */
+  sessionCalls?: number
+  /** On a turn: when its prompt was sent (the turn's end less its length). */
+  promptAt?: number
+}
+
+// What a rule sees as the session ends, after the last flush. A toast here
+// would go unseen, so `ended` answers nothing.
+export type Ended = View & {
+  /** When the session began, if the host said. */
+  startedAt?: number
+  /** The session's cost in US dollars, if the host said. */
+  usd?: number
+  sessionCalls?: number
 }
 
 // Text to print, or `{ text, copy: false }` for a message that is not a result.
@@ -40,4 +54,5 @@ export type StatsRule = {
   }
   /** Toast lines to show, in order. */
   after?: (ctx: After) => Promise<readonly string[]>
+  ended?: (ctx: Ended) => Promise<void>
 }

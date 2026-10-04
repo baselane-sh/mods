@@ -1,0 +1,15 @@
+{
+  "engine": "pane",
+  "mods": [
+    {
+      "name": "todo-pane",
+      "description": "A live side pane of the TODO, FIXME and HACK lines in tracked files (git grep), grouped by file and capped at 30. It refreshes after file edits while open. Open it with /todo-pane.",
+      "rules": ["todo-pane"]
+    },
+    {
+      "name": "cost-pane",
+      "description": "A live side pane with the session cost, the cost of each of the last 10 turns as a bar, and the average per turn. Open it with /cost-pane.",
+      "rules": ["cost-pane"]
+    }
+  ]
+}

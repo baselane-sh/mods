@@ -61,9 +61,10 @@ export type StatsProbe = {
   start: () => Promise<void>
   end: () => Promise<void>
   // A whole turn: turn.start, the cost moves to `usd` when given, turn.complete.
-  turn: (usd?: number) => Promise<void>
+  // `durationMs` is the turn's length as turn.complete reports it (default 1).
+  turn: (usd?: number, durationMs?: number) => Promise<void>
   // Only a turn.complete, under the given id (a repeat of an id is the same turn).
-  complete: (turnId: string, extra?: { agentId?: string }) => Promise<void>
+  complete: (turnId: string, extra?: { agentId?: string; durationMs?: number }) => Promise<void>
   run: (name: string, args?: string) => Promise<string>
   advance: (ms: number) => Promise<void>
   toasts: () => readonly string[]
@@ -136,7 +137,7 @@ export const probe = ($: Engine, on: OnFn, opts: Opts = {}): StatsProbe => {
     return { result: {} }
   })
 
-  const complete = async (turnId: string, extra: { agentId?: string } = {}) => {
+  const complete = async (turnId: string, extra: { agentId?: string; durationMs?: number } = {}) => {
     await $.turn.complete({ answer: '', durationMs: 1, isAborted: false, turnId, reason: 'answer', ...extra })
   }
 
@@ -151,11 +152,11 @@ export const probe = ($: Engine, on: OnFn, opts: Opts = {}): StatsProbe => {
     end: async () => {
       await $.session.end({ reason: 'other', sessionId: 's', resume: { id: 's' } })
     },
-    turn: async after => {
+    turn: async (after, durationMs) => {
       turns += 1
       await $.turn.start({ text: 'go', turnId: `t${turns}` })
       if (after !== undefined) usd = after
-      await complete(`t${turns}`)
+      await complete(`t${turns}`, durationMs === undefined ? {} : { durationMs })
     },
     complete,
     run: async (name, args = '') =>

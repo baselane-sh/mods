@@ -1,14 +1,16 @@
 import { atom, read, update } from 'claude-code'
 import type { On, Timer } from 'claude-code'
 
-import type { PaneLine, PaneView } from '../types'
+import type { PaneLine, PaneView, TurnCost } from '../types'
 import { line, redactLines } from './lines'
 import type { PaneHost, PaneRule } from './rule'
+import { endTurn, startTurn } from './turns'
 import { paneTree } from './view'
 
 // The build writes the mod's own name in place of the token: `$.state` is
 // written only by the plugin that owns it.
 const views = atom({ plugin: 'port-watch', key: 'views' } as const, {})
+const turns = atom({ plugin: 'port-watch', key: 'turns' } as const, [] as TurnCost[])
 
 // A pane reads the world at most once a second, however many calls ask.
 const MIN_GAP_MS = 1_000
@@ -104,7 +106,12 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
 
     on('command.run', { command }, async $ => {
       const live: Live = {
-        host: { run: argv => $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS }), cwd: () => $.session.cwd() },
+        host: {
+          run: argv => $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS }),
+          cwd: () => $.session.cwd(),
+          usage: () => $.session.usage(),
+          turns: () => read($, turns),
+        },
         now: () => $.clock.now(),
         isOpen: async pane => (await $.ui.panes()).some(open => open.id === pane),
         write: (pane, view) => update($, views, all => ({ ...all, [pane]: view })),
@@ -136,6 +143,7 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
   }
 
   const watchers = rules.filter(rule => rule.observe !== undefined)
+  const turnRules = rules.filter(rule => rule.turns === true)
 
   on('tool.call', async ($, e, next) => {
     const startedAt = watchers.length > 0 ? await $.clock.now() : 0
@@ -159,7 +167,12 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
       const due = rules.filter(rule => rule.load !== undefined && rule.refreshAfter?.(e) === true)
       if (due.length > 0) {
         const live: Live = {
-          host: { run: argv => $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS }), cwd: () => $.session.cwd() },
+          host: {
+          run: argv => $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS }),
+          cwd: () => $.session.cwd(),
+          usage: () => $.session.usage(),
+          turns: () => read($, turns),
+        },
           now: () => $.clock.now(),
           isOpen: async pane => (await $.ui.panes()).some(open => open.id === pane),
           write: (pane, view) => update($, views, all => ({ ...all, [pane]: view })),
@@ -174,5 +187,46 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
       await $.ui.log(`pane: a tool call was not read, ${message(error)}`)
     }
     return ran
+  })
+
+  // A mod with no rule that asks for turns hooks none.
+  if (turnRules.length === 0) return
+
+  // Only the main loop raises turn.start, so a subagent's run is never a turn.
+  on('turn.start', async ($, e, next) => {
+    try {
+      const usd = (await $.session.usage()).cost?.usd
+      await update($, turns, ledger => startTurn(ledger, e.turnId, usd))
+    } catch (error) {
+      await $.ui.log(`pane: a turn start was not read, ${message(error)}`)
+    }
+    return next(e)
+  })
+
+  on('turn.complete', async ($, e, next) => {
+    if (e.agentId !== undefined) return next(e)
+    try {
+      const usd = (await $.session.usage()).cost?.usd
+      await update($, turns, ledger => endTurn(ledger, e.turnId, usd))
+      const live: Live = {
+        host: {
+          run: argv => $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS }),
+          cwd: () => $.session.cwd(),
+          usage: () => $.session.usage(),
+          turns: () => read($, turns),
+        },
+        now: () => $.clock.now(),
+        isOpen: async pane => (await $.ui.panes()).some(open => open.id === pane),
+        write: (pane, view) => update($, views, all => ({ ...all, [pane]: view })),
+        log: text => $.ui.log(text),
+        after: (ms, fn) => $.clock.after(ms, fn),
+        every: (ms, fn) => $.clock.every(ms, fn),
+      }
+      // Not awaited, as after a tool call: the turn does not wait on a pane.
+      for (const rule of turnRules) void request(rule, live)
+    } catch (error) {
+      await $.ui.log(`pane: a turn end was not read, ${message(error)}`)
+    }
+    return next(e)
   })
 }

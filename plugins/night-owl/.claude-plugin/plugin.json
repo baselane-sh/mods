@@ -1,0 +1,11 @@
+{
+  "name": "night-owl",
+  "version": "0.2.0",
+  "description": "Records the hour of each prompt across sessions and adds /hours: a 24-hour histogram of when you work, naming your peak hour.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

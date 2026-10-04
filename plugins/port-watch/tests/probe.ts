@@ -53,6 +53,12 @@ export type PaneProbe = {
   closes: () => readonly string[]
   commands: () => readonly string[]
   logs: () => readonly string[]
+  // The session cost `$.session.usage()` reports; undefined leaves `cost` out,
+  // as a host with no cost ledger does.
+  setUsd: (usd: number | undefined) => void
+  // A whole turn: turn.start, the cost moves to `usd` when given, then
+  // turn.complete. A subagent's turn raises no turn.start.
+  turn: (usd?: number, extra?: { agentId?: string }) => Promise<void>
 }
 
 const result = (answer: Partial<ProcessRunResult>): ProcessRunResult => ({
@@ -78,6 +84,8 @@ export const probe = ($: Engine, on: OnFn, world: Readonly<Record<string, Answer
   let commands: string[] = []
   let logs: string[] = []
   let next: ToolAnswer = {}
+  let usd: number | undefined
+  let turns = 0
 
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
   on('session.cwd', () => ({ value: cwd }))
@@ -110,6 +118,11 @@ export const probe = ($: Engine, on: OnFn, world: Readonly<Record<string, Answer
     commands = [...commands, e.name]
     return { value: { command: e.name } }
   })
+  on('session.usage', () => ({
+    value: { startedAt: NOW, context: { window: 200_000 }, rateLimits: [], ...(usd === undefined ? {} : { cost: { usd } }) },
+  }))
+  on('turn.start', (_$, e) => ({ turnId: e.turnId }))
+  on('turn.complete', () => ({ text: '' }))
   on('tool.call', async () => {
     const answer = next
     if (answer.tookMs !== undefined) await clock.sleep(answer.tookMs)
@@ -164,5 +177,16 @@ export const probe = ($: Engine, on: OnFn, world: Readonly<Record<string, Answer
     closes: () => closes,
     commands: () => commands,
     logs: () => logs,
+    setUsd: value => {
+      usd = value
+    },
+    turn: async (after, extra = {}) => {
+      turns += 1
+      const turnId = `t${turns}`
+      if (extra.agentId === undefined) await $.turn.start({ text: 'go', turnId })
+      if (after !== undefined) usd = after
+      await $.turn.complete({ answer: '', durationMs: 1, isAborted: false, turnId, reason: 'answer', ...extra })
+      await clock.settle()
+    },
   }
 }

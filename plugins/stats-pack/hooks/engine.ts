@@ -95,6 +95,7 @@ const flush = async (host: Host, extra: Extra): Promise<Rolled | undefined> => {
   const memo = await host.memo()
   const fresh = taken.files.filter(file => !memo.seen.includes(file))
   if (fresh.length > 0) await host.patchMemo(m => ({ ...m, seen: [...m.seen, ...fresh].slice(-MAX_SEEN_FILES) }))
+  if (taken.calls > 0) await host.patchMemo(m => ({ ...m, calls: (m.calls ?? 0) + taken.calls }))
 
   const now = await host.now()
   const date = localDate(now)
@@ -157,11 +158,19 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
       })
       const rolled = await flush(host, { sessions: 0, turns: 1, ...(spent === undefined ? {} : { usd: spent }) })
       if (rolled === undefined) return next(e)
+      const sessionCalls = (await read($, session)).calls ?? 0
 
       for (const rule of rules) {
         if (rule.after === undefined) continue
         try {
-          const lines = await rule.after({ ...rolled, store: host.store, event: 'turn', ...(usage === undefined ? {} : { startedAt: usage.startedAt }) })
+          const lines = await rule.after({
+            ...rolled,
+            store: host.store,
+            event: 'turn',
+            sessionCalls,
+            promptAt: rolled.now - e.durationMs,
+            ...(usage === undefined ? {} : { startedAt: usage.startedAt }),
+          })
           for (const line of lines) await $.ui.toast(line)
         } catch (error) {
           await $.ui.log(failed(rule.id, error))
@@ -184,6 +193,26 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
         store: { get: key => $.store.get(key), set: (key, value) => $.store.set(key, value) },
       })
       await flush(host, { sessions: 0, turns: 0 })
+      const enders = rules.filter(rule => rule.ended !== undefined)
+      if (enders.length > 0) {
+        const rolled = await load(host)
+        const usage = await attempt(() => $.session.usage())
+        const usd = usage?.cost?.usd
+        const ctx = {
+          ...rolled,
+          store: host.store,
+          sessionCalls: (await read($, session)).calls ?? 0,
+          ...(usage === undefined ? {} : { startedAt: usage.startedAt }),
+          ...(usd === undefined ? {} : { usd }),
+        }
+        for (const rule of enders) {
+          try {
+            await rule.ended?.(ctx)
+          } catch (error) {
+            await $.ui.log(failed(rule.id, error))
+          }
+        }
+      }
     } catch (error) {
       await $.ui.log(failed('session end', error))
     }
@@ -211,11 +240,18 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
       })
       const rolled = (isNew ? await flush(host, { sessions: 1, turns: 0 }) : undefined) ?? (await load(host))
       const usage = await attempt(() => $.session.usage())
+      const sessionCalls = (await read($, session)).calls ?? 0
 
       for (const rule of rules) {
         if (rule.after === undefined) continue
         try {
-          const lines = await rule.after({ ...rolled, store: host.store, event: 'session', ...(usage === undefined ? {} : { startedAt: usage.startedAt }) })
+          const lines = await rule.after({
+            ...rolled,
+            store: host.store,
+            event: 'session',
+            sessionCalls,
+            ...(usage === undefined ? {} : { startedAt: usage.startedAt }),
+          })
           for (const line of lines) await $.ui.toast(line)
         } catch (error) {
           await $.ui.log(failed(rule.id, error))

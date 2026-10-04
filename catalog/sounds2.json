@@ -1,0 +1,15 @@
+{
+  "engine": "sound",
+  "mods": [
+    {
+      "name": "sounds-nature",
+      "description": "Soft nature sounds: a bird chirp when tests pass, a plunk into water when they fail, a gust of wind when a call is blocked, a water drop when a turn ends.",
+      "rules": ["nature"]
+    },
+    {
+      "name": "sounds-minimal",
+      "description": "Very short, quiet clicks and ticks for a subtle signal: a tick when tests pass, two low ticks when they fail, a click when a call is blocked, a soft tick when a turn ends.",
+      "rules": ["minimal"]
+    }
+  ]
+}

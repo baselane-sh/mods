@@ -447,6 +447,26 @@
       }
     },
     {
+      "name": "todo-pane",
+      "source": "./plugins/todo-pane",
+      "description": "A live side pane of the TODO, FIXME and HACK lines in tracked files (git grep), grouped by file and capped at 30. It refreshes after file edits while open. Open it with /todo-pane.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "cost-pane",
+      "source": "./plugins/cost-pane",
+      "description": "A live side pane with the session cost, the cost of each of the last 10 turns as a bar, and the average per turn. Open it with /cost-pane.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "diff-stats",
       "source": "./plugins/diff-stats",
       "description": "Edit and Write rows show a compact +12 -3 bar beside the file name: green for lines added, red for lines removed, up to 20 cells.",
@@ -507,6 +527,26 @@
       }
     },
     {
+      "name": "sounds-nature",
+      "source": "./plugins/sounds-nature",
+      "description": "Soft nature sounds: a bird chirp when tests pass, a plunk into water when they fail, a gust of wind when a call is blocked, a water drop when a turn ends.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "sounds-minimal",
+      "source": "./plugins/sounds-minimal",
+      "description": "Very short, quiet clicks and ticks for a subtle signal: a tick when tests pass, two low ticks when they fail, a click when a call is blocked, a soft tick when a turn ends.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "wrapped",
       "source": "./plugins/wrapped",
       "description": "Adds /wrapped: a screenshot-ready Claude Code Wrapped for the last 7 days (or /wrapped month for 30), printed and copied.",
@@ -540,6 +580,26 @@
       "name": "stats-pack",
       "source": "./plugins/stats-pack",
       "description": "Every Baselane stats mod in one: /wrapped, streaks and achievements on one shared daily rollup.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "night-owl",
+      "source": "./plugins/night-owl",
+      "description": "Records the hour of each prompt across sessions and adds /hours: a 24-hour histogram of when you work, naming your peak hour.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "personal-bests",
+      "source": "./plugins/personal-bests",
+      "description": "Tracks your records across sessions (longest session, most tool calls in a session, most files edited in a day, cheapest session over 30 minutes) with a toast when one is beaten, and /bests to list them.",
       "version": "0.2.0",
       "author": {
         "name": "Baselane",

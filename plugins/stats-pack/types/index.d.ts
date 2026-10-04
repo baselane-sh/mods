@@ -42,6 +42,8 @@ export type SessionMemo = {
   lastUsd: number | null
   /** Files already counted this session. */
   seen: string[]
+  /** Tool calls flushed this session. Absent in a memo from before it was kept. */
+  calls?: number
 }
 
 declare module 'claude-code' {

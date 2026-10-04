@@ -1,0 +1,11 @@
+{
+  "name": "personal-bests",
+  "version": "0.2.0",
+  "description": "Tracks your records across sessions (longest session, most tool calls in a session, most files edited in a day, cheapest session over 30 minutes) with a toast when one is beaten, and /bests to list them.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

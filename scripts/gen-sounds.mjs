@@ -48,6 +48,16 @@ const noise = ({ seed, secs, decay, gain = 0.5, smooth = 0 }) => {
 const silence = secs => new Array(Math.floor(secs * RATE)).fill(0)
 const join2 = (...parts) => parts.flat()
 
+// A bird chirp: a fast upward sweep from `from` Hz.
+const chirp = (from, gain) => tone({ freq: t => from + 30000 * t, secs: 0.05, decay: 0.03, gain })
+
+// A water drop: the pitch jumps up and settles, as a drop's bubble rings.
+const drop = gain => tone({ freq: t => 700 + 1400 * (1 - Math.exp(-t / 0.015)), secs: 0.12, decay: 0.035, gain })
+
+// Wind: low-passed noise that swells and fades over `secs`.
+const wind = ({ seed, secs, gain }) =>
+  noise({ seed, secs, decay: 1000, gain, smooth: 0.95 }).map((s, i, all) => s * Math.sin((Math.PI * i) / all.length))
+
 const mix = (...layers) => {
   const length = Math.max(...layers.map(layer => layer.length))
   return Array.from({ length }, (_, i) => layers.reduce((sum, layer) => sum + (layer[i] ?? 0), 0))
@@ -103,7 +113,25 @@ const PACKS = {
     deny: () => tone({ wave: square, freq: t => 300 - 500 * t, secs: 0.22, decay: 0.3, gain: 0.3 }),
     done: () => tone({ freq: t => 200 + 1800 * t * t * 4.5, secs: 0.45, decay: 0.3, gain: 0.45 }),
   },
+  // Soft and low: a bird chirp, a plunk into water, a gust of wind, a drop.
+  nature: {
+    pass: () => join2(chirp(2400, 0.3), silence(0.04), chirp(2900, 0.25)),
+    fail: () => mix(tone({ freq: t => 420 - 900 * t, secs: 0.25, decay: 0.08, gain: 0.45 }), noise({ seed: 17, secs: 0.12, decay: 0.03, gain: 0.25, smooth: 0.8 })),
+    deny: () => wind({ seed: 19, secs: 0.42, gain: 1.6 }),
+    done: () => join2(drop(0.4), silence(0.06), drop(0.15)),
+  },
+  // Very short and quiet: a tick, two low ticks, a click, a soft tick.
+  minimal: {
+    pass: () => tone({ freq: 3000, secs: 0.015, decay: 0.003, gain: 0.18 }),
+    fail: () => join2(tone({ freq: 700, secs: 0.015, decay: 0.004, gain: 0.2 }), silence(0.04), tone({ freq: 700, secs: 0.015, decay: 0.004, gain: 0.2 })),
+    deny: () => noise({ seed: 13, secs: 0.012, decay: 0.003, gain: 0.2 }),
+    done: () => tone({ freq: 1800, secs: 0.02, decay: 0.005, gain: 0.12 }),
+  },
 }
+
+// Packs with a tighter bound than MAX_SECONDS: the longest file and the
+// loudest sample (1 is full scale).
+const LIMITS = { minimal: { seconds: 0.08, peak: 0.25 } }
 
 let total = 0
 for (const [pack, sounds] of Object.entries(PACKS)) {
@@ -112,7 +140,10 @@ for (const [pack, sounds] of Object.entries(PACKS)) {
   let bytes = 0
   for (const [name, make] of Object.entries(sounds)) {
     const samples = finish(make())
-    if (samples.length / RATE >= MAX_SECONDS + 0.001) throw new Error(`${pack}/${name} is longer than ${MAX_SECONDS}s`)
+    const limit = LIMITS[pack] ?? { seconds: MAX_SECONDS, peak: 1 }
+    if (samples.length / RATE >= limit.seconds + 0.001) throw new Error(`${pack}/${name} is longer than ${limit.seconds}s`)
+    const peak = Math.max(...samples.map(Math.abs))
+    if (peak > limit.peak) throw new Error(`${pack}/${name} peaks at ${peak.toFixed(2)}, over ${limit.peak}`)
     const file = wav(samples)
     writeFileSync(join(dir, `${name}.wav`), file)
     bytes += file.length

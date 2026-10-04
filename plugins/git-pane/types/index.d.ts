@@ -24,11 +24,27 @@ export type PaneView = {
   lines: PaneLine[]
 }
 
+// One turn of the person's, as the engine measured it from the session cost
+// (kept only for a mod whose rule asks for turns).
+export type TurnCost = {
+  turnId: string
+  // 1 for the first turn the mod saw this session.
+  n: number
+  // The session cost in US dollars as the turn began; null where the host
+  // said none.
+  startUsd: number | null
+  ended: boolean
+  // What the turn cost, once it ended and both costs were known.
+  usd?: number
+}
+
 declare module 'claude-code' {
   interface PluginState {
     'git-pane': {
       // By pane id: one mod may draw several panes.
       views: Record<string, PaneView>
+      // Oldest first.
+      turns: TurnCost[]
     }
   }
 }

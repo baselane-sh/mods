@@ -2,7 +2,7 @@ import type { Pending, SessionMemo } from '../types'
 import { isTestCommand } from './testcmd'
 
 export const EMPTY_PENDING: Pending = { calls: 0, blocked: 0, passed: 0, failed: 0, tools: {}, files: [] }
-export const FRESH_SESSION: SessionMemo = { counted: false, lastTurn: null, turnStartUsd: null, lastUsd: null, seen: [] }
+export const FRESH_SESSION: SessionMemo = { counted: false, lastTurn: null, turnStartUsd: null, lastUsd: null, seen: [], calls: 0 }
 
 const MAX_PENDING_FILES = 500
 export const MAX_SEEN_FILES = 2000

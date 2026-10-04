@@ -1,0 +1,10 @@
+{
+  "name": "desktop-notify",
+  "version": "0.2.0",
+  "description": "Shows a desktop notification when Claude Code needs your input: osascript on macOS, notify-send elsewhere when it is installed. The text is the project name and a short status only.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

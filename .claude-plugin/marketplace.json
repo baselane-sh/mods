@@ -617,6 +617,66 @@
       }
     },
     {
+      "name": "desktop-notify",
+      "source": "./plugins/desktop-notify",
+      "description": "Shows a desktop notification when Claude Code needs your input: osascript on macOS, notify-send elsewhere when it is installed. The text is the project name and a short status only.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "slack-notify",
+      "source": "./plugins/slack-notify",
+      "description": "Posts to a Slack incoming webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "discord-notify",
+      "source": "./plugins/discord-notify",
+      "description": "Posts to a Discord webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "say-done",
+      "source": "./plugins/say-done",
+      "description": "On macOS, says \"Claude is done\" when a turn ends after more than 30 seconds. Does nothing on other platforms.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "auto-lint",
+      "source": "./plugins/auto-lint",
+      "description": "Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits inside the project, only when the project has that linter's config, and tells Claude what is left.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "notify-pack",
+      "source": "./plugins/notify-pack",
+      "description": "Local alerts in one: a desktop notification when Claude Code needs your input, and a spoken line on macOS when a long turn ends.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "test-reminder",
       "source": "./plugins/test-reminder",
       "description": "Reminds you at turn end when source files changed but no test command ran since.",

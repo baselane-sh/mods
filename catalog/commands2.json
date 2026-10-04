@@ -1,0 +1,51 @@
+{
+  "engine": "command",
+  "mods": [
+    {
+      "name": "todos",
+      "description": "Adds /todos: TODO, FIXME and HACK lines in tracked files, grouped by file (50 lines at most). Read-only.",
+      "rules": [
+        "todos"
+      ]
+    },
+    {
+      "name": "loc",
+      "description": "Adds /loc: lines of tracked text files by language, sorted, with a total. Skips lockfiles and binaries. Read-only.",
+      "rules": [
+        "loc"
+      ]
+    },
+    {
+      "name": "hotspots",
+      "description": "Adds /hotspots: the 10 files changed most often in the last 90 days, with change counts. Read-only.",
+      "rules": [
+        "hotspots"
+      ]
+    },
+    {
+      "name": "commit-msg",
+      "description": "Adds /commit-msg: a Conventional Commits message proposed from the staged diff. Heuristic, no model call, writes nothing.",
+      "rules": [
+        "commit-msg"
+      ]
+    },
+    {
+      "name": "branches",
+      "description": "Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list. Never deletes.",
+      "rules": [
+        "branches"
+      ]
+    },
+    {
+      "name": "repo-pack",
+      "description": "Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches.",
+      "rules": [
+        "todos",
+        "loc",
+        "hotspots",
+        "commit-msg",
+        "branches"
+      ]
+    }
+  ]
+}

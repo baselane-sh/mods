@@ -137,6 +137,66 @@
       }
     },
     {
+      "name": "todos",
+      "source": "./plugins/todos",
+      "description": "Adds /todos: TODO, FIXME and HACK lines in tracked files, grouped by file (50 lines at most). Read-only.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "loc",
+      "source": "./plugins/loc",
+      "description": "Adds /loc: lines of tracked text files by language, sorted, with a total. Skips lockfiles and binaries. Read-only.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "hotspots",
+      "source": "./plugins/hotspots",
+      "description": "Adds /hotspots: the 10 files changed most often in the last 90 days, with change counts. Read-only.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "commit-msg",
+      "source": "./plugins/commit-msg",
+      "description": "Adds /commit-msg: a Conventional Commits message proposed from the staged diff. Heuristic, no model call, writes nothing.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "branches",
+      "source": "./plugins/branches",
+      "description": "Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list. Never deletes.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "repo-pack",
+      "source": "./plugins/repo-pack",
+      "description": "Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "secret-filename-guard",
       "source": "./plugins/secret-filename-guard",
       "description": "Asks before a Bash command touches a secret-looking file (.env, private keys, credentials).",

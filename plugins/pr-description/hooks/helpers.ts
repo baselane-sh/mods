@@ -26,3 +26,15 @@ export const bullets = (items: readonly string[], limit: number, indent = ''): s
   ...items.slice(0, limit).map(item => `${indent}- ${item}`),
   ...(items.length > limit ? [`${indent}- and ${items.length - limit} more`] : []),
 ]
+
+// Items grouped by key, in first-seen order (Map.groupBy is past the es2023 lib).
+export const groupBy = <T>(items: readonly T[], key: (item: T) => string): [string, T[]][] => {
+  // Built in place: copying per item would be quadratic on a long git log.
+  const groups = new Map<string, T[]>()
+  for (const item of items) {
+    const mine = groups.get(key(item))
+    if (mine === undefined) groups.set(key(item), [item])
+    else mine.push(item)
+  }
+  return [...groups]
+}

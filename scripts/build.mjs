@@ -180,7 +180,7 @@ write(
   join(ROOT, '.claude-plugin/marketplace.json'),
   `${JSON.stringify(
     {
-      name: 'baselane-mods',
+      name: 'baselane-mods-dev',
       description: 'Baselane mods for Claude Code: guards, panes and tools you pick and combine.',
       owner: AUTHOR,
       plugins: mods.map(mod => ({

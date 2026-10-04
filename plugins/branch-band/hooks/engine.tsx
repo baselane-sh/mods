@@ -5,7 +5,7 @@ import type { GitState, Outcome, Pomodoro, Reading, Tally } from '../types'
 import { localDate } from './date'
 import type { BandRule, Segment } from './rule'
 import { bandTree, fitSegments } from './view'
-import { watchCalls, watchTickers } from './watch'
+import { stopMinuteTick, syncMinuteTick, watchCalls, watchTickers } from './watch'
 
 // The build writes the mod's own name in place of the token: `$.state` is
 // written only by the plugin that owns it, and the scan wants the atoms here.
@@ -19,6 +19,8 @@ const pomodoro = atom({ plugin: 'branch-band', key: 'pomodoro' } as const, null 
 // Written by tally.ts and git.ts, which spell the same atoms; read here to draw.
 const tally = atom({ plugin: 'branch-band', key: 'tally' } as const, { calls: {}, failures: 0 } as Tally)
 const git = atom({ plugin: 'branch-band', key: 'git' } as const, null as GitState | null)
+// Written by the minute tick and read to draw, so the write redraws the band.
+const minute = atom({ plugin: 'branch-band', key: 'minute' } as const, 0)
 
 const failed = (where: string, error: unknown): string =>
   `band: ${where} skipped, ${error instanceof Error ? error.message : String(error)}`
@@ -51,6 +53,7 @@ const modelOf = async (read: () => Promise<string>): Promise<string | undefined>
 export const registerBand = (on: On, rules: readonly BandRule[], options: PluginOptions): void => {
   watchCalls(on, rules)
   watchTickers(on, rules)
+  const isMinutely = rules.some(rule => rule.everyMinute !== undefined)
 
   // The cost as the turn begins: what this turn's cost is measured from.
   on('turn.start', async ($, e, next) => {
@@ -100,11 +103,35 @@ export const registerBand = (on: On, rules: readonly BandRule[], options: Plugin
       await update($, reading, () => now)
       // Spent: a second end of the same turn adds nothing.
       await update($, turnStartUsd, () => null)
+      if (isMinutely) {
+        // The callbacks close over `$`; they never pass it on.
+        await syncMinuteTick(rules, now, {
+          now: () => $.clock.now(),
+          after: (ms, fn) => $.clock.after(ms, fn),
+          every: (ms, fn) => $.clock.every(ms, fn),
+          tick: async () => {
+            try {
+              await update($, minute, n => n + 1)
+            } catch (error) {
+              await $.ui.log(failed('minute', error))
+            }
+          },
+        })
+      }
     } catch (error) {
       await $.ui.log(failed('turn end', error))
     }
     return next(e)
   })
+
+  // The tick stops with the session. A /clear or a resume goes on in this
+  // process with the band still drawn, so the tick goes on too.
+  if (isMinutely) {
+    on('session.end', async (_$, e, next) => {
+      if (e.reason !== 'clear' && e.reason !== 'resume') stopMinuteTick()
+      return next(e)
+    })
+  }
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey) return next(e)
@@ -118,6 +145,8 @@ export const registerBand = (on: On, rules: readonly BandRule[], options: Plugin
       tally: await read($, tally),
       git: await read($, git),
     }
+    // Read only so its write redraws the band.
+    if (isMinutely) await read($, minute)
     const segments = fitSegments(segmentsOf(rules, { reading: current, options, date, now, ...live }), e.props.bodyColumns)
     if (segments.length === 0) return next(e)
 

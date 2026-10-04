@@ -58,6 +58,9 @@ declare module 'claude-code' {
       tally: Tally
       // Null when the session is not in a repository, or before the first read.
       git: GitState | null
+      // Bumped on each minute while a rule wants it: the band reads it, so the
+      // write redraws a figure that moves with the clock alone.
+      minute: number
     }
   }
 }

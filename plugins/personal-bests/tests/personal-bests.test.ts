@@ -71,6 +71,44 @@ test('personal-bests: tool calls add up across the turns of a session', async ($
   expect(news(session)).toEqual(['New personal best: most tool calls in a session, 6 (was 5)'])
 })
 
+test('personal-bests: a resumed session never lowers its own record', async ($, on) => {
+  // A resume keeps the session's first start, and a new process counts its calls from 0.
+  const startedAt = NOON - 20 * HOUR
+  const own: Best = { value: 800, date: YESTERDAY, owner: String(startedAt) }
+  const session = probe($, on, { startedAt, store: { bests: { calls: own } } })
+  for (let i = 0; i < 3; i += 1) await session.bash(`echo ${i}`)
+  await session.turn()
+  expect(bests(session)?.['calls']).toEqual(own)
+  expect(news(session)).toEqual([])
+})
+
+test('personal-bests: a resumed session counts its length from the resume, not the time away', async ($, on) => {
+  const startedAt = NOON - 20 * HOUR
+  const session = probe($, on, { startedAt, store: { bests: { longest: old(3 * HOUR) } } })
+  await session.start()
+  await session.advance(10 * MINUTE)
+  await session.turn()
+  expect(news(session)).toEqual([])
+  expect(bests(session)?.['longest']).toEqual(old(3 * HOUR))
+  await session.advance(3 * HOUR)
+  await session.turn()
+  expect(news(session)).toEqual(['New personal best: longest session, 3 h 10 min (was 3 h 0 min)'])
+})
+
+test('personal-bests: after a /clear the tool calls count again from 0', async ($, on) => {
+  const session = probe($, on, { startedAt: NOON - HOUR })
+  for (let i = 0; i < 3; i += 1) await session.bash(`echo ${i}`)
+  await session.turn()
+  expect(bests(session)?.['calls']?.value).toBe(3)
+  await session.end('clear')
+  // A /clear starts the session over at that moment.
+  session.setStartedAt(NOON)
+  await session.bash('ls')
+  await session.turn()
+  expect(news(session)).toEqual([])
+  expect(bests(session)?.['calls']?.value).toBe(3)
+})
+
 test('personal-bests: files edited count the whole day, other sessions included', async ($, on) => {
   const session = probe($, on, {
     store: { days: { [TODAY]: day({ sessions: 1, turns: 1, files: 2 }) }, bests: { files: { value: 2, date: YESTERDAY, owner: YESTERDAY } } },

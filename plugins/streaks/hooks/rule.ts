@@ -22,8 +22,14 @@ export type View = {
 // What a rule sees right after the engine wrote a session start or a turn end.
 export type After = View & {
   event: 'session' | 'turn'
-  /** When the session began, if the host said. */
+  /** When the session began, if the host said. A resumed session keeps its first start. */
   startedAt?: number
+  /**
+   * When this run of the session began: the later of `startedAt` and the
+   * first session start this process saw. A resumed session's time away is
+   * not in it. Absent when the host gave no start.
+   */
+  runStartedAt?: number
   /** Tool calls counted this session so far. */
   sessionCalls?: number
   /** On a turn: when its prompt was sent (the turn's end less its length). */

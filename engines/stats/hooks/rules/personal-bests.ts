@@ -3,8 +3,9 @@ import type { After, Ended, StatsRule, View } from '../rule'
 // Records across sessions (store key `bests`), each with the day it was set
 // and its owner: the session (its start time) or the day that holds it. A
 // record its own owner improves grows quietly, so one long session toasts
-// once, not every turn. The first value of a record is the mark to beat and
-// toasts nothing.
+// once, not every turn, and its owner never lowers it (a resumed session
+// counts its calls from 0 again). The first value of a record is the mark to
+// beat and toasts nothing.
 const BESTS_KEY = 'bests'
 // Lines from a session's end, toasted at the next session start.
 const NEWS_KEY = 'bests-news'
@@ -57,10 +58,9 @@ const judge = (bests: Bests, candidates: readonly Candidate[], date: string, bea
     (so_far, { id, value, owner }) => {
       const best = so_far.bests[id]
       const next: Best = { value, date, owner }
-      if (best === undefined || best.owner === owner) {
-        return best?.value === value ? so_far : { ...so_far, bests: { ...so_far.bests, [id]: next } }
-      }
+      if (best === undefined) return { ...so_far, bests: { ...so_far.bests, [id]: next } }
       if (!beats(value, best.value)) return so_far
+      if (best.owner === owner) return { ...so_far, bests: { ...so_far.bests, [id]: next } }
       const { label, show } = RECORDS[id]
       return { bests: { ...so_far.bests, [id]: next }, lines: [...so_far.lines, `${label}, ${show(value)} (was ${show(best.value)})`] }
     },
@@ -70,11 +70,12 @@ const judge = (bests: Bests, candidates: readonly Candidate[], date: string, bea
 const higher = (a: number, b: number): boolean => a > b
 const lower = (a: number, b: number): boolean => a < b
 
-// A nothing value (no calls yet, a session that just began) sets no mark.
+// A nothing value (no calls yet, a session that just began) sets no mark. The
+// length counts from this run, so a resumed session's time away is not in it.
 const turnCandidates = (ctx: After): Candidate[] => {
   const session = ctx.startedAt === undefined ? undefined : String(ctx.startedAt)
   const all: Candidate[] = [
-    ...(session === undefined ? [] : [{ id: 'longest' as const, value: ctx.now - (ctx.startedAt ?? ctx.now), owner: session }]),
+    ...(session === undefined ? [] : [{ id: 'longest' as const, value: ctx.now - (ctx.runStartedAt ?? ctx.startedAt ?? ctx.now), owner: session }]),
     ...(session === undefined ? [] : [{ id: 'calls' as const, value: ctx.sessionCalls ?? 0, owner: session }]),
     { id: 'files', value: ctx.days[ctx.date]?.files ?? 0, owner: ctx.date },
   ]

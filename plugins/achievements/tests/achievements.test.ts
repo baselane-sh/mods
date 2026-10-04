@@ -113,6 +113,16 @@ test('achievements: a session over two hours unlocks at the next turn, an hour a
   expect(unlocked(session)).toContain('Achievement unlocked: Marathon')
 })
 
+test('achievements: a resumed session counts from the resume, not the time away', async ($, on) => {
+  const session = probe($, on, { startedAt: at(2026, 10, 3, 12) })
+  await session.start()
+  await session.turn()
+  expect(badges(session)?.['marathon']).toBeUndefined()
+  await session.advance(2 * HOUR + 60_000)
+  await session.turn()
+  expect(unlocked(session)).toContain('Achievement unlocked: Marathon')
+})
+
 for (const [hour, minute, expected] of [
   [0, 0, true],
   [3, 59, true],

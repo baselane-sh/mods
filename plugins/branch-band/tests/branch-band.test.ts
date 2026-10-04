@@ -85,3 +85,26 @@ test('branch-band: drawing never writes state', async ($, on) => {
   await read(session, 'desktop')
   expect(session.stateWrites('git')).toBe(before)
 })
+
+test('branch-band: a tool result does not wait for git', async ($, on) => {
+  const session = probe($, on)
+  session.slowGit(5000, '## main\n')
+  // The clock stands still, so a call that waited for git would never answer.
+  expect(await session.bash('ls')).toEqual({ result: {} })
+  expect(session.gitRuns()).toBe(1)
+  expect(await read(session)).toBeUndefined()
+  await session.advance(5000)
+  expect(await read(session)).toBe('main · clean')
+})
+
+test('branch-band: a slow git read never overwrites a newer one', async ($, on) => {
+  const session = probe($, on)
+  session.slowGit(1000, '## main\n')
+  const first = session.bash('git checkout dev')
+  await session.settle()
+  session.setGit('## dev\n')
+  await session.bash('ls')
+  await session.advance(1000)
+  await first
+  expect(await read(session)).toBe('dev · clean')
+})

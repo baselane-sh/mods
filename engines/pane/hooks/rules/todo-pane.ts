@@ -87,7 +87,8 @@ export const rule: PaneRule = {
     const cwd = await host.cwd()
     let ran: ProcessRunResult
     try {
-      ran = await host.run(['git', '--no-optional-locks', '-C', cwd, 'grep', '-z', '-n', '-I', '-w', '-E', '-e', MARKERS])
+      // --no-color: a color.ui=always config would wrap each -z field in escape codes.
+      ran = await host.run(['git', '--no-optional-locks', '-C', cwd, 'grep', '--no-color', '-z', '-n', '-I', '-w', '-E', '-e', MARKERS])
     } catch (error) {
       return [line('failed', { text: `git did not run: ${error instanceof Error ? error.message : String(error)}`, color: 'red' })]
     }

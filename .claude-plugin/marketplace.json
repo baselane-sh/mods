@@ -379,7 +379,7 @@
     {
       "name": "guard-devops",
       "source": "./plugins/guard-devops",
-      "description": "Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, world-writable or broad recursive chmod and chown, and git commands that lose work or rewrite history.",
+      "description": "Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, world-writable or broad recursive chmod and chown, and git commands that lose work or rewrite history. Add infra-guard for plain kubectl delete.",
       "version": "0.2.0",
       "author": {
         "name": "Baselane",

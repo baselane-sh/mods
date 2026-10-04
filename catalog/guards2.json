@@ -38,7 +38,7 @@
     },
     {
       "name": "guard-devops",
-      "description": "Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, world-writable or broad recursive chmod and chown, and git commands that lose work or rewrite history.",
+      "description": "Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, world-writable or broad recursive chmod and chown, and git commands that lose work or rewrite history. Add infra-guard for plain kubectl delete.",
       "rules": ["docker", "k8s", "ci-config", "chmod", "git-history"]
     }
   ]

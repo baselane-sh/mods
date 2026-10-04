@@ -1,0 +1,60 @@
+import { expect, test } from 'claude-code/testing'
+
+import { HOUR, NOON, SURFACES, probe } from './probe'
+
+const MINUTE = 60_000
+
+const read = async (session: ReturnType<typeof probe>, surface: (typeof SURFACES)[number] = 'terminal') => {
+  const ui = await session.mount(surface, 200)
+  const found = (await session.segments(ui)).find(item => item.key === 'session-clock')
+  await ui.unmount()
+  return found?.text
+}
+
+test('session-clock: the wall clock and the session age, on every surface', async ($, on) => {
+  const session = probe($, on)
+  await session.turn({ startedAt: NOON - HOUR - 12 * MINUTE })
+  for (const surface of SURFACES) expect(await read(session, surface)).toBe('12:00 · 1h 12m')
+})
+
+test('session-clock: both figures move with the clock, with no turn between', async ($, on) => {
+  const session = probe($, on)
+  await session.turn({ startedAt: NOON - 50 * MINUTE })
+  expect(await read(session)).toBe('12:00 · 50m')
+  await session.advance(15 * MINUTE)
+  expect(await read(session)).toBe('12:15 · 1h 5m')
+})
+
+test('session-clock: a session under a minute old reads 0m', async ($, on) => {
+  const session = probe($, on)
+  await session.turn({ startedAt: NOON - 20_000 })
+  expect(await read(session)).toBe('12:00 · 0m')
+})
+
+test('session-clock: a start in the future never reads a negative age', async ($, on) => {
+  const session = probe($, on)
+  await session.turn({ startedAt: NOON + HOUR })
+  expect(await read(session)).toBe('12:00 · 0m')
+})
+
+test('session-clock: days of age stay in hours', async ($, on) => {
+  const session = probe($, on)
+  await session.turn({ startedAt: NOON - 26 * HOUR })
+  expect(await read(session)).toBe('12:00 · 26h 0m')
+})
+
+test('session-clock: hidden while the session reports no start', async ($, on) => {
+  const session = probe($, on)
+  await session.turn({ percent: 10 })
+  expect(await read(session)).toBeUndefined()
+})
+
+test('session-clock: drawing never writes state', async ($, on) => {
+  const session = probe($, on)
+  await session.turn({ startedAt: NOON - HOUR })
+  const before = session.stateWrites('reading')
+  await read(session)
+  await session.advance(MINUTE)
+  await read(session)
+  expect(session.stateWrites('reading')).toBe(before)
+})

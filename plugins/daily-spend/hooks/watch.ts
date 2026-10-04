@@ -1,30 +1,48 @@
 import { atom, read, update } from 'claude-code'
 import type { On, Timer } from 'claude-code'
 
-import type { Outcome, Pomodoro } from '../types'
+import type { GitState, Outcome, Pomodoro, Tally } from '../types'
+import { ARGV, READ_TIMEOUT_MS, TOUCHING_TOOLS, refreshGit } from './git'
 import type { BandRule } from './rule'
+import { addCall } from './tally'
 
 const WINDOW = 20
 
-// The same two atoms as engine.tsx: the state scan wants each spelled in the
+// The same atoms as engine.tsx: the state scan wants each spelled in the
 // file that reads or writes it. The build writes the mod's own name for the token.
 const outcomes = atom({ plugin: 'daily-spend', key: 'outcomes' } as const, [] as readonly Outcome[])
 const pomodoro = atom({ plugin: 'daily-spend', key: 'pomodoro' } as const, null as Pomodoro | null)
+const tally = atom({ plugin: 'daily-spend', key: 'tally' } as const, { calls: {}, failures: 0 } as Tally)
+const git = atom({ plugin: 'daily-spend', key: 'git' } as const, null as GitState | null)
 
 const failed = (where: string, error: unknown): string =>
   `band: ${where} skipped, ${error instanceof Error ? error.message : String(error)}`
 
-// Records how each tool call ended, for the rules that draw from it. The
-// result is passed on as it came: a denied call stays denied.
-export const watchOutcomes = (on: On, rules: readonly BandRule[]): void => {
-  if (!rules.some(rule => rule.tracksOutcomes === true)) return
+// Watches each tool call for the rules that draw from how it ended: the recent
+// outcomes, the tally of the session, the repository. The result is passed on
+// as it came: a denied call stays denied. Only one hook may answer `tool.call`
+// without a matcher, so the three share it.
+export const watchCalls = (on: On, rules: readonly BandRule[]): void => {
+  const has = (flag: 'tracksOutcomes' | 'tracksTools' | 'tracksGit'): boolean => rules.some(rule => rule[flag] === true)
+  const [isOutcomes, isTally, isGit] = [has('tracksOutcomes'), has('tracksTools'), has('tracksGit')]
+  if (!isOutcomes && !isTally && !isGit) return
+
   on('tool.call', async ($, e, next) => {
     const ran = await next(e)
     try {
       const outcome: Outcome = ran.deny !== undefined ? 'block' : ran.isError === true ? 'error' : 'ok'
-      await update($, outcomes, recent => [...recent, outcome].slice(-WINDOW))
+      if (isOutcomes) await update($, outcomes, recent => [...recent, outcome].slice(-WINDOW))
+      if (isTally) await update($, tally, current => addCall(current, e.tool, outcome !== 'ok'))
     } catch (error) {
       await $.ui.log(failed('outcomes', error))
+    }
+    // A denied call changed nothing.
+    if (isGit && ran.deny === undefined && TOUCHING_TOOLS.has(e.tool)) {
+      await refreshGit({
+        run: () => $.process.run(ARGV, { timeoutMs: READ_TIMEOUT_MS }),
+        set: state => update($, git, () => state),
+        log: text => $.ui.log(text),
+      })
     }
     return ran
   })

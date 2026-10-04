@@ -1,6 +1,6 @@
 import type { PluginOptions } from 'claude-code'
 
-import type { Outcome, Pomodoro, Reading } from '../types'
+import type { GitState, Outcome, Pomodoro, Reading, Tally } from '../types'
 
 // One piece of the band. `key` names its Text so a test or a host can find it.
 export type Segment = {
@@ -19,6 +19,12 @@ export type DrawContext = {
   outcomes: readonly Outcome[]
   // The running pomodoro, or null.
   pomodoro: Pomodoro | null
+  // The clock at this drawing, in milliseconds.
+  now: number
+  // Tool calls this session.
+  tally: Tally
+  // The repository's branch and changed files, or null.
+  git: GitState | null
 }
 
 // What a rule may touch at a turn end.
@@ -43,6 +49,12 @@ export type BandRule = {
   // Set by a rule that draws from how the last tool calls ended. The engine
   // then records each call's outcome into the `outcomes` atom.
   tracksOutcomes?: true
+  // Set by a rule that draws from the tool calls of the whole session. The
+  // engine then counts each call, by tool, into the `tally` atom.
+  tracksTools?: true
+  // Set by a rule that draws from the repository. The engine then reads the
+  // branch and the changed files after a Bash call or a file edit.
+  tracksGit?: true
   // For a rule with a timer, started and stopped by a slash command.
   ticker?: Ticker
 }

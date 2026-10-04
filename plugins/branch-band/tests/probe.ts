@@ -1,0 +1,236 @@
+import type { Mounted, TestBody } from 'claude-code/testing'
+import { mock } from 'claude-code/testing'
+
+type Engine = Parameters<TestBody>[0]
+type OnFn = Parameters<TestBody>[1]
+
+// The build writes the mod's own name here: `$.state` is owned by the plugin
+// that declares it, so each mod of this engine keeps its state under its name.
+export const PLUGIN = 'branch-band'
+export const SURFACES = ['terminal', 'desktop'] as const
+export type Surface = (typeof SURFACES)[number]
+
+// 2026-10-04 12:00 local time, so a day rollover is a fixed 12 hours away
+// whatever zone the test runs in.
+export const NOON = new Date(2026, 9, 4, 12, 0, 0).getTime()
+export const HOUR = 3_600_000
+export const TODAY_KEY = 'daily:2026-10-04'
+export const TOMORROW_KEY = 'daily:2026-10-05'
+
+export const bandProps = (bodyColumns: number, hasSurvey = false) =>
+  ({
+    hasSurvey,
+    isWorking: false,
+    maxRows: 10,
+    bodyColumns,
+    scroll: { offset: 0, bodyRows: 10 },
+    view: {},
+  }) as const
+
+// `startedAt` and `model` are what the session reports besides its usage.
+export type Reading = { usd?: number; percent?: number; startedAt?: number; model?: string }
+
+// What a `git status --porcelain -b` answers by default: main, two files changed.
+export const GIT_DEFAULT = '## main...origin/main\n M a.ts\n?? b.ts\n'
+
+// A Bash command containing this word is denied beneath the mod; one
+// containing FAIL runs and comes back as an error.
+export const DENY_WORD = 'DENYME'
+export const FAIL_WORD = 'FAILME'
+
+export type Segment = { key: string; text: string; color?: unknown }
+
+export type BandProbe = {
+  // A whole turn: turn.start sees the cost as it stands, the turn spends,
+  // then turn.complete reads the new figures.
+  turn: (after: Reading) => Promise<void>
+  // Only the turn.complete, with no turn.start before it.
+  complete: (after: Reading, extra?: { agentId?: string }) => Promise<void>
+  mount: (surface: Surface, bodyColumns?: number, hasSurvey?: boolean) => Promise<Mounted<Surface, 'AbovePrompt'>>
+  segments: (ui: Mounted<Surface, 'AbovePrompt'>) => Promise<Segment[]>
+  advance: (ms: number) => Promise<void>
+  logs: () => readonly string[]
+  // What the mod wrote to its store, by key, as written.
+  writes: () => Readonly<Record<string, unknown>>
+  breakUsage: () => void
+  // One Bash call: it passes, or fails or is denied by the word it holds.
+  bash: (command: string) => Promise<unknown>
+  // Raises session.start, the way the session does.
+  start: () => Promise<void>
+  // One call of any tool (Edit, Write, Read...): it passes.
+  tool: (name: string) => Promise<unknown>
+  // Every later call of this tool comes back as an error.
+  failTool: (name: string) => void
+  // What `git status --porcelain -b` answers from now on; null is not a repository.
+  setGit: (output: string | null) => void
+  // How many times the mod ran git.
+  gitRuns: () => number
+  // Runs `/<name>` and answers its output text.
+  run: (name: string) => Promise<string>
+  toasts: () => readonly string[]
+  registered: () => readonly string[]
+  // How many times the mod wrote the state value `key` (any owner).
+  stateWrites: (key: string) => number
+  // Gives a mod that draws from live activity something to show: a few tool
+  // calls, and /pomodoro where the mod has it. A mod without that command
+  // has nothing to run, which is not a failure.
+  wake: () => Promise<void>
+}
+
+// Stands in for the engine beneath the mod: the clock and store are the
+// test kit's, `session.usage` answers `now` and a test moves it.
+export const probe = (
+  $: Engine,
+  on: OnFn,
+  start: Reading = {},
+  store: Readonly<Record<string, unknown>> = {},
+): BandProbe => {
+  let now: Reading = start
+  let isBroken = false
+  let gitOutput: string | null = GIT_DEFAULT
+  let gitRuns = 0
+  let failing: readonly string[] = []
+  let logs: string[] = []
+  let turns = 0
+  let written: Record<string, unknown> = {}
+  let toasts: string[] = []
+  let registered: string[] = []
+  let writes: Record<string, number> = {}
+
+  const clock = mock.clock(on, { now: NOON })
+  // The kit's mock.store answers the same four calls from memory, but only
+  // one hook may answer each event, and these tests read the writes back.
+  let kept: Record<string, unknown> = { ...store }
+  on('store.get', (_$, e) => ({ value: kept[e.key] }))
+  on('store.set', (_$, e) => {
+    kept = { ...kept, [e.key]: e.value }
+    written = { ...written, [e.key]: e.value }
+    return { value: undefined }
+  })
+  on('store.delete', (_$, e) => {
+    const { [e.key]: _gone, ...rest } = kept
+    kept = rest
+    return { value: undefined }
+  })
+  on('store.keys', () => ({ value: Object.keys(kept) }))
+  on('session.usage', () => {
+    if (isBroken) throw new Error('usage is down')
+    return {
+      value: {
+        // NaN stands for a session that reports no start: the engine leaves it out.
+        startedAt: now.startedAt ?? Number.NaN,
+        context: { window: 200_000, ...(now.percent === undefined ? {} : { tokens: now.percent * 2000, percent: now.percent }) },
+        rateLimits: [],
+        ...(now.usd === undefined ? {} : { cost: { usd: now.usd } }),
+      },
+    }
+  })
+  // The state is the test's own so each write can be counted.
+  const state = new Map<string, { value: unknown; version: number }>()
+  on('state.get', (_$, e) => {
+    const held = state.get(`${e.plugin}.${e.key}`)
+    return { value: { value: held?.value, version: held?.version ?? 0 } }
+  })
+  on('state.set', (_$, e) => {
+    const name = `${e.plugin}.${e.key}`
+    const version = state.get(name)?.version ?? 0
+    if (e.ifVersion !== undefined && e.ifVersion !== version) return { value: { isSet: false as const, version } }
+    state.set(name, { value: e.value, version: version + 1 })
+    writes = { ...writes, [e.key]: (writes[e.key] ?? 0) + 1 }
+    return { value: { isSet: true as const, version: version + 1 } }
+  })
+  on('session.model', () => ({ value: now.model ?? '' }))
+  on('process.run', (_$, e) => {
+    const isGit = e.argv[0] === 'git'
+    if (isGit) gitRuns += 1
+    return {
+      value: {
+        exitCode: isGit && gitOutput !== null ? 0 : 128,
+        stdout: gitOutput ?? '',
+        stderr: '',
+        isStdoutTruncated: false,
+        isStderrTruncated: false,
+      },
+    }
+  })
+  on('session.start', (_$, e) => ({ cwd: e.cwd }))
+  on('command.register', (_$, e) => {
+    registered = [...registered, e.name]
+    return { value: { command: e.name } }
+  })
+  on('ui.toast', (_$, e) => {
+    toasts = [...toasts, e.text]
+    return { value: undefined }
+  })
+  on('tool.call', (_$, e) => {
+    if (failing.includes(e.tool)) return { result: {}, isError: true }
+    const command = e.tool === 'Bash' ? e.command : ''
+    if (command.includes(DENY_WORD)) return { deny: 'blocked by test' }
+    if (command.includes(FAIL_WORD)) return { result: {}, isError: true }
+    return { result: {} }
+  })
+  on('ui.log', (_$, e) => {
+    logs = [...logs, e.text]
+    return { value: undefined }
+  })
+  // What the engine draws when the band yields: something that is not the band.
+  on('ui.render', () => ({ type: 'Text', props: {}, children: ['engine own'] }))
+  on('turn.start', (_$, e) => ({ turnId: e.turnId }))
+  on('turn.complete', () => ({ text: '' }))
+
+  const complete = async (after: Reading, extra: { agentId?: string } = {}) => {
+    now = after
+    turns += 1
+    await $.turn.complete({ answer: '', durationMs: 1, isAborted: false, turnId: `t${turns}`, reason: 'answer', ...extra })
+  }
+
+  return {
+    complete,
+    turn: async after => {
+      await $.turn.start({ text: 'go', turnId: `t${turns + 1}` })
+      await complete(after)
+    },
+    mount: (surface, bodyColumns = 80, hasSurvey = false) =>
+      $.ui.mount({ plugin: PLUGIN, surface, component: 'AbovePrompt', props: bandProps(bodyColumns, hasSurvey) }),
+    segments: async ui => {
+      const texts = await ui.findAll({ type: 'Text' })
+      return (await ui.findAll({ type: 'Box' }))
+        .filter(box => box.key !== undefined && box.key !== 'band' && !box.key.startsWith('gap-'))
+        .map(box => ({ key: box.key ?? '', text: box.text, color: texts.find(text => text.text === box.text)?.props.color }))
+    },
+    advance: ms => clock.advance(ms),
+    bash: command => $.tool.call({ tool: 'Bash', command }),
+    // The tool name is free text here: the kit's `tool.call` types by name, so
+    // the call goes in loose, as the engine would see any tool.
+    tool: name => $.tool.call({ tool: name, ...(name === 'Bash' ? { command: 'ls' } : {}) } as Parameters<typeof $.tool.call>[0]),
+    failTool: name => {
+      failing = [...failing, name]
+    },
+    setGit: output => {
+      gitOutput = output
+    },
+    gitRuns: () => gitRuns,
+    start: async () => {
+      await $.session.start({ cwd: '/repo', surface: null, isInteractive: true })
+    },
+    run: async name =>
+      (await $.command.run({ command: name, args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })).text ??
+      '',
+    wake: async () => {
+      await $.tool.call({ tool: 'Bash', command: 'ls' })
+      try {
+        await $.command.run({ command: 'pomodoro', args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })
+      } catch {
+        // No /pomodoro in this mod.
+      }
+    },
+    toasts: () => toasts,
+    registered: () => registered,
+    stateWrites: key => writes[key] ?? 0,
+    logs: () => logs,
+    writes: () => written,
+    breakUsage: () => {
+      isBroken = true
+    },
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "error-meter",
+  "version": "0.2.0",
+  "description": "A band above the prompt with how many tool calls failed this session (an error or a deny) and which tool failed last. Red from the first failure.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

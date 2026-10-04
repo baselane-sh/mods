@@ -1,0 +1,10 @@
+{
+  "name": "shakespeare-mode",
+  "version": "0.2.0",
+  "description": "Prose in Early Modern English flair. Code, commands, commit messages and error text stay exact.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

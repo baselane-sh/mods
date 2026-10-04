@@ -1,0 +1,20 @@
+{
+  "engine": "render",
+  "mods": [
+    {
+      "name": "diff-stats",
+      "description": "Edit and Write rows show a compact +12 -3 bar beside the file name: green for lines added, red for lines removed, up to 20 cells.",
+      "rules": ["diff-stats"]
+    },
+    {
+      "name": "file-links",
+      "description": "In Claude's replies, path/to/file.ts:42 references to files in your project become links. Click one to put @path/to/file.ts in the prompt.",
+      "rules": ["file-links"]
+    },
+    {
+      "name": "render-pack",
+      "description": "Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies.",
+      "rules": ["diff-stats", "file-links"]
+    }
+  ]
+}

@@ -417,6 +417,36 @@
       }
     },
     {
+      "name": "diff-stats",
+      "source": "./plugins/diff-stats",
+      "description": "Edit and Write rows show a compact +12 -3 bar beside the file name: green for lines added, red for lines removed, up to 20 cells.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "file-links",
+      "source": "./plugins/file-links",
+      "description": "In Claude's replies, path/to/file.ts:42 references to files in your project become links. Click one to put @path/to/file.ts in the prompt.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "render-pack",
+      "source": "./plugins/render-pack",
+      "description": "Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "sounds-retro",
       "source": "./plugins/sounds-retro",
       "description": "8-bit sounds: a coin when tests pass, a buzz when they fail, a chime when a turn ends.",

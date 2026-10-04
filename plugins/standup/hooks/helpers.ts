@@ -38,3 +38,13 @@ export const groupBy = <T>(items: readonly T[], key: (item: T) => string): [stri
   }
   return [...groups]
 }
+
+// The repo's top folder (not the cwd), or undefined outside a repo.
+export const repoRoot = async (tools: CommandTools): Promise<string | undefined> =>
+  (await tools.git('rev-parse', '--show-toplevel'))?.trim() || undefined
+
+// The first `limit` rows, then "+N more" for the rest (the todos wording).
+export const cap = (rows: readonly string[], limit: number): string[] => [
+  ...rows.slice(0, limit),
+  ...(rows.length > limit ? [`+${rows.length - limit} more`] : []),
+]

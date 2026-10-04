@@ -257,6 +257,66 @@
       }
     },
     {
+      "name": "tree",
+      "source": "./plugins/tree",
+      "description": "Adds /tree: tracked files as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "deps",
+      "source": "./plugins/deps",
+      "description": "Adds /deps: direct dependencies with versions from package.json, pyproject.toml, requirements.txt, go.mod and Cargo.toml at the repo root. No network, no audit. Read-only.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "authors",
+      "source": "./plugins/authors",
+      "description": "Adds /authors: the top 15 contributors by commit count with their last commit date. Names only, never email addresses. Read-only.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "scripts",
+      "source": "./plugins/scripts",
+      "description": "Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts. Read-only.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "env-check",
+      "source": "./plugins/env-check",
+      "description": "Adds /env-check: variable names in .env.example against .env, listing missing and extra names. Reads names only, never a value. Read-only.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "explore-pack",
+      "source": "./plugins/explore-pack",
+      "description": "Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "secret-filename-guard",
       "source": "./plugins/secret-filename-guard",
       "description": "Asks before a Bash command touches a secret-looking file (.env, private keys, credentials).",

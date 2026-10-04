@@ -1,0 +1,10 @@
+{
+  "name": "guard-devops",
+  "version": "0.2.0",
+  "description": "Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, world-writable or broad recursive chmod and chown, and git commands that lose work or rewrite history.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

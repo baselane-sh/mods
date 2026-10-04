@@ -29,3 +29,6 @@ export const openRepo = async (command: string, tools: GuardTools): Promise<Repo
 
 export const lines = (text: string | undefined): string[] =>
   (text ?? '').split('\n').filter(line => line.length > 0)
+
+// git's global options that take the next word as their value.
+export const GIT_VALUE_FLAGS: ReadonlySet<string> = new Set(['-C', '-c', '--git-dir', '--work-tree', '--namespace', '--exec-path'])

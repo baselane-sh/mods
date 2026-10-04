@@ -307,6 +307,86 @@
       }
     },
     {
+      "name": "docker-guard",
+      "source": "./plugins/docker-guard",
+      "description": "Asks before Docker commands that delete data: system, volume or image prune, rm -f, volume rm and compose down -v.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "k8s-guard",
+      "source": "./plugins/k8s-guard",
+      "description": "Asks before kubectl apply or replace with --force, kubectl drain, helm uninstall, and kubectl delete behind global flags (plain kubectl delete is infra-guard's).",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "migration-guard",
+      "source": "./plugins/migration-guard",
+      "description": "Asks before Write or Edit changes a migration that already exists; new migration files pass.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "ci-config-guard",
+      "source": "./plugins/ci-config-guard",
+      "description": "Asks before Write or Edit changes CI config: .github/workflows, .gitlab-ci.yml or .circleci/config.yml.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "chmod-guard",
+      "source": "./plugins/chmod-guard",
+      "description": "Asks before chmod makes files world-writable (777, a+w, o+w) or chmod or chown runs recursively on a broad path (/, a system folder, a home folder).",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "git-history-guard",
+      "source": "./plugins/git-history-guard",
+      "description": "Asks before git commands that throw away work or rewrite history: reset --hard, clean, rebase, filter-branch, filter-repo, push --delete, branch -D and stash clear.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "big-file-guard",
+      "source": "./plugins/big-file-guard",
+      "description": "Asks before a Write creates content over 1 MB, or git add names a file over 5 MB.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "guard-devops",
+      "source": "./plugins/guard-devops",
+      "description": "Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, world-writable or broad recursive chmod and chown, and git commands that lose work or rewrite history.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "auto-format",
       "source": "./plugins/auto-format",
       "description": "Runs your project's own formatter on each file Claude writes or edits, only when the project has a formatter config, and tells Claude to re-read the file.",

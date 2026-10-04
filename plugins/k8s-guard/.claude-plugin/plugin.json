@@ -1,0 +1,10 @@
+{
+  "name": "k8s-guard",
+  "version": "0.2.0",
+  "description": "Asks before kubectl apply or replace with --force, kubectl drain, helm uninstall, and kubectl delete behind global flags (plain kubectl delete is infra-guard's).",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

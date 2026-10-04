@@ -100,11 +100,9 @@ test('rootOf decodes a checkout path with a space', () => {
   assert.equal(rootOf('file:///Users/me/My%20Mods/mods/scripts/gen-docs.mjs'), '/Users/me/My Mods/mods/')
 })
 
-// The catalog table reads best with short descriptions. Only the nudge
-// catalogs are held to this here; other engines are trimmed on their own.
-test('nudge catalog descriptions are 200 characters or fewer', () => {
+// The gallery refuses a plugin description over 200 characters.
+test('catalog descriptions are 200 characters or fewer', () => {
   const long = readCatalogs(rootOf(import.meta.url))
-    .filter(catalog => catalog.engine === 'nudge')
     .flatMap(catalog => catalog.mods)
     .filter(mod => mod.description.length > 200)
     .map(mod => `${mod.name} (${mod.description.length})`)

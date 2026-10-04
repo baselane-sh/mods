@@ -559,7 +559,7 @@
     {
       "name": "guard-devops",
       "source": "./plugins/guard-devops",
-      "description": "Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, world-writable or broad recursive chmod and chown, and git commands that lose work or rewrite history. Add infra-guard for plain kubectl delete.",
+      "description": "Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, broad chmod and chown, and git commands that lose work. Add infra-guard for plain kubectl delete.",
       "version": "0.2.0",
       "author": {
         "name": "Baselane",
@@ -659,7 +659,7 @@
     {
       "name": "auto-lint",
       "source": "./plugins/auto-lint",
-      "description": "Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits inside the project, only when the project has that linter's config, and tells Claude what is left.",
+      "description": "Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits, only when the project has that linter's config, and tells Claude what is left.",
       "version": "0.2.0",
       "author": {
         "name": "Baselane",

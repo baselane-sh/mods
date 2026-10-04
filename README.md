@@ -111,7 +111,7 @@ Ask you before a harsh or risky command runs.
 | `big-file-guard` | Asks before a Write creates content over 1 MB, or git add names a file over 5 MB. |  |  |
 | `guard-essentials` | Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. The quiet choice for daily work. |  | pack |
 | `guard-pack` | Every Baselane guard in one mod. |  | pack |
-| `guard-devops` | Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, world-writable or broad recursive chmod and chown, and git commands that lose work or rewrite history. Add infra-guard for plain kubectl delete. |  | pack |
+| `guard-devops` | Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, broad chmod and chown, and git commands that lose work. Add infra-guard for plain kubectl delete. |  | pack |
 
 ### Reminders (17)
 
@@ -190,7 +190,7 @@ Live side panes that you open with a slash command.
 | --- | --- | --- | --- |
 | `agent-firewall` | A live pane of every tool call the agent makes: green when it ran, red when it was blocked, with counters. Open it with /firewall. | `/firewall` |  |
 | `git-pane` | A live side pane with the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. It refreshes after git commands and file edits. Open it with /git. | `/git` |  |
-| `test-pane` | A live side pane with the last test run: runner, pass, fail and skip counts, duration and the first failing tests, read from vitest, jest, pytest, go test, cargo test, bun test and claude plugin test output. Open it with /tests. | `/tests` |  |
+| `test-pane` | A live side pane with the last test run (vitest, jest, pytest, go test, cargo test, bun test, claude plugin test): runner, pass, fail and skip counts, duration and first failures. Open it with /tests. | `/tests` |  |
 | `port-watch` | A live side pane of the local TCP ports that listen, with the process name and pid, refreshed every 10 seconds while open. Reads lsof (macOS, most Linux). Open it with /ports. | `/ports` |  |
 | `todo-pane` | A live side pane of the TODO, FIXME and HACK lines in tracked files (git grep), grouped by file and capped at 30. It refreshes after file edits while open. Open it with /todo-pane. | `/todo-pane` |  |
 | `cost-pane` | A live side pane with the session cost, the cost of each of the last 10 turns as a bar, and the average per turn. Open it with /cost-pane. | `/cost-pane` |  |
@@ -244,7 +244,7 @@ Local records of how you use Claude Code.
 | `streaks` | Counts consecutive days you used Claude Code: a Day N streak toast at session start, and /streak to ask. | `/streak` |  |
 | `achievements` | Unlocks eight badges once each (first session, first green test run, 100 and 1,000 tool calls, 7-day streak, 10 blocked calls, a 2 hour session, night owl), with a toast and /achievements. | `/achievements` |  |
 | `night-owl` | Records the hour of each prompt across sessions and adds /hours: a 24-hour histogram of when you work, naming your peak hour. | `/hours` |  |
-| `personal-bests` | Tracks your records across sessions (longest session, most tool calls in a session, most files edited in a day, cheapest session over 30 minutes) with a toast when one is beaten, and /bests to list them. | `/bests` |  |
+| `personal-bests` | Tracks your records across sessions (longest session, most tool calls in a session, most files edited in a day, cheapest session over 30 minutes), toasts a new one, and lists them with /bests. | `/bests` |  |
 | `stats-pack` | Every Baselane stats mod in one: /wrapped, streaks and achievements on one shared daily rollup. | `/wrapped`, `/streak`, `/achievements` | pack |
 
 ### Display and render (9)
@@ -277,7 +277,7 @@ Act on session events: format files, push a notification, keep a journal.
 | `slack-notify` | Posts to a Slack incoming webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL. |  | needs setup |
 | `discord-notify` | Posts to a Discord webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL. |  | needs setup |
 | `say-done` | On macOS, says "Claude is done" when a turn ends after more than 30 seconds. Does nothing on other platforms. |  |  |
-| `auto-lint` | Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits inside the project, only when the project has that linter's config, and tells Claude what is left. |  |  |
+| `auto-lint` | Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits, only when the project has that linter's config, and tells Claude what is left. |  |  |
 | `lifecycle-pack` | Every Baselane lifecycle mod in one: auto-format, long-run and input pushes, and the session journal. |  | needs setup, pack |
 | `notify-pack` | Local alerts in one: a desktop notification when Claude Code needs your input, and a spoken line on macOS when a long turn ends. |  | pack |
 

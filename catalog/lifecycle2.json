@@ -23,7 +23,7 @@
     },
     {
       "name": "auto-lint",
-      "description": "Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits inside the project, only when the project has that linter's config, and tells Claude what is left.",
+      "description": "Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits, only when the project has that linter's config, and tells Claude what is left.",
       "rules": ["auto-lint"]
     },
     {

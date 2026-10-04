@@ -10,7 +10,7 @@
       "name": "cost-meter",
       "source": "./plugins/cost-meter",
       "description": "A band above the prompt with the session cost so far and what the last turn cost.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -20,7 +20,7 @@
       "name": "latte-meter",
       "source": "./plugins/latte-meter",
       "description": "A band above the prompt that counts the session cost in lattes. Set the latte price in the plugin options.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -30,7 +30,7 @@
       "name": "context-meter",
       "source": "./plugins/context-meter",
       "description": "A band above the prompt with a 10 cell bar of the context window used, yellow from 60 percent, red from 80.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -40,7 +40,7 @@
       "name": "daily-spend",
       "source": "./plugins/daily-spend",
       "description": "A band above the prompt with today's total cost across all your sessions.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -50,7 +50,7 @@
       "name": "band-pack",
       "source": "./plugins/band-pack",
       "description": "Every Baselane band meter in one row above the prompt: session cost, lattes, context bar and today's spend.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -60,7 +60,7 @@
       "name": "receipt",
       "source": "./plugins/receipt",
       "description": "Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -70,7 +70,7 @@
       "name": "standup",
       "source": "./plugins/standup",
       "description": "Adds /standup: Yesterday, Today and Blockers from your git log and this session's record, printed and copied.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -80,7 +80,7 @@
       "name": "changelog",
       "source": "./plugins/changelog",
       "description": "Adds /changelog: commits since the last tag (or the last 30), grouped by conventional-commit type, as Markdown.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -90,7 +90,7 @@
       "name": "pr-description",
       "source": "./plugins/pr-description",
       "description": "Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -100,7 +100,7 @@
       "name": "handoff",
       "source": "./plugins/handoff",
       "description": "Adds /handoff: writes a session summary to .claude/handoff.md (never overwriting) and answers with the path.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -110,7 +110,7 @@
       "name": "command-pack",
       "source": "./plugins/command-pack",
       "description": "Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -120,7 +120,7 @@
       "name": "secret-filename-guard",
       "source": "./plugins/secret-filename-guard",
       "description": "Asks before a Bash command touches a secret-looking file (.env, private keys, credentials).",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -130,7 +130,7 @@
       "name": "secret-guard",
       "source": "./plugins/secret-guard",
       "description": "Asks before a live API key, token or private key is written, edited or run.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -140,7 +140,7 @@
       "name": "env-exfil-guard",
       "source": "./plugins/env-exfil-guard",
       "description": "Asks before a command prints your environment, echoes a secret variable or sends local data to a remote host.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -150,7 +150,7 @@
       "name": "infra-guard",
       "source": "./plugins/infra-guard",
       "description": "Asks before terraform destroy, kubectl delete, force-push, DROP TABLE or rm -rf.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -160,7 +160,7 @@
       "name": "secret-commit-guard",
       "source": "./plugins/secret-commit-guard",
       "description": "Asks before a git commit that would record a credential or a secret-named file.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -170,7 +170,7 @@
       "name": "protect-main",
       "source": "./plugins/protect-main",
       "description": "Asks before a commit, push or merge while you are on main or master.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -180,7 +180,7 @@
       "name": "gitignore-check",
       "source": "./plugins/gitignore-check",
       "description": "Asks before git add or commit when secret-looking files are not ignored or are already tracked.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -190,7 +190,7 @@
       "name": "secret-output-guard",
       "source": "./plugins/secret-output-guard",
       "description": "Tells Claude not to repeat a credential that showed up in command or file output, and names the source to rotate.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -200,7 +200,7 @@
       "name": "curl-pipe-guard",
       "source": "./plugins/curl-pipe-guard",
       "description": "Asks before a download is piped into a shell or interpreter (curl | sh, wget -O- | bash, bash <(curl ...)).",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -210,7 +210,7 @@
       "name": "sudo-guard",
       "source": "./plugins/sudo-guard",
       "description": "Asks before sudo, doas or su -c runs a command with elevated rights.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -220,7 +220,7 @@
       "name": "no-verify-guard",
       "source": "./plugins/no-verify-guard",
       "description": "Asks before git hooks are skipped (--no-verify, commit -n, HUSKY=0, core.hooksPath=/dev/null).",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -230,7 +230,7 @@
       "name": "lockfile-guard",
       "source": "./plugins/lockfile-guard",
       "description": "Asks before a lockfile is written or edited by hand; the package manager should change it.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -240,7 +240,7 @@
       "name": "package-guard",
       "source": "./plugins/package-guard",
       "description": "Asks before a new dependency is installed (npm, pnpm, yarn, bun, pip, uv, poetry, cargo, go, gem) and names the packages.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -250,7 +250,7 @@
       "name": "prod-db-guard",
       "source": "./plugins/prod-db-guard",
       "description": "Asks before destructive SQL runs in a command: TRUNCATE, DELETE or UPDATE with no WHERE.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -260,7 +260,7 @@
       "name": "path-jail",
       "source": "./plugins/path-jail",
       "description": "Asks before Write, Edit or NotebookEdit changes a file outside the working directory, by real path.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -270,7 +270,7 @@
       "name": "guard-pack",
       "source": "./plugins/guard-pack",
       "description": "Every Baselane guard in one mod.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -280,7 +280,7 @@
       "name": "auto-format",
       "source": "./plugins/auto-format",
       "description": "Runs your project's own formatter on each file Claude writes or edits, only when the project has a formatter config, and tells Claude to re-read the file.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -290,7 +290,7 @@
       "name": "long-run-notify",
       "source": "./plugins/long-run-notify",
       "description": "Sends a phone push through ntfy.sh when a Bash command ran longer than a threshold (60 seconds by default). Sends the project name and the seconds only. Does nothing until you set an ntfy topic.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -300,7 +300,7 @@
       "name": "ntfy-notify",
       "source": "./plugins/ntfy-notify",
       "description": "Sends a phone push through ntfy.sh when Claude Code needs your input. The message is generic. Does nothing until you set an ntfy topic.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -310,7 +310,7 @@
       "name": "session-journal",
       "source": "./plugins/session-journal",
       "description": "Appends one line per session end (time, directory, reason) to ~/.claude/journal.log.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -320,7 +320,7 @@
       "name": "lifecycle-pack",
       "source": "./plugins/lifecycle-pack",
       "description": "Every Baselane lifecycle mod in one: auto-format, long-run and input pushes, and the session journal.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -330,7 +330,7 @@
       "name": "test-reminder",
       "source": "./plugins/test-reminder",
       "description": "Reminds you at turn end when source files changed but no test command ran since.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -340,7 +340,7 @@
       "name": "ctx-nudge",
       "source": "./plugins/ctx-nudge",
       "description": "Reminds you to /clear or /compact when the context window passes 75 percent.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -350,7 +350,7 @@
       "name": "nudge-pack",
       "source": "./plugins/nudge-pack",
       "description": "Every Baselane turn-end reminder in one mod.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -360,7 +360,7 @@
       "name": "agent-firewall",
       "source": "./plugins/agent-firewall",
       "description": "A live pane of every tool call the agent makes: green when it ran, red when it was blocked, with counters. Open it with /firewall.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -370,7 +370,7 @@
       "name": "terse-mode",
       "source": "./plugins/terse-mode",
       "description": "Short answers: no preamble, no recap.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -380,7 +380,7 @@
       "name": "plain-english",
       "source": "./plugins/plain-english",
       "description": "Writes in ASD-STE-100 Simplified Technical English: short sentences, active voice, simple words.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -390,7 +390,7 @@
       "name": "junior-mode",
       "source": "./plugins/junior-mode",
       "description": "Explains each step and why, and defines jargon once, for a learner.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -400,7 +400,7 @@
       "name": "reply-language",
       "source": "./plugins/reply-language",
       "description": "Answers in the language you set (English by default). Code, identifiers and commands stay as they are.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -410,7 +410,7 @@
       "name": "no-sycophancy",
       "source": "./plugins/no-sycophancy",
       "description": "No flattery or filler. Disagreement is stated plainly, with the reason.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -420,7 +420,7 @@
       "name": "no-em-dash",
       "source": "./plugins/no-em-dash",
       "description": "Never writes the em-dash character. Uses a comma, colon, period or parentheses.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"
@@ -430,7 +430,7 @@
       "name": "pirate-mode",
       "source": "./plugins/pirate-mode",
       "description": "Talks like a pirate in prose, never inside code, commands or file contents.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Baselane",
         "url": "https://baselane.sh"

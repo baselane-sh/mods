@@ -1,6 +1,6 @@
 {
   "name": "band-pack",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Every Baselane band meter in one row above the prompt: session cost, lattes, context bar and today's spend.",
   "author": {
     "name": "Baselane",

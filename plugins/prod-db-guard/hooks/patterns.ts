@@ -17,6 +17,8 @@ const SECRET_VALUE_SOURCES = [
   '[sr]k_live_[0-9a-zA-Z]{20,}',
   'eyJ[A-Za-z0-9_-]{10,}\\.eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}',
   '(postgres(ql)?|mysql|mongodb(\\+srv)?|redis|amqp|mssql)://[^:/@\\s]+:[^@\\s]+@',
+  // Any other URL with a user and a password, such as git+https://user:token@host.
+  '[a-z][a-z0-9+.-]*://[^:/@\\s]+:[^/@\\s]+@',
   'npm_[A-Za-z0-9]{36}',
   'SG\\.[A-Za-z0-9_-]{22}\\.[A-Za-z0-9_-]{43}',
   'SK[0-9a-fA-F]{32}',

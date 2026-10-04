@@ -64,6 +64,9 @@ export type LifecycleRule = {
 }
 
 const PUSH_TIMEOUT_MS = 5000
+// The Notification types that wait for the person. Others (auth_success and
+// the like) need no input, so they send nothing.
+const NEEDS_INPUT = new Set(['permission_prompt', 'idle_prompt', 'elicitation_dialog'])
 // A desktop notification or a spoken line must not hold up the session long.
 const NOTIFY_TIMEOUT_MS = 10_000
 
@@ -129,6 +132,7 @@ export const registerLifecycle = (on: On, rules: readonly LifecycleRule[], optio
 
   if (has(rule => rule.onNeedsInput)) {
     on('classic.Notification', async ($, e, next) => {
+      if (!NEEDS_INPUT.has(e.notification_type)) return next(e)
       const tools: NotifyTools = {
         post: (url, headers, body) =>
           push(

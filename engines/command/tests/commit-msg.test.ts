@@ -65,6 +65,12 @@ test('commit-msg: manifests and lockfiles are build', async ($, on) => {
   expect(subject(session.copied()[0] ?? '')).toBe('build: update 2 files')
 })
 
+test('commit-msg: a requirements file is build, not docs', async ($, on) => {
+  const session = probe($, on, staged(['M\trequirements.txt']))
+  await session.run('commit-msg')
+  expect(subject(session.copied()[0] ?? '')).toBe('build: update requirements.txt')
+})
+
 test('commit-msg: source in several folders has no scope', async ($, on) => {
   const session = probe($, on, staged(['M\tsrc/a.ts', 'M\tlib/b.ts']))
   await session.run('commit-msg')

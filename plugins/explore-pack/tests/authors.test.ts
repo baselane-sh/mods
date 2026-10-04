@@ -81,10 +81,20 @@ test('authors: outside a git repo it says so', async ($, on) => {
   expect(session.copied()).toEqual([])
 })
 
-test('authors: output cut at the cap is reported, not half read', async ($, on) => {
+// A history too long to read in full still gives the counts, with no dates.
+test('authors: a date log cut at the cap still lists counts, dates unknown', async ($, on) => {
   const session = probe($, on, { ...repo(SHORT, DATES), truncated: [LOG] })
   const text = await session.run('authors')
-  expect(text).toMatch(/^authors: failed, git log output passed the 4 MiB cap/)
+  expect(text).toContain('Contributors by commits: 3 people, 50 commits')
+  expect(text).toContain('42 commits  Ada Lovelace  (last unknown)')
+  expect(text).not.toContain('2026-09-12')
+  expect(session.copied().length).toBe(1)
+})
+
+test('authors: a shortlog cut at the cap is reported, not half read', async ($, on) => {
+  const session = probe($, on, { ...repo(SHORT, DATES), truncated: [SHORTLOG] })
+  const text = await session.run('authors')
+  expect(text).toMatch(/^authors: failed, git shortlog output passed the 4 MiB cap/)
   expect(session.copied()).toEqual([])
 })
 

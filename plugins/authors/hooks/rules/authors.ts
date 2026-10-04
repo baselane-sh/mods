@@ -34,7 +34,10 @@ const compose = async (_record: unknown, _facts: unknown, tools: CommandTools): 
     .filter((author): author is Author => author !== undefined)
   if (authors.length === 0) return message('No commits yet.')
 
-  const dates = lastDates(await tools.git('log', '--no-merges', '--format=%aN%x09%as'))
+  // On a very long history the date log can pass the output cap; the counts
+  // still print, with unknown dates.
+  const log = await tools.git('log', '--no-merges', '--format=%aN%x09%as').catch(() => undefined)
+  const dates = lastDates(log)
   const total = authors.reduce((sum, author) => sum + author.commits, 0)
   const rest = authors.length - TOP
   return finish(

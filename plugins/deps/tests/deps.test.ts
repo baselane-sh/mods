@@ -198,3 +198,30 @@ test('deps: never uses the network, and the text has no em-dashes', async ($, on
   expect(session.written()).toEqual({})
   expect(session.ran().every(c => c.startsWith('git -C /repo rev-parse'))).toBe(true)
 })
+
+test('deps: a credential inside a dependency URL is redacted', async ($, on) => {
+  // Spliced so this file does not match the shape it carries.
+  const npm = JSON.stringify({ dependencies: { lib: 'git+' + 'https://gitlab-ci-token:' + 'glpatSECRET1@gitlab.com/org/lib.git', react: '^18.2.0' } })
+  const pip = 'pkg @ ' + 'https://oauth2:' + 'pipSECRET2@host.example/pkg.tar.gz\nflask==1'
+  const session = probe($, on, at({ 'package.json': npm, 'requirements.txt': pip }))
+  const text = await session.run('deps')
+  const all = text + session.copied().join('')
+  expect(all).not.toContain('glpatSECRET1')
+  expect(all).not.toContain('pipSECRET2')
+  expect(text).toContain('[REDACTED]gitlab.com/org/lib.git')
+  expect(text).toContain('react  ^18.2.0')
+})
+
+test('deps: a dependency URL with no credential is shown as is', async ($, on) => {
+  const npm = JSON.stringify({ dependencies: { lib: 'git+https://github.com/org/lib.git#v1' } })
+  const session = probe($, on, at({ 'package.json': npm }))
+  expect(await session.run('deps')).toContain('lib  git+https://github.com/org/lib.git#v1')
+})
+
+test('deps: a comment line inside a go.mod require block is not a dependency', async ($, on) => {
+  const gomod = ['module x', '', 'require (', '\t// pinned for CVE-2024-1234', '\tgithub.com/a/b v1.2.3', ')'].join('\n')
+  const session = probe($, on, at({ 'go.mod': gomod }))
+  const text = await session.run('deps')
+  expect(text).toContain(['go.mod (1)', '  github.com/a/b  v1.2.3'].join('\n'))
+  expect(text).not.toContain('pinned')
+})

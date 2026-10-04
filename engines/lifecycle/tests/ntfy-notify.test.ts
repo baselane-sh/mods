@@ -33,3 +33,9 @@ test('ntfy-notify: a refused push does not break the notification', { options: {
   await session.needsInput()
   expect(session.fetched().length).toBe(1)
 })
+
+test('ntfy-notify: a notification that waits for nobody (auth_success) pushes nothing', { options: { ntfyTopic: 't-123' } }, async ($, on) => {
+  const session = probe($, on)
+  await session.needsInput('/work/myproj', 'auth_success')
+  expect(session.fetched()).toEqual([])
+})

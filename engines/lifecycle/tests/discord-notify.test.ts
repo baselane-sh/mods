@@ -56,3 +56,18 @@ test('discord-notify: a refused post is logged and the notification goes on', { 
   await session.needsInput()
   expect(session.logs()).toEqual(['discord-notify: skipped, the push was refused (HTTP 500)'])
 })
+
+const CANARY_HOOK = 'https://canary.discord.com/api/webhooks/123/tok-abc'
+const PTB_HOOK = 'https://ptb.discord.com/api/webhooks/123/tok-abc'
+
+test('discord-notify: a webhook from the Canary client is accepted', { options: { discordWebhookUrl: CANARY_HOOK } }, async ($, on) => {
+  const session = probe($, on)
+  await session.needsInput('/work/myproj')
+  expect(session.fetched()[0]?.url).toBe(CANARY_HOOK)
+})
+
+test('discord-notify: a webhook from the PTB client is accepted', { options: { discordWebhookUrl: PTB_HOOK } }, async ($, on) => {
+  const session = probe($, on)
+  await session.needsInput('/work/myproj')
+  expect(session.fetched()[0]?.url).toBe(PTB_HOOK)
+})

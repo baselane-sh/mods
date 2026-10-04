@@ -59,3 +59,9 @@ test('desktop-notify: sends nothing over the network', async ($, on) => {
   await session.needsInput()
   expect(session.fetched()).toEqual([])
 })
+
+test('desktop-notify: a notification that waits for nobody (auth_success) shows nothing', async ($, on) => {
+  const session = probe($, on, { uname: 'Darwin' })
+  await session.needsInput('/work/myproj', 'auth_success')
+  expect(programs(session.started())).toEqual([])
+})

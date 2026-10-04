@@ -267,6 +267,16 @@
       }
     },
     {
+      "name": "guard-essentials",
+      "source": "./plugins/guard-essentials",
+      "description": "Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. The quiet choice for daily work.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "guard-pack",
       "source": "./plugins/guard-pack",
       "description": "Every Baselane guard in one mod.",

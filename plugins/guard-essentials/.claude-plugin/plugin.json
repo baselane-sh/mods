@@ -1,0 +1,10 @@
+{
+  "name": "guard-essentials",
+  "version": "0.2.0",
+  "description": "Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. The quiet choice for daily work.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

@@ -77,6 +77,11 @@
       "rules": ["path-jail"]
     },
     {
+      "name": "guard-essentials",
+      "description": "Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. The quiet choice for daily work.",
+      "rules": ["infra", "prod-db", "curl-pipe", "sudo", "env-exfil", "secret-value", "secret-commit", "secret-output"]
+    },
+    {
       "name": "guard-pack",
       "description": "Every Baselane guard in one mod.",
       "rules": ["secret-filename", "secret-value", "env-exfil", "infra", "secret-commit", "protect-main", "gitignore", "secret-output", "curl-pipe", "sudo", "no-verify", "lockfile", "new-package", "prod-db", "path-jail"]

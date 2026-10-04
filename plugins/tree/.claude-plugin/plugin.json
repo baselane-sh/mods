@@ -1,0 +1,11 @@
+{
+  "name": "tree",
+  "version": "0.2.0",
+  "description": "Adds /tree: tracked files as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

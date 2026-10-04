@@ -1,0 +1,11 @@
+{
+  "name": "explore-pack",
+  "version": "0.2.0",
+  "description": "Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

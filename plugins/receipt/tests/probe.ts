@@ -24,6 +24,8 @@ export type Fakes = {
   truncated?: readonly string[]
   // Files that already exist, by path.
   files?: readonly string[]
+  // Files fs.read can read, by path: the text. A path that is absent is missing.
+  contents?: Readonly<Record<string, string>>
   // Every fs.write rejects.
   writeFails?: boolean
   turns?: number
@@ -112,6 +114,11 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
     return { value: result }
   })
   on('fs.exists', (_$, e) => ({ value: (fakes.files ?? []).includes(e.path) || e.path in written }))
+  on('fs.read', (_$, e) => {
+    const text = fakes.contents?.[e.path]
+    if (text === undefined) throw new Error(`ENOENT: ${e.path}`)
+    return { value: text }
+  })
   on('fs.write', (_$, e) => {
     if (fakes.writeFails === true) throw new Error('disk full')
     written = { ...written, [e.path]: e.text }

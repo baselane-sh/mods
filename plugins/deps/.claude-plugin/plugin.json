@@ -1,0 +1,11 @@
+{
+  "name": "deps",
+  "version": "0.2.0",
+  "description": "Adds /deps: direct dependencies with versions from package.json, pyproject.toml, requirements.txt, go.mod and Cargo.toml at the repo root. No network, no audit. Read-only.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

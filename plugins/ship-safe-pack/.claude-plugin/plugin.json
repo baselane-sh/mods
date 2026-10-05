@@ -1,0 +1,10 @@
+{
+  "name": "ship-safe-pack",
+  "version": "0.3.0",
+  "description": "The release-pack guards plus db-reset-guard and upload-guard: asks before publish, tag push, production deploy, registry push, database wipes and file uploads.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

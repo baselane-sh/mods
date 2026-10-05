@@ -1,0 +1,10 @@
+{
+  "name": "release-pack",
+  "version": "0.3.0",
+  "description": "Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

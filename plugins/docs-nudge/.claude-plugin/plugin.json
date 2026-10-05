@@ -1,6 +1,6 @@
 {
   "name": "docs-nudge",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "At turn end, one toast when edits added exported code (an export statement in .ts or .js, or a public function signature) and no README or docs file was edited this session.",
   "author": {
     "name": "Baselane",

@@ -1,0 +1,6 @@
+{
+  "engine": "sound",
+  "mods": [
+    { "name": "bead-chime", "description": "Plays a short chime when a Bash call that ran bd close (or bd done) ends with exit code 0. It reads only the command text and the result, and runs no program.", "rules": ["bead-chime"] }
+  ]
+}

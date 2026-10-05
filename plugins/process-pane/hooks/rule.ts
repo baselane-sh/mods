@@ -38,10 +38,13 @@ export type PaneSpec = {
 // finished tool call and answers new lines, or undefined to keep the old.
 // `turns` has the engine measure each turn's cost and load after each turn.
 // `files` has the engine keep the files Read, Edit and Write touched.
+// `minGapMs` spaces the loads wider than the engine's one second, for a
+// program that is slow or costly to run.
 export type PaneRule = {
   id: string
   pane: PaneSpec
   everyMs?: number
+  minGapMs?: number
   turns?: boolean
   files?: boolean
   refreshAfter?: (e: ToolCallEnvelope) => boolean

@@ -60,7 +60,7 @@ export const watchCallsWithRun = (on: On, rules: readonly BandRule[]): void => {
         git: () => read($, git),
         set: (id, value) => storeFetched(change => update($, fetched, change), id, value),
         log: text => $.ui.log(text),
-      })
+      }, e.tool === 'Bash' ? { tool: e.tool, command: e.command } : { tool: e.tool })
     }
     return ran
   })

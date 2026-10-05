@@ -6,6 +6,8 @@
   "types": "types/index.d.ts",
   "nameToken": "pane-mods",
   "needs": {
+    "beads-pane": ["run"],
+    "epics-pane": ["run"],
     "git-pane": ["run"],
     "port-watch": ["run"],
     "process-pane": ["run"],

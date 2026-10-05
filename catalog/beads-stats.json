@@ -1,0 +1,6 @@
+{
+  "engine": "stats",
+  "mods": [
+    { "name": "bead-streak", "description": "Counts the days in a row you closed a bead, from Bash calls that ran bd close and exited 0. Adds /bead-streak and a toast on a new best. Reads command text only, runs no program.", "rules": ["bead-streak"] }
+  ]
+}

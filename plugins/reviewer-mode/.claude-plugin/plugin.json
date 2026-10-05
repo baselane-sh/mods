@@ -1,6 +1,6 @@
 {
   "name": "reviewer-mode",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "After each code change, reviews its own diff like a strict senior reviewer and lists each issue it found and fixed.",
   "author": {
     "name": "Baselane",

@@ -1,6 +1,6 @@
 {
   "name": "auto-format",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Runs your project's own formatter on each file Claude writes or edits, only when the project has a formatter config, and tells Claude to re-read the file.",
   "author": {
     "name": "Baselane",

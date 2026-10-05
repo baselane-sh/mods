@@ -10,7 +10,8 @@
     "discord-notify": ["input-push"],
     "desktop-notify": ["input-run"],
     "say-done": ["turn-run"],
-    "session-journal": ["journal"]
+    "session-journal": ["journal"],
+    "bead-stale-nudge": ["start-run"]
   },
   "hosts": {
     "tool": [
@@ -25,6 +26,9 @@
     ],
     "turn": [
       { "file": "hooks/hosts/turn-run.ts", "export": "turnEndWithRun", "gives": ["turn-run"], "options": true }
+    ],
+    "start": [
+      { "file": "hooks/hosts/start-run.ts", "export": "startSessionWithRun", "gives": ["start-run"] }
     ],
     "end": [
       { "file": "hooks/hosts/journal.ts", "export": "sessionEndWithJournal", "gives": ["journal"], "options": true }

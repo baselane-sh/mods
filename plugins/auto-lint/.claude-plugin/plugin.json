@@ -1,6 +1,6 @@
 {
   "name": "auto-lint",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits, only when the project has that linter's config, and tells Claude what is left.",
   "author": {
     "name": "Baselane",

@@ -26,9 +26,13 @@ const FACTS: PromptComposeInput = {
 
 // Stands in for the engine beneath the style rules: it composes `existing`,
 // and the plugin answers on top of that list.
-export const compose = async ($: Engine, on: OnFn, existing: readonly PromptComposeSection[] = ENGINE_SECTIONS) => {
+// `times` composes that often against the one session and gives the last
+// answer, for a rule that keeps something between composes.
+export const compose = async ($: Engine, on: OnFn, existing: readonly PromptComposeSection[] = ENGINE_SECTIONS, times = 1) => {
   on('prompt.compose', () => ({ sections: existing }))
-  return (await $.prompt.compose(FACTS)).sections
+  let sections = existing
+  for (let i = 0; i < times; i += 1) sections = (await $.prompt.compose(FACTS)).sections
+  return sections
 }
 
 // The section a rule added, found by id, so a test holds in a pack where

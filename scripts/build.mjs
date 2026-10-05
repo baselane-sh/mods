@@ -13,7 +13,7 @@ import { dirname, join } from 'node:path'
 const ROOT = new URL('..', import.meta.url).pathname
 const AUTHOR = { name: 'Baselane', url: 'https://baselane.sh' }
 const MARKER = '.generated'
-const VERSION = '0.4.0'
+const VERSION = '0.5.0'
 const LICENSE = 'MIT'
 
 const camel = id => id.replace(/-(\w)/g, (_, c) => c.toUpperCase())

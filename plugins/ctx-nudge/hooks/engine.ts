@@ -1,4 +1,4 @@
-import type { ModelCompleteRequest, ModelCompleteResult, PluginOptions, ToolCallEnvelope, ToolCallResult } from 'claude-code'
+import type { ModelCompleteRequest, ModelCompleteResult, PluginOptions, ProcessRunResult, ToolCallEnvelope, ToolCallResult } from 'claude-code'
 
 // What a nudge may read when the turn stops. The engine forbids passing `$`
 // itself, so it hands over these functions instead.
@@ -13,11 +13,16 @@ export type NudgeTools = {
   // One model call. It resolves with `isAnswered: false` instead of throwing
   // when the model gives no text, so a nudge checks that before it speaks.
   complete: (request: ModelCompleteRequest) => Promise<ModelCompleteResult>
+  // Runs a program (argv only, no shell) in `cwd`, with a time limit. It
+  // rejects when the program is missing or runs too long.
+  run: (argv: readonly string[], cwd: string) => Promise<ProcessRunResult>
 }
+
+export const RUN_TIMEOUT_MS = 10_000
 
 // One nudge: it may watch each tool call once the tool answered, and when
 // the turn stops it may name a one-line reminder for the person. The engine
-// shows each reminder as a toast; the model never reads it. `options` are the
+// shows each reminder as a toast. The model reads it only when the mod's host keeps it as a note for the next prompt (the bead nudges do; see PendingNotes). `options` are the
 // plugin's userConfig values, empty for a mod that declares none. `cwd` is
 // the session cwd ('' when the host gave none), for `repoPath`.
 export type Nudge = {
@@ -49,6 +54,27 @@ export const NO_TOOLS: NudgeTools = {
   sessionStartedAt: absent('sessionStartedAt'),
   envExampleNames: absent('envExampleNames'),
   complete: absent('complete'),
+  run: absent('run'),
+}
+
+// Reminders waiting for the person's next prompt, so Claude reads them too.
+// Made once per mod and shared by the turn-end host and the prompt host. A
+// note is fixed text, a count or an id that matched the id pattern, never a
+// title or commit text.
+export type PendingNotes = { add: (note: string) => void; take: () => readonly string[] }
+
+export const createNotes = (): PendingNotes => {
+  let pending: readonly string[] = []
+  return {
+    add: note => {
+      pending = [...pending, note]
+    },
+    take: () => {
+      const taken = pending
+      pending = []
+      return taken
+    },
+  }
 }
 
 // Hands each finished tool call to the nudges that watch them. `log` closes
@@ -77,13 +103,18 @@ export const remindAll = async (
   options: PluginOptions,
   toast: (text: string) => unknown,
   log: (text: string) => unknown,
-): Promise<void> => {
+): Promise<readonly string[]> => {
+  let reminders: readonly string[] = []
   for (const nudge of nudges) {
     try {
       const reminder = await nudge.atStop(tools, options)
-      if (reminder !== undefined) await toast(`${nudge.id}: ${reminder}`)
+      if (reminder !== undefined) {
+        await toast(`${nudge.id}: ${reminder}`)
+        reminders = [...reminders, reminder]
+      }
     } catch (error) {
       await log(failed(nudge.id, error))
     }
   }
+  return reminders
 }

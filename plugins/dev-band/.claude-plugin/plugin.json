@@ -1,6 +1,6 @@
 {
   "name": "dev-band",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "The developer band in one row above the prompt: git branch and changed files (read with git status), wall clock and session age, tool counts, and failed tool calls.",
   "author": {
     "name": "Baselane",

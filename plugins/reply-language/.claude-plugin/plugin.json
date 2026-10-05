@@ -1,6 +1,6 @@
 {
   "name": "reply-language",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Answers in the language you set (English by default). Code, identifiers and commands stay as they are.",
   "author": {
     "name": "Baselane",

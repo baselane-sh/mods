@@ -1,6 +1,6 @@
 {
   "name": "context-pane",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A live side pane of how full the context window is: the percent as a bar, the tokens used, and a short tip past 75 percent. Open it with /context-pane.",
   "author": {
     "name": "Baselane",

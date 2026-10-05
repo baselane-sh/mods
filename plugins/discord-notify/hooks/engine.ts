@@ -12,6 +12,13 @@ export type RunTools = {
 
 export type NotifyTools = PushTools & RunTools
 
+// What a rule at the session's start may use: a program run in the session's
+// folder, and a toast for the person.
+export type StartTools = {
+  run: (argv: readonly string[], cwd: string) => Promise<ProcessRunResult>
+  toast: (text: string) => unknown
+}
+
 export type ToolTools = PushTools & {
   cwd: () => Promise<string>
   root: () => Promise<string>
@@ -59,6 +66,7 @@ export type LifecycleRule = {
   id: string
   afterTool?: (run: ToolRun, tools: ToolTools, settings: Settings) => Promise<string | undefined>
   onNeedsInput?: (e: { cwd: string }, tools: NotifyTools, settings: Settings) => Promise<void>
+  onSessionStart?: (e: { cwd: string }, tools: StartTools) => Promise<void>
   onTurnEnd?: (e: TurnEnd, tools: RunTools, settings: Settings) => Promise<void>
   onSessionEnd?: (e: { cwd: string; reason: string }, tools: JournalTools, settings: Settings) => Promise<void>
 }
@@ -70,6 +78,8 @@ const NEEDS_INPUT = new Set(['permission_prompt', 'idle_prompt', 'elicitation_di
 // A desktop notification or a spoken line must not hold up the session long.
 export const NOTIFY_TIMEOUT_MS = 10_000
 export const RUN_TIMEOUT_MS = 30_000
+// A read of bd at the session start must not hold anything up for long.
+export const START_RUN_TIMEOUT_MS = 10_000
 
 type Log = (text: string) => unknown
 
@@ -150,6 +160,10 @@ export const needsInput = async (
 ): Promise<void> => {
   if (!NEEDS_INPUT.has(e.notification_type)) return
   for (const rule of rules) await guarded(rule.id, log, async () => rule.onNeedsInput?.(e, tools, settings))
+}
+
+export const sessionStart = async (rules: readonly LifecycleRule[], tools: StartTools, log: Log, e: { cwd: string }): Promise<void> => {
+  for (const rule of rules) await guarded(rule.id, log, async () => rule.onSessionStart?.(e, tools))
 }
 
 export const turnEnd = async (rules: readonly LifecycleRule[], settings: Settings, tools: RunTools, log: Log, end: TurnEnd): Promise<void> => {

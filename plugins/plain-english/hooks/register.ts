@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerStyles } from './engine'
+import { addStaticSections } from './hosts/static'
 import { rule as plainEnglish } from './rules/plain-english'
 
-export const register: Register = (on, options) => registerStyles(on, [plainEnglish], options)
+export const register: Register = (on, options) => {
+  const rules = [plainEnglish]
+  addStaticSections(on, rules, options)
+}

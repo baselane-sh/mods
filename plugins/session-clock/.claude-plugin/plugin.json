@@ -1,6 +1,6 @@
 {
   "name": "session-clock",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A band above the prompt with the wall clock and how long the session has run (14:05 · 1h 12m).",
   "author": {
     "name": "Baselane",

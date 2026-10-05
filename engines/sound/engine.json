@@ -2,7 +2,8 @@
   "tests": [
     "probe.ts",
     "suite.ts",
-    "engine.test.ts"
+    "engine.test.ts",
+    "bead.test.ts"
   ],
   "register": "registerSounds",
   "ruleExport": "rule",
@@ -120,6 +121,51 @@
         "description": "Turn off the sound that plays when a turn finishes. Test and blocked-call sounds stay on.",
         "default": false
       }
+    },
+    "bead-chime": {
+      "volume": {
+        "type": "number",
+        "title": "Volume",
+        "description": "Playback gain for every sound: 1 is the file as recorded, 0 is silent, 2 is twice as loud.",
+        "default": 1,
+        "min": 0,
+        "max": 2
+      }
     }
+  },
+  "needs": {
+    "retro": [
+      "turn"
+    ],
+    "office": [
+      "turn"
+    ],
+    "scifi": [
+      "turn"
+    ],
+    "nature": [
+      "turn"
+    ],
+    "minimal": [
+      "turn"
+    ],
+    "zen": [
+      "turn"
+    ],
+    "arcade": [
+      "turn"
+    ]
+  },
+  "hosts": {
+    "turn": [
+      {
+        "file": "hooks/hosts/turn.ts",
+        "export": "playOnTurnEnd",
+        "gives": [
+          "turn"
+        ],
+        "options": true
+      }
+    ]
   }
 }

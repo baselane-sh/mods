@@ -1,6 +1,6 @@
 {
   "name": "hotspots",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Adds /hotspots: the 10 files changed most often in the last 90 days, from git log, with change counts. Read-only.",
   "author": {
     "name": "Baselane",

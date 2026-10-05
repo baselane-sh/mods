@@ -1,6 +1,6 @@
 {
   "name": "upload-guard",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Asks before local files go to a remote host: scp or rsync to host:path, piped input to nc, curl -T, sftp put. Local copies, downloads and localhost pass.",
   "author": {
     "name": "Baselane",

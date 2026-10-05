@@ -1,0 +1,106 @@
+import { expect, test } from 'claude-code/testing'
+
+import { beadsDangersIn } from '../hooks/rules/beads'
+import { probe } from './probe'
+
+const HITS: ReadonlyArray<readonly [string, string]> = [
+  ['bd delete bm-1', 'bd delete'],
+  ['bd delete bm-1 bm-2 --force', 'bd delete'],
+  ['bd purge', 'bd purge'],
+  ['bd prune --older-than 90d', 'bd prune'],
+  ['bd flatten', 'bd flatten'],
+  ['bd compact', 'bd compact'],
+  ['bd gc --force', 'bd gc'],
+  ['bd rename-prefix xy', 'bd rename-prefix'],
+  ['bd sql "select 1"', 'bd sql'],
+  ['bd admin reset', 'bd admin'],
+  ['bd admin cleanup --force', 'bd admin'],
+  ['bd init --force', 'bd init --force'],
+  ['bd dolt push --force', 'bd dolt push --force'],
+  ['bd dolt push --remote origin --force', 'bd dolt push --force'],
+  ['bd duplicates --auto-merge', 'bd duplicates --auto-merge'],
+  ['bd vc merge feature-x', 'bd vc merge'],
+  ['bd import issues.jsonl', 'bd import'],
+  ['bd forget some-key', 'bd forget'],
+  ['bd rename bm-a bm-b', 'bd rename'],
+  ['bd backup restore', 'bd backup restore'],
+  ['bd backup restore /path', 'bd backup restore'],
+  ['bd mol burn mol-1', 'bd mol burn'],
+  ['bd kv clear mykey', 'bd kv clear'],
+  ['bd dolt clean-databases', 'bd dolt clean-databases'],
+  ['bd migrate issues --from a --to b', 'bd migrate issues'],
+  ['bd migrate schema', 'bd migrate schema'],
+  ['bd migrate sync main', 'bd migrate sync'],
+  ['bd migrate hooks --apply', 'bd migrate hooks --apply'],
+  ['bd -C /repo delete bm-1', 'bd delete'],
+  ['bd --db x.db --json delete bm-1', 'bd delete'],
+  ['bd --actor bot --json purge', 'bd purge'],
+  ['bd --directory /repo gc', 'bd gc'],
+  ['/opt/homebrew/bin/bd delete bm-1', 'bd delete'],
+  ['cd x && bd delete y', 'bd delete'],
+  ['bd list; bd purge', 'bd purge'],
+  ['sudo bd delete bm-1', 'bd delete'],
+  ['BEADS_DIR=/r/.beads bd delete bm-1', 'bd delete'],
+  ['env BEADS_DIR=/r bd delete bm-1', 'bd delete'],
+  ['bash -c "bd delete bm-1"', 'bd delete'],
+  ['bd list --json | xargs bd delete', 'bd delete'],
+]
+const MISSES = [
+  'bd list --json',
+  'bd show bm-1 --json',
+  'bd ready',
+  'bd status --json',
+  'bd count --status open --json',
+  'bd stale --days 7',
+  'bd create "x"',
+  'bd update bm-1 --claim',
+  'bd close bm-1',
+  'bd init',
+  'bd dolt push',
+  'bd dolt status',
+  'bd duplicates',
+  'bd duplicates --dry-run',
+  'bd vc status',
+  'bd delete --help',
+  'bd delete -h',
+  'bd purge --help',
+  'bd admin --help',
+  'bd sql -h',
+  'bd backup restore --help',
+  'bd import --help',
+  'bd backup status',
+  'bd backup sync',
+  'bd backup init /x',
+  'bd mol show x',
+  'bd mol pour x',
+  'bd kv get k',
+  'bd kv list',
+  'bd kv set k v',
+  'bd migrate',
+  'bd migrate hooks --dry-run',
+  'bd compact --dry-run',
+  'bd memories',
+  'bd remember x',
+  'bd vc commit -m x',
+  'bd delete bm-1 --dry-run',
+  'bd purge --dry-run',
+  'bd -C /repo list --json',
+  'bd',
+  'echo "bd delete bm-1"',
+  "echo 'bd purge'",
+  'grep "bd sql" notes.md',
+  'cat <<EOF\nbd delete bm-1\nEOF',
+  'git commit -m "bd delete is next"',
+  'docker delete x',
+]
+
+test('beads-guard: command table', () => {
+  for (const [command, name] of HITS) expect({ command, found: beadsDangersIn(command) }).toEqual({ command, found: [name] })
+  for (const command of MISSES) expect({ command, found: beadsDangersIn(command) }).toEqual({ command, found: [] })
+})
+
+test('beads-guard: asks through the engine and passes the traps', async ($, on) => {
+  const guard = probe($, on)
+  for (const [command] of HITS) expect({ command, answered: await guard.answered(command) }).toEqual({ command, answered: true })
+  for (const command of MISSES) expect({ command, answered: await guard.answered(command) }).toEqual({ command, answered: false })
+})

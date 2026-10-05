@@ -22,6 +22,9 @@ test('pane engine: a load waits out the rest of a second since the last one', ()
   expect(waitBeforeLoad(5_000, 5_400)).toBe(600)
   expect(waitBeforeLoad(5_000, 6_000)).toBe(0)
   expect(waitBeforeLoad(5_000, 9_000)).toBe(0)
+  // A rule's longer gap.
+  expect(waitBeforeLoad(5_000, 9_000, 10_000)).toBe(6_000)
+  expect(waitBeforeLoad(5_000, 15_000, 10_000)).toBe(0)
 })
 
 test('pane engine: control characters and color codes are cleaned out of drawn text', () => {

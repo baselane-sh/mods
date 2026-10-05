@@ -1,6 +1,6 @@
 {
   "name": "git-history-guard",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Asks before git commands that throw away work or rewrite history: reset --hard, clean, rebase, filter-branch, filter-repo, push --delete, branch -D and stash clear.",
   "author": {
     "name": "Baselane",

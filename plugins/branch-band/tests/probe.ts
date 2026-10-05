@@ -56,6 +56,16 @@ const SAMPLE_REPLIES: Readonly<Record<string, CommandReply>> = {
   osascript: { stdout: 'Song - Artist\n' },
   gh: { stdout: '[{"status":"completed","conclusion":"success"}]' },
   'git grep': { stdout: 'a.ts:2\n' },
+  // The beads tracker, by its read command.
+  bd: argv => {
+    const words = argv.filter(arg => arg !== '--json').slice(1).join(' ')
+    if (words === 'status') return { stdout: '{"summary":{"total_issues":10,"closed_issues":7,"in_progress_issues":1,"blocked_issues":1,"ready_issues":2}}' }
+    if (words.startsWith('list ')) return { stdout: '[{"id":"bd-1.2","title":"Draw the band","updated_at":"2026-10-04T09:00:00Z","parent":"bd-1"}]' }
+    if (words === 'epic status') return { stdout: '[{"epic":{"id":"bd-1","status":"open"},"total_children":4,"closed_children":3}]' }
+    if (words.startsWith('count --by-priority')) return { stdout: JSON.stringify({ groups: [{ group: 'P1', count: words.includes('closed') ? 1 : 3 }] }) }
+    if (words.startsWith('count ')) return { stdout: '{"count":2}' }
+    return { exitCode: 1 }
+  },
 }
 
 // What a turn spent on the prompt cache, as the API reports it.
@@ -132,6 +142,8 @@ export const probe = (
   on: OnFn,
   start: Reading = {},
   store: Readonly<Record<string, unknown>> = {},
+  // The clock at the start, in milliseconds.
+  at: number = NOON,
 ): BandProbe => {
   let now: Reading = start
   let isBroken = false
@@ -152,7 +164,7 @@ export const probe = (
   let reads: Record<string, number> = {}
   let modelReads = 0
 
-  const clock = mock.clock(on, { now: NOON })
+  const clock = mock.clock(on, { now: at })
   // The kit's mock.store answers the same four calls from memory, but only
   // one hook may answer each event, and these tests read the writes back.
   let kept: Record<string, unknown> = { ...store }

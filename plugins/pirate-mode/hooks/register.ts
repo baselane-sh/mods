@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerStyles } from './engine'
+import { addStaticSections } from './hosts/static'
 import { rule as pirateMode } from './rules/pirate-mode'
 
-export const register: Register = (on, options) => registerStyles(on, [pirateMode], options)
+export const register: Register = (on, options) => {
+  const rules = [pirateMode]
+  addStaticSections(on, rules, options)
+}

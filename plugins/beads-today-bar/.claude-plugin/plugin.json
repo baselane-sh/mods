@@ -1,0 +1,21 @@
+{
+  "name": "beads-today-bar",
+  "version": "0.5.0",
+  "description": "A band above the prompt with the beads closed today against a daily goal you set (today ▮▮▮▯▯ 3/5), green when met, read with bd count. Hidden without bd or a beads project.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "dailyGoal": {
+      "type": "number",
+      "title": "Daily bead goal",
+      "description": "How many beads you aim to close each day, 1 to 50. The today bar turns green when the beads closed today reach it.",
+      "default": 5,
+      "min": 1,
+      "max": 50
+    }
+  },
+  "types": "./types/index.d.ts"
+}

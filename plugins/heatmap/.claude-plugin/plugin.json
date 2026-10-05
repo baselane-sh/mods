@@ -1,6 +1,6 @@
 {
   "name": "heatmap",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Adds /heatmap: a 12-week calendar grid of the days you used Claude Code, like a contribution graph, shaded by turns, naming your busiest day.",
   "author": {
     "name": "Baselane",

@@ -1,0 +1,15 @@
+{
+  "engine": "pane",
+  "mods": [
+    {
+      "name": "beads-pane",
+      "description": "A live side pane of your beads: in progress, ready and blocked issues, 10 each, with counts. Read with bd, read-only, after Bash calls. Open it with /beads.",
+      "rules": ["beads-pane"]
+    },
+    {
+      "name": "epics-pane",
+      "description": "A live side pane of each open beads epic: a bar of closed and total children, and a mark when it is ready to close. Read with bd, read-only. Open it with /epics.",
+      "rules": ["epics-pane"]
+    }
+  ]
+}

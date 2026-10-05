@@ -1,0 +1,12 @@
+{
+  "engine": "guard",
+  "mods": [
+    {
+      "name": "beads-guard",
+      "description": "Asks before bd commands that delete data or rewrite history: delete, purge, prune, gc, sql, admin, import, rename, forget, restore, migrate and more. Reads only the command text, runs no bd.",
+      "rules": [
+        "beads"
+      ]
+    }
+  ]
+}

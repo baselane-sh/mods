@@ -1,6 +1,7 @@
 {
   "tests": ["probe.ts", "engine.test.ts"],
   "ruleExport": "create",
+  "shared": "createNotes",
   "needs": {
     "test-reminder": ["observe"],
     "clippy": ["observe"],
@@ -15,16 +16,22 @@
     "migration-nudge": ["observe"],
     "env-example-nudge": ["observe", "env"],
     "ctx-nudge": ["usage"],
-    "break-nudge": ["usage", "clock"]
+    "break-nudge": ["usage", "clock"],
+    "bead-claim-nudge": ["observe", "run", "notes"],
+    "bead-commit-nudge": ["observe", "run", "notes"]
   },
   "hosts": {
     "observe": [
       { "file": "hooks/hosts/observe.ts", "export": "observeCalls", "gives": ["observe"] }
     ],
+    "prompt": [
+      { "file": "hooks/hosts/prompt-notes.ts", "export": "notePrompts", "gives": ["notes"], "shared": true }
+    ],
     "stop": [
       { "file": "hooks/hosts/stop.ts", "export": "remindAtStop", "gives": [] },
       { "file": "hooks/hosts/stop-usage.ts", "export": "remindWithUsage", "gives": ["usage"] },
       { "file": "hooks/hosts/stop-usage-clock.ts", "export": "remindWithUsageAndClock", "gives": ["usage", "clock"] },
+      { "file": "hooks/hosts/stop-run.ts", "export": "remindWithRun", "gives": ["run"], "shared": true },
       { "file": "hooks/hosts/stop-env.ts", "export": "remindWithEnvNames", "gives": ["env"] },
       { "file": "hooks/hosts/stop-model.ts", "export": "remindWithModel", "gives": ["model"], "options": true }
     ]

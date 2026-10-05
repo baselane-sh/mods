@@ -1,0 +1,26 @@
+{
+  "engine": "command",
+  "mods": [
+    {
+      "name": "ready",
+      "description": "Adds /ready: the 20 top ready beads, one line each, and the total. Read with bd, the beads tracker. Read-only. Prints only, copies nothing.",
+      "rules": [
+        "ready"
+      ]
+    },
+    {
+      "name": "bead",
+      "description": "Adds /bead <id>: one bead with status, priority, labels, description, blockers and children. Read with bd, the beads tracker. Read-only. Prints only, copies nothing.",
+      "rules": [
+        "bead"
+      ]
+    },
+    {
+      "name": "beads-standup",
+      "description": "Adds /beads-standup: beads closed since yesterday, in progress, and the next 5 ready. Read with bd, the beads tracker. Read-only. Prints only, copies nothing.",
+      "rules": [
+        "beads-standup"
+      ]
+    }
+  ]
+}

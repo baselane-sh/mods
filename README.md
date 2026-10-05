@@ -85,7 +85,7 @@ MIT. Copyright (c) 2026 Baselane, LLC. Read [LICENSE](LICENSE).
 
 <!-- catalog:start -->
 
-**130 mods** in 10 families.
+**140 mods** in 10 families.
 
 "needs setup" means the mod has options that you set with `claude plugin configure <mod>`. Its description tells you if it works before you set them. "pack" means one mod with several rules.
 
@@ -145,7 +145,7 @@ One quiet toast at turn end when something needs your attention.
 | `focus-pack` | Three quiet nudges in one mod: commit after 8 edits, TODO/FIXME/HACK lines added, and debug prints added. |  | pack |
 | `quality-pack` | Three quiet nudges in one mod: type check after TypeScript edits, lockfile after dependency edits, and a split suggestion past 500 changed lines. |  | pack |
 
-### Commands (18)
+### Commands (28)
 
 Slash commands that print a result and, where it helps, copy it.
 
@@ -166,9 +166,19 @@ Slash commands that print a result and, where it helps, copy it.
 | `authors` | Adds /authors: the top 15 contributors by commit count with their last commit date. Names only, never email addresses. Read-only. | `/authors` |  |
 | `scripts` | Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts. Read-only. | `/scripts` |  |
 | `env-check` | Adds /env-check: variable names in .env.example against .env, listing missing and extra names. Reads names only, never a value. Read-only. | `/env-check` |  |
+| `size` | Adds /size: the 15 largest tracked files and the total tracked size at HEAD. Read-only. | `/size` |  |
+| `licenses` | Adds /licenses: the licence of each direct dependency, from node_modules and Python dist-info. Shows unknown when it cannot tell. Read-only. | `/licenses` |  |
+| `conflicts` | Adds /conflicts: tracked files that still hold merge conflict markers, with line numbers. Read-only. | `/conflicts` |  |
+| `secret-scan` | Adds /secret-scan: tracked files and line numbers that hold secret-shaped text. Never prints a matched value. Read-only. | `/secret-scan` |  |
+| `envinfo` | Adds /envinfo: versions of git, node, npm, python3, go, rustc and docker if installed (2 s limit each), and the OS. Read-only. | `/envinfo` |  |
+| `stashes` | Adds /stashes: git stashes with their age and the branch each was made on. Read-only, never applies or drops. | `/stashes` |  |
+| `recent` | Adds /recent: your last 15 commits across all local branches (author is git user.name), with branch and date. Read-only. | `/recent` |  |
+| `file-owners` | Adds /owners <path>: the top 5 authors of a file or folder by lines, from git blame. Names only, never addresses. Read-only. | `/owners` |  |
+| `readme-check` | Adds /readme-check: which common README sections are missing (install, usage, licence, contributing) and which relative links are broken. Read-only. | `/readme-check` |  |
 | `command-pack` | Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. | `/receipt`, `/standup`, `/changelog`, `/pr-description`, `/handoff` | pack |
 | `repo-pack` | Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. | `/todos`, `/loc`, `/hotspots`, `/commit-msg`, `/branches` | pack |
 | `explore-pack` | Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. | `/tree`, `/deps`, `/authors`, `/scripts`, `/env-check` | pack |
+| `audit-pack` | Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. | `/secret-scan`, `/conflicts`, `/licenses` | pack |
 
 ### Band meters (13)
 

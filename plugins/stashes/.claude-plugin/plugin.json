@@ -1,0 +1,11 @@
+{
+  "name": "stashes",
+  "version": "0.3.0",
+  "description": "Adds /stashes: git stashes with their age and the branch each was made on. Read-only, never applies or drops.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

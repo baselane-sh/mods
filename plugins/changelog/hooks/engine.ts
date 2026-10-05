@@ -1,5 +1,5 @@
 import { atom, read, update } from 'claude-code'
-import type { On } from 'claude-code'
+import type { On, ProcessRunResult } from 'claude-code'
 
 import type { CommandRecord } from '../types'
 import { draw } from './render'
@@ -29,7 +29,19 @@ export type CommandTools = {
   read: (path: string) => Promise<string | undefined>
   // Creates the file and its directories.
   write: (path: string, text: string) => Promise<void>
+  // `git -C <cwd> <args>` with the exit code kept, for a command that must tell
+  // "no match" (1) from a real failure. Never throws.
+  gitRun: (...args: string[]) => Promise<Ran>
+  // Any program, killed after `timeoutMs`. Never throws: a program that is not
+  // installed answers a non-zero code.
+  run: (argv: readonly string[], timeoutMs: number) => Promise<Ran>
+  // The entries of a directory, or undefined when it is missing or unreadable.
+  list: (path: string) => Promise<{ name: string; isDir: boolean }[] | undefined>
 }
+
+// What a program answered. `timedOut` and `truncated` (output past the 4 MiB
+// cap) are set when stdout cannot be trusted as complete.
+export type Ran = { code: number; stdout: string; stderr: string; timedOut: boolean; truncated: boolean }
 
 // What a rule answers: text to print and copy, or `{ text, copy: false }` for
 // a message that is not a result (an error must not replace the clipboard).
@@ -40,7 +52,8 @@ export type Composed = string | { text: string; copy: false }
 export type CommandRule = {
   name: string
   description: string
-  compose: (record: CommandRecord, facts: Facts, tools: CommandTools) => Composed | Promise<Composed>
+  // `args` is what the person typed after the command name, trimmed.
+  compose: (record: CommandRecord, facts: Facts, tools: CommandTools, args: string) => Composed | Promise<Composed>
 }
 
 const GIT_TIMEOUT_MS = 15_000
@@ -56,6 +69,22 @@ const attempt = async <T>(read: () => Promise<T>): Promise<T | undefined> => {
     return await read()
   } catch {
     return undefined
+  }
+}
+
+// Takes a closure over `$.process.run`, never `$` itself. The host rejects both
+// for a program that cannot start and for one still running at the timeout, and
+// the message does not say which, so a rejection that took nearly the whole
+// timeout counts as a timeout.
+const exec = async (start: () => Promise<ProcessRunResult>, timeoutMs: number, now: () => Promise<number>): Promise<Ran> => {
+  const began = await now()
+  try {
+    const ran = await start()
+    return { code: ran.exitCode, stdout: ran.stdout, stderr: ran.stderr, timedOut: false, truncated: ran.isStdoutTruncated }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    const slow = (await now()) - began >= timeoutMs * 0.9
+    return { code: -1, stdout: '', stderr: '', timedOut: slow || /time/i.test(message), truncated: false }
   }
 }
 
@@ -84,7 +113,7 @@ export const registerCommands = (on: On, rules: readonly CommandRule[]): void =>
   })
 
   for (const rule of rules) {
-    on('command.run', { command: rule.name }, async $ => {
+    on('command.run', { command: rule.name }, async ($, event) => {
       const usage = await attempt(() => $.session.usage())
       const turns = await attempt(() => $.session.turns())
       const now = await attempt(() => $.clock.now())
@@ -108,11 +137,23 @@ export const registerCommands = (on: On, rules: readonly CommandRule[]): void =>
         exists: path => $.fs.exists(path),
         read: path => attempt(() => $.fs.read(path)),
         write: (path, text) => $.fs.write(path, text),
+        gitRun: async (...args) => {
+          const dir = await $.session.cwd()
+          return exec(() => $.process.run(['git', '-C', dir, ...args], { cwd: dir, timeoutMs: GIT_TIMEOUT_MS }), GIT_TIMEOUT_MS, () => $.clock.now())
+        },
+        run: async (argv, timeoutMs) => {
+          const dir = await $.session.cwd()
+          return exec(() => $.process.run(argv, { cwd: dir, timeoutMs }), timeoutMs, () => $.clock.now())
+        },
+        list: async path => {
+          const entries = await attempt(() => $.fs.list(path))
+          return entries?.map(entry => ({ name: entry.name, isDir: entry.kind === 'dir' }))
+        },
       }
 
       let composed: Composed
       try {
-        composed = await rule.compose(kept ?? EMPTY, facts, tools)
+        composed = await rule.compose(kept ?? EMPTY, facts, tools, (event.args ?? '').trim())
       } catch (error) {
         return { text: `${rule.name}: failed, ${error instanceof Error ? error.message : String(error)}` }
       }

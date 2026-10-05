@@ -317,6 +317,106 @@
       }
     },
     {
+      "name": "size",
+      "source": "./plugins/size",
+      "description": "Adds /size: the 15 largest tracked files and the total tracked size at HEAD. Read-only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "licenses",
+      "source": "./plugins/licenses",
+      "description": "Adds /licenses: the licence of each direct dependency, from node_modules and Python dist-info. Shows unknown when it cannot tell. Read-only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "conflicts",
+      "source": "./plugins/conflicts",
+      "description": "Adds /conflicts: tracked files that still hold merge conflict markers, with line numbers. Read-only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "secret-scan",
+      "source": "./plugins/secret-scan",
+      "description": "Adds /secret-scan: tracked files and line numbers that hold secret-shaped text. Never prints a matched value. Read-only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "envinfo",
+      "source": "./plugins/envinfo",
+      "description": "Adds /envinfo: versions of git, node, npm, python3, go, rustc and docker if installed (2 s limit each), and the OS. Read-only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "stashes",
+      "source": "./plugins/stashes",
+      "description": "Adds /stashes: git stashes with their age and the branch each was made on. Read-only, never applies or drops.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "recent",
+      "source": "./plugins/recent",
+      "description": "Adds /recent: your last 15 commits across all local branches (author is git user.name), with branch and date. Read-only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "file-owners",
+      "source": "./plugins/file-owners",
+      "description": "Adds /owners <path>: the top 5 authors of a file or folder by lines, from git blame. Names only, never addresses. Read-only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "readme-check",
+      "source": "./plugins/readme-check",
+      "description": "Adds /readme-check: which common README sections are missing (install, usage, licence, contributing) and which relative links are broken. Read-only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "audit-pack",
+      "source": "./plugins/audit-pack",
+      "description": "Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "secret-filename-guard",
       "source": "./plugins/secret-filename-guard",
       "description": "Asks before a Bash command touches a secret-looking file (.env, private keys, credentials).",

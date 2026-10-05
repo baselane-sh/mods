@@ -41,7 +41,7 @@ The catalog below marks each pack with "pack".
 ## Safety
 
 - **Guards ask. They do not block.** A guard stops a harsh command and asks you first. You decide. If a guard check fails, it asks you. It does not let the call through without a question.
-- **Your data stays on your machine.** No mod sends data out unless you set a destination yourself, such as an ntfy topic for `ntfy-notify` or `long-run-notify`, or a webhook URL for `slack-notify` or `discord-notify`. With a destination set, those mods send a short message only: a generic "needs input" text with the project folder name, or the project name and the seconds.
+- **Your data stays on your machine.** No mod sends data out unless you set a destination yourself, such as an ntfy topic for `ntfy-notify` or `long-run-notify`, or a webhook URL for `slack-notify` or `discord-notify`. With a destination set, those mods send a short message only: a generic "needs input" text with the project folder name, or the project name and the seconds. One exception needs no setup: `ci-band` and `ops-band` ask GitHub, through your own gh login, for the latest Actions run of your branch every 2 minutes, sending the repository and branch name. Without gh, or with gh not logged in, they do nothing.
 - **One mod can make a model call, and it is off by default.** `sports-narrator` makes one small model call at the end of a turn that used tools. It sends tool names, file names and the first two words of each shell command, never file contents. It spends tokens, so you must turn it on.
 - **Display mods do not change what Claude reads.** The mods in "Display and render" change only how rows and replies look on your screen. Other families can add text for Claude: prompt styles change how Claude writes, `secret-output-guard` tells Claude not to repeat a credential, and `auto-format` and `auto-lint` tell Claude to read a file again.
 - **Stats stay local.** Streaks, achievements and `/wrapped` read records that the mods keep on your machine.
@@ -50,7 +50,7 @@ The catalog below marks each pack with "pack".
 ## Requirements
 
 - Claude Code 2.1.288 or later, with mods (the plugin function-hook API, in early access). Read the [Claude Code mods docs](https://code.claude.com/docs/en/plugins/mods/overview).
-- Some mods use local tools: git for the git pane, the git band and most commands, and `lsof` for `port-watch` (macOS and most Linux).
+- Some mods use local tools: git for the git pane, the git band and most commands, `lsof` for `port-watch`, `gh` for `ci-band`, `ps` for `process-pane`, and on macOS `pmset` for `battery-band` and `pgrep` with `osascript` for `now-playing`.
 - To build from source: Node.js.
 
 ## Build and check from source
@@ -126,7 +126,7 @@ Ask you before a harsh or risky command runs.
 | `upload-guard` | Asks before local files go to a remote host: scp or rsync to host:path, piped input to nc, curl -T, sftp put. Local copies, downloads and localhost pass. |  |  |
 | `registry-push-guard` | Asks before an image or chart is pushed to a registry: docker push, docker buildx --push, podman push, helm push, gcloud artifacts docker push. Local registries pass. |  |  |
 | `guard-essentials` | Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. Reads git. The quiet choice for daily work. |  | pack |
-| `guard-pack` | Every Baselane guard in one mod. Some read git, measure files with find, read HOME with printenv, or check where a path really lands. |  | pack |
+| `guard-pack` | The 15 core Baselane guards in one mod (secrets, git, infra, packages, path jail). Some read git, measure files with find, read HOME with printenv, or check where a path really lands. |  | pack |
 | `guard-devops` | Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, broad chmod and chown, and git commands that lose work. Add infra-guard for plain kubectl delete. |  | pack |
 | `release-pack` | Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod. The tag guard reads tags with git. |  | pack |
 | `ship-safe-pack` | The release-pack guards plus db-reset-guard and upload-guard: asks before publish, tag push, production deploy, registry push, database wipes and file uploads. Reads tags with git. |  | pack |
@@ -151,7 +151,7 @@ One quiet toast at turn end when something needs your attention.
 | `big-diff-nudge` | Suggests splitting the change once your edits added or removed more than 500 lines since the last git commit. A successful commit resets the count. |  |  |
 | `migration-nudge` | At turn end, one toast when a schema file changed (schema.prisma, models.py, SQL under schema/, a drizzle schema) and no migration file was created this session. |  |  |
 | `env-example-nudge` | At turn end, one toast when edits add a reference to an environment variable (process.env, os.environ, os.getenv, Deno.env) that .env.example does not list. Reads only .env.example names, never .env. |  |  |
-| `nudge-pack` | Every Baselane turn-end reminder in one mod. |  | pack |
+| `nudge-pack` | Two turn-end reminders in one mod: test-reminder and ctx-nudge. |  | pack |
 | `focus-pack` | Three quiet nudges in one mod: commit after 8 edits, TODO/FIXME/HACK lines added, and debug prints added. |  | pack |
 | `quality-pack` | Three quiet nudges in one mod: type check after TypeScript edits, lockfile after dependency edits, and a split suggestion past 500 changed lines. |  | pack |
 
@@ -185,7 +185,7 @@ Slash commands that print a result and, where it helps, copy it.
 | `recent` | Adds /recent: your last 15 commits across all local branches (author is git user.name), with branch and date. Read-only. | `/recent` |  |
 | `file-owners` | Adds /owners <path>: the top 5 authors of a file or folder by lines, from git blame. Names only, never addresses. Read-only. | `/owners` |  |
 | `readme-check` | Adds /readme-check: which common README sections are missing (install, usage, licence, contributing) and which relative links are broken, at the git repo root. Read-only. | `/readme-check` |  |
-| `command-pack` | Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. They read git; /handoff also writes .claude/handoff.md. | `/receipt`, `/standup`, `/changelog`, `/pr-description`, `/handoff` | pack |
+| `command-pack` | The five original slash commands in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. They read git; /handoff also writes .claude/handoff.md. | `/receipt`, `/standup`, `/changelog`, `/pr-description`, `/handoff` | pack |
 | `repo-pack` | Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. They read git. | `/todos`, `/loc`, `/hotspots`, `/commit-msg`, `/branches` | pack |
 | `explore-pack` | Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. They read git and project files. | `/tree`, `/deps`, `/authors`, `/scripts`, `/env-check` | pack |
 | `audit-pack` | Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. They read git, project files and dependency folders. | `/secret-scan`, `/conflicts`, `/licenses` | pack |
@@ -211,11 +211,11 @@ A one-line band above the prompt.
 | `ahead-behind` | A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), read with git status after each Bash call and file edit. Hidden when the branch has no upstream. |  |  |
 | `battery-band` | A band above the prompt with the Mac battery percent and charging state (🔋 87%, ⚡ 54% while charging), read from pmset once a minute. Hidden on other systems. |  |  |
 | `now-playing` | A band above the prompt with the track Music or Spotify plays on your Mac (♪ Song - Artist), read with pgrep and osascript once a minute, only from a player that runs. Hidden when nothing plays. |  |  |
-| `ci-band` | A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes. Hidden without gh. |  |  |
+| `ci-band` | A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes; branch read with git. Hidden without gh. |  |  |
 | `todo-count` | A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), counted with git after edits. Hidden when there are none. |  |  |
 | `cache-meter` | A band above the prompt with the share of prompt tokens the cache served this session (cache 87%). A high share means cheaper, faster turns. |  |  |
 | `streak-flame` | A band above the prompt with your daily streak, the days in a row you finished a turn (🔥 5d). The mod keeps the count in its own store. |  |  |
-| `band-pack` | Every Baselane band meter in one row above the prompt: session cost, lattes, context bar, today's spend, the focus timer and the mood ring. | `/pomodoro` | needs setup, pack |
+| `band-pack` | The first six Baselane band meters in one row above the prompt: session cost, lattes, context bar, today's spend, the focus timer and the mood ring. | `/pomodoro` | needs setup, pack |
 | `dev-band` | The developer band in one row above the prompt: git branch and changed files (read with git status), wall clock and session age, tool counts, and failed tool calls. |  | pack |
 | `creator-band` | The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines (read with git), and the daily streak flame. |  | pack |
 | `ops-band` | The ops band in one row above the prompt: commits ahead and behind the upstream (git), the latest GitHub Actions run of your branch (gh), and the Mac battery (pmset). |  | pack |
@@ -300,7 +300,7 @@ Local records of how you use Claude Code.
 | `heatmap` | Adds /heatmap: a 12-week calendar grid of the days you used Claude Code, like a contribution graph, shaded by turns, naming your busiest day. | `/heatmap` |  |
 | `langs` | Counts the file types Claude edits across sessions and adds /langs: a bar list of the types edited most, each file counted once per session. | `/langs` |  |
 | `weekly` | Adds /week: this week (since Monday) against last week, with sessions, turns, tool calls, files edited and cost, and the change for each. | `/week` |  |
-| `stats-pack` | Every Baselane stats mod in one: /wrapped, streaks and achievements on one shared daily rollup. | `/wrapped`, `/streak`, `/achievements` | pack |
+| `stats-pack` | The three original stats mods in one: /wrapped, streaks and achievements on one shared daily rollup. | `/wrapped`, `/streak`, `/achievements` | pack |
 
 ### Display and render (12)
 
@@ -318,7 +318,7 @@ Change how rows and replies look on your screen. What Claude reads does not chan
 | `sha-links` | Commit SHAs in Claude's replies, and in the output of git commands, become links to the commit page when origin is on GitHub or GitLab. Display only. |  |  |
 | `issue-links` | #123 references in Claude's replies become links to that issue when the repository's origin is on GitHub or GitLab. Display only. |  |  |
 | `path-shorten` | Tool rows draw long absolute file paths shorter: the project root as ./ and your home folder as ~. Display only; Bash commands are drawn as they ran. |  |  |
-| `render-pack` | Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies (a click puts @path in the prompt). |  | pack |
+| `render-pack` | Both original rendering mods in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies (a click puts @path in the prompt). |  | pack |
 | `render-plus` | Three row badges in one: time-badge, exit-badge and size-badge. |  | pack |
 
 ### Lifecycle and notify (11)
@@ -336,7 +336,7 @@ Act on session events: format files, push a notification, keep a journal.
 | `discord-notify` | Posts to a Discord webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL. |  | needs setup |
 | `say-done` | On macOS, speaks "Claude is done" with the say command when a turn ends after more than 30 seconds. Does nothing on other platforms. |  |  |
 | `auto-lint` | Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits, only when the project has that linter's config, and tells Claude what is left. |  |  |
-| `lifecycle-pack` | Every Baselane lifecycle mod in one: runs your formatter, sends ntfy.sh pushes for long commands and input waits, and appends to ~/.claude/journal.log. |  | needs setup, pack |
+| `lifecycle-pack` | The four original lifecycle mods in one: runs your formatter, sends ntfy.sh pushes for long commands and input waits, and appends to ~/.claude/journal.log. |  | needs setup, pack |
 | `notify-pack` | Local alerts in one: a desktop notification when Claude Code needs your input (osascript or notify-send), and a spoken line (say) on macOS when a long turn ends. |  | pack |
 
 <!-- catalog:end -->

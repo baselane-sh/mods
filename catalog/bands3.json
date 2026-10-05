@@ -23,7 +23,7 @@
     },
     {
       "name": "ci-band",
-      "description": "A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes. Hidden without gh.",
+      "description": "A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes; branch read with git. Hidden without gh.",
       "rules": ["ci-band"]
     },
     {

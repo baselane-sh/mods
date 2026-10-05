@@ -83,7 +83,7 @@
     },
     {
       "name": "guard-pack",
-      "description": "Every Baselane guard in one mod. Some read git, measure files with find, read HOME with printenv, or check where a path really lands.",
+      "description": "The 15 core Baselane guards in one mod (secrets, git, infra, packages, path jail). Some read git, measure files with find, read HOME with printenv, or check where a path really lands.",
       "rules": ["secret-filename", "secret-value", "env-exfil", "infra", "secret-commit", "protect-main", "gitignore", "secret-output", "curl-pipe", "sudo", "no-verify", "lockfile", "new-package", "prod-db", "path-jail"]
     }
   ]

@@ -43,7 +43,7 @@ test('owners: a folder sums its files and keeps only the top 5', async ($, on) =
 })
 
 test('owners: names only, never an address', async ($, on) => {
-  const session = probe($, on, repo({ 'a.ts': 'h 1 1 1\nauthor Eve <eve@example.com>\n\tx\nh 2 2 1\nauthor bob@corp.io\n\ty\n' }, 'a.ts'))
+  const session = probe($, on, repo({ 'a.ts': 'h 1 1 1\nauthor Eve <eve@example.com>\n\tx\nh 2 2 1\nauthor bob@example.com\n\ty\n' }, 'a.ts'))
   const text = await session.run('owners', 'a.ts')
   expect(text + session.copied().join('')).not.toContain('@')
   expect(text).toContain('Eve')

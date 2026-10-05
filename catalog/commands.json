@@ -28,7 +28,7 @@
     },
     {
       "name": "command-pack",
-      "description": "Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. They read git; /handoff also writes .claude/handoff.md.",
+      "description": "The five original slash commands in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. They read git; /handoff also writes .claude/handoff.md.",
       "rules": ["receipt", "standup", "changelog", "pr-description", "handoff"]
     }
   ]

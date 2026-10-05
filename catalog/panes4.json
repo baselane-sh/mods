@@ -1,0 +1,25 @@
+{
+  "engine": "pane",
+  "mods": [
+    {
+      "name": "files-pane",
+      "description": "A live side pane of the files Claude read, edited or wrote this session, grouped by action with a count per file, newest first. Open it with /files.",
+      "rules": ["files-pane"]
+    },
+    {
+      "name": "timeline-pane",
+      "description": "A live side pane of this session's turns, newest first: start time, length, tool calls and cost of each, with a total. Open it with /timeline.",
+      "rules": ["timeline-pane"]
+    },
+    {
+      "name": "context-pane",
+      "description": "A live side pane of how full the context window is: the percent as a bar, the tokens used, and a short tip past 75 percent. Open it with /context-pane.",
+      "rules": ["context-pane"]
+    },
+    {
+      "name": "process-pane",
+      "description": "A live side pane of the processes the session's Bash calls started that still run, with pid, age and command. Read-only: one ps every 5 seconds. Open it with /procs.",
+      "rules": ["process-pane"]
+    }
+  ]
+}

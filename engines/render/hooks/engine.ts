@@ -1,21 +1,39 @@
-import type { ElementTable, FsStat, On, RenderElement, RenderInput, RenderPropsOf } from 'claude-code'
+import type { ElementTable, FsStat, On, RenderElement, RenderInput, RenderPropsOf, SessionRepo } from 'claude-code'
 
 // Which tools a rule draws on: a list of names, or every tool.
 export type ToolSet = readonly string[] | 'all'
 
+// Reads a draw may make, as closures over `$` (a rule never holds `$`).
+// `repo` is the session's git repository, or null outside one.
+export type Reads = {
+  cwd: () => Promise<string>
+  repo: () => Promise<SessionRepo | null>
+}
+
+// A draw may answer at once or after its reads.
+type Drawn = RenderElement | undefined | Promise<RenderElement | undefined>
+
 // What a tool row rule draws from: the row's input, the engine's own drawing
 // of it (`next(e)`), and the surface's elements. `durationMs` is how long the
 // call ran, given to a `timed` rule once the call has ended in this session.
-export type ToolRowDraw = {
+export type ToolRowDraw = Reads & {
   e: RenderInput<'ToolUse'>
   row: RenderElement
   elements: ElementTable
   durationMs?: number
 }
 
+// What a tool row rewrite reads: the row's props, the person's home folder
+// and the session's project root.
+export type ToolRowRewrite = {
+  props: RenderPropsOf['ToolUse']
+  home: () => Promise<string | undefined>
+  root: () => Promise<string>
+}
+
 // What a tool result rule draws from: the result block's input, the engine's
 // drawing of it, and the surface's elements.
-export type ToolResultDraw = {
+export type ToolResultDraw = Reads & {
   e: RenderInput<'ToolResult'>
   row: RenderElement
   elements: ElementTable
@@ -23,29 +41,31 @@ export type ToolResultDraw = {
 
 // What an assistant text rule draws from. `$` never leaves the engine's hook,
 // so the calls a rule needs come as closures over it.
-export type AssistantDraw = {
+export type AssistantDraw = Reads & {
   e: RenderInput<'AssistantMessage'>
   elements: ElementTable
-  cwd: () => Promise<string>
   stat: (path: string) => Promise<FsStat>
   insert: (text: string) => void
 }
 
-// One rendering rule. `toolRow` draws on the ToolUse rows of the named tools;
-// `toolResult` rewrites the props of a result block (`rewrite`) or draws
-// beside it (`draw`); `assistantText` draws an assistant reply's text blocks.
-// A draw or rewrite that answers undefined, or throws, leaves the engine's.
+// One rendering rule. `toolRow` rewrites the props of the ToolUse rows of the
+// named tools (`rewrite`, which changes the row alone) or draws beside them
+// (`draw`); `toolResult` rewrites the props of a result block (`rewrite`) or
+// draws beside it (`draw`); `assistantText` draws an assistant reply's text
+// blocks. A draw or rewrite that answers undefined, or throws, leaves the
+// engine's.
 export type RenderRule = {
   id: string
   toolRow?: {
     tools: ToolSet
     timed?: true
-    draw: (input: ToolRowDraw) => RenderElement | undefined
+    rewrite?: (input: ToolRowRewrite) => Promise<RenderPropsOf['ToolUse'] | undefined>
+    draw?: (input: ToolRowDraw) => Drawn
   }
   toolResult?: {
     tools: ToolSet
     rewrite?: (props: RenderPropsOf['ToolResult']) => RenderPropsOf['ToolResult'] | undefined
-    draw?: (input: ToolResultDraw) => RenderElement | undefined
+    draw?: (input: ToolResultDraw) => Drawn
   }
   assistantText?: {
     draw: (input: AssistantDraw) => Promise<RenderElement | undefined>
@@ -78,15 +98,24 @@ const registerTimer = (on: On): void => {
 }
 
 const registerToolRow = (on: On, id: string, toolRow: NonNullable<RenderRule['toolRow']>): void => {
+  const { rewrite, draw } = toolRow
   // ToolUse carries no ctrl+o flag, so the engine's row is always kept and
   // the rule draws beside it.
   on('ui.render', { component: 'ToolUse' }, async ($, e, next) => {
     if (!covers(toolRow.tools, e.props.tool)) return next(e)
-    const row = await next(e)
+    let props: RenderPropsOf['ToolUse'] | undefined
+    try {
+      props = await rewrite?.({ props: e.props, home: () => $.env.get('HOME'), root: () => $.session.root() })
+    } catch (error) {
+      await $.ui.log(`${id}: drew the engine's props, ${reason(error)}`)
+    }
+    const row = await next(props === undefined ? e : { ...e, props })
+    if (draw === undefined) return row
     try {
       // Read only by a timed rule, so the other rows do not redraw on a write.
       const durationMs = toolRow.timed ? (await $.state.get({ ...DURATIONS, id: e.props.tool_use_id })).value : undefined
-      return toolRow.draw({ e, row, elements: $.ui.resolve(e), durationMs }) ?? row
+      const drawn = await draw({ e, row, elements: $.ui.resolve(e), durationMs, cwd: () => $.session.cwd(), repo: () => $.session.repo() })
+      return drawn ?? row
     } catch (error) {
       await $.ui.log(`${id}: drew the engine's row, ${reason(error)}`)
       return row
@@ -107,7 +136,7 @@ const registerToolResult = (on: On, id: string, toolResult: NonNullable<RenderRu
     const row = await next(props === undefined ? e : { ...e, props })
     if (draw === undefined) return row
     try {
-      return draw({ e, row, elements: $.ui.resolve(e) }) ?? row
+      return (await draw({ e, row, elements: $.ui.resolve(e), cwd: () => $.session.cwd(), repo: () => $.session.repo() })) ?? row
     } catch (error) {
       await $.ui.log(`${id}: drew the engine's result, ${reason(error)}`)
       return row
@@ -122,6 +151,7 @@ const registerAssistantText = (on: On, id: string, assistantText: NonNullable<Re
         e,
         elements: $.ui.resolve(e),
         cwd: () => $.session.cwd(),
+        repo: () => $.session.repo(),
         stat: path => $.fs.stat(path),
         insert: text =>
           void $.prompt

@@ -1,0 +1,11 @@
+{
+  "name": "files-pane",
+  "version": "0.3.0",
+  "description": "A live side pane of the files Claude read, edited or wrote this session, grouped by action with a count per file, newest first. Open it with /files.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

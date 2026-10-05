@@ -1,0 +1,11 @@
+{
+  "name": "heatmap",
+  "version": "0.3.0",
+  "description": "Adds /heatmap: a 12-week calendar grid of the days you used Claude Code, like a contribution graph, shaded by turns, naming your busiest day.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

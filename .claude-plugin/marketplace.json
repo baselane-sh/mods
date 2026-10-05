@@ -1207,6 +1207,46 @@
       }
     },
     {
+      "name": "files-pane",
+      "source": "./plugins/files-pane",
+      "description": "A live side pane of the files Claude read, edited or wrote this session, grouped by action with a count per file, newest first. Open it with /files.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "timeline-pane",
+      "source": "./plugins/timeline-pane",
+      "description": "A live side pane of this session's turns, newest first: start time, length, tool calls and cost of each, with a total. Open it with /timeline.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "context-pane",
+      "source": "./plugins/context-pane",
+      "description": "A live side pane of how full the context window is: the percent as a bar, the tokens used, and a short tip past 75 percent. Open it with /context-pane.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "process-pane",
+      "source": "./plugins/process-pane",
+      "description": "A live side pane of the processes the session's Bash calls started that still run, with pid, age and command. Read-only: one ps every 5 seconds. Open it with /procs.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "diff-stats",
       "source": "./plugins/diff-stats",
       "description": "Edit and Write rows show a compact +12 -3 bar beside the file name: green for lines added, red for lines removed, up to 20 cells.",
@@ -1290,6 +1330,36 @@
       "name": "render-plus",
       "source": "./plugins/render-plus",
       "description": "Three row badges in one: time-badge, exit-badge and size-badge.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "sha-links",
+      "source": "./plugins/sha-links",
+      "description": "Commit SHAs in Claude's replies, and in the output of git commands, become links to the commit page when origin is on GitHub or GitLab. Display only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "issue-links",
+      "source": "./plugins/issue-links",
+      "description": "#123 references in Claude's replies become links to that issue when the repository's origin is on GitHub or GitLab. Display only.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "path-shorten",
+      "source": "./plugins/path-shorten",
+      "description": "Tool rows draw long absolute file paths shorter: the project root as ./ and your home folder as ~. Display only; Bash commands are drawn as they ran.",
       "version": "0.3.0",
       "author": {
         "name": "Baselane",
@@ -1420,6 +1490,36 @@
       "name": "personal-bests",
       "source": "./plugins/personal-bests",
       "description": "Tracks your records across sessions (longest session, most tool calls in a session, most files edited in a day, cheapest session over 30 minutes), toasts a new one, and lists them with /bests.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "heatmap",
+      "source": "./plugins/heatmap",
+      "description": "Adds /heatmap: a 12-week calendar grid of the days you used Claude Code, like a contribution graph, shaded by turns, naming your busiest day.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "langs",
+      "source": "./plugins/langs",
+      "description": "Counts the file types Claude edits across sessions and adds /langs: a bar list of the types edited most, each file counted once per session.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "weekly",
+      "source": "./plugins/weekly",
+      "description": "Adds /week: this week (since Monday) against last week, with sessions, turns, tool calls, files edited and cost, and the change for each.",
       "version": "0.3.0",
       "author": {
         "name": "Baselane",

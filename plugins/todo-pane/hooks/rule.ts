@@ -1,6 +1,6 @@
 import type { ProcessRunResult, SessionUsage, ToolCallEnvelope, ToolCallResult } from 'claude-code'
 
-import type { PaneLine, TurnCost } from '../types'
+import type { FileTouch, PaneLine, TurnCost } from '../types'
 
 // What a rule may ask of the host while it reads the world. The engine hands
 // closures over `$`; `$` itself never comes here.
@@ -11,6 +11,8 @@ export type PaneHost = {
   usage: () => Promise<SessionUsage>
   // The turns measured so far, oldest first (empty unless the rule asks for turns).
   turns: () => Promise<readonly TurnCost[]>
+  // The files touched so far, oldest touch first (empty unless the rule asks for files).
+  files: () => Promise<readonly FileTouch[]>
 }
 
 // A finished tool call, for a rule that reads tool results.
@@ -35,11 +37,13 @@ export type PaneSpec = {
 // `refreshAfter` names, and every `everyMs` while open); `observe` reads a
 // finished tool call and answers new lines, or undefined to keep the old.
 // `turns` has the engine measure each turn's cost and load after each turn.
+// `files` has the engine keep the files Read, Edit and Write touched.
 export type PaneRule = {
   id: string
   pane: PaneSpec
   everyMs?: number
   turns?: boolean
+  files?: boolean
   refreshAfter?: (e: ToolCallEnvelope) => boolean
   load?: (host: PaneHost) => Promise<PaneLine[]>
   observe?: (call: Observed) => PaneLine[] | undefined

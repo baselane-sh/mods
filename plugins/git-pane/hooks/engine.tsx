@@ -1,16 +1,18 @@
 import { atom, read, update } from 'claude-code'
 import type { On, Timer } from 'claude-code'
 
-import type { PaneLine, PaneView, TurnCost } from '../types'
+import type { FileTouch, PaneLine, PaneView, TurnCost } from '../types'
+import { touchFile, touchOf } from './files'
 import { line, redactLines } from './lines'
 import type { PaneHost, PaneRule } from './rule'
-import { endTurn, startTurn } from './turns'
+import { countTool, endTurn, startTurn } from './turns'
 import { paneTree } from './view'
 
 // The build writes the mod's own name in place of the token: `$.state` is
 // written only by the plugin that owns it.
 const views = atom({ plugin: 'git-pane', key: 'views' } as const, {})
 const turns = atom({ plugin: 'git-pane', key: 'turns' } as const, [] as TurnCost[])
+const files = atom({ plugin: 'git-pane', key: 'files' } as const, [] as FileTouch[])
 
 // A pane reads the world at most once a second, however many calls ask.
 const MIN_GAP_MS = 1_000
@@ -111,6 +113,7 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
           cwd: () => $.session.cwd(),
           usage: () => $.session.usage(),
           turns: () => read($, turns),
+          files: () => read($, files),
         },
         now: () => $.clock.now(),
         isOpen: async pane => (await $.ui.panes()).some(open => open.id === pane),
@@ -144,11 +147,19 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
 
   const watchers = rules.filter(rule => rule.observe !== undefined)
   const turnRules = rules.filter(rule => rule.turns === true)
+  const keepsFiles = rules.some(rule => rule.files === true)
 
   on('tool.call', async ($, e, next) => {
     const startedAt = watchers.length > 0 ? await $.clock.now() : 0
     const ran = await next(e)
     try {
+      // Before any refresh below, so a load reads this call too.
+      if (turnRules.length > 0) await update($, turns, countTool)
+      const touch = keepsFiles ? touchOf(e, ran) : undefined
+      if (touch !== undefined) {
+        const at = await $.clock.now()
+        await update($, files, ledger => touchFile(ledger, touch.path, touch.action, at))
+      }
       if (watchers.length > 0) {
         const at = await $.clock.now()
         for (const rule of watchers) {
@@ -172,6 +183,7 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
           cwd: () => $.session.cwd(),
           usage: () => $.session.usage(),
           turns: () => read($, turns),
+          files: () => read($, files),
         },
           now: () => $.clock.now(),
           isOpen: async pane => (await $.ui.panes()).some(open => open.id === pane),
@@ -196,7 +208,8 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
   on('turn.start', async ($, e, next) => {
     try {
       const usd = (await $.session.usage()).cost?.usd
-      await update($, turns, ledger => startTurn(ledger, e.turnId, usd))
+      const at = await $.clock.now()
+      await update($, turns, ledger => startTurn(ledger, e.turnId, usd, at))
     } catch (error) {
       await $.ui.log(`pane: a turn start was not read, ${message(error)}`)
     }
@@ -207,13 +220,15 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
     if (e.agentId !== undefined) return next(e)
     try {
       const usd = (await $.session.usage()).cost?.usd
-      await update($, turns, ledger => endTurn(ledger, e.turnId, usd))
+      const at = await $.clock.now()
+      await update($, turns, ledger => endTurn(ledger, e.turnId, usd, at))
       const live: Live = {
         host: {
           run: argv => $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS }),
           cwd: () => $.session.cwd(),
           usage: () => $.session.usage(),
           turns: () => read($, turns),
+          files: () => read($, files),
         },
         now: () => $.clock.now(),
         isOpen: async pane => (await $.ui.panes()).some(open => open.id === pane),

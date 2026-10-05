@@ -126,3 +126,22 @@ export const workspace = (on: OnFn, files: readonly string[], dirs: readonly str
 // The props of a drawing's root element, or none.
 export const rootProps = (drawn: RenderElement): Record<string, unknown> =>
   'props' in drawn && drawn.props !== undefined ? (drawn.props as Record<string, unknown>) : {}
+
+export type Repo = {
+  // How often `$.session.repo()` was read.
+  reads: () => number
+}
+
+// A session in CWD inside a git repository whose `origin` is `remote` (null:
+// none; undefined: not a repository at all), its project root CWD, and HOME.
+export const repository = (on: OnFn, remote: string | null | undefined, home = '/Users/me'): Repo => {
+  let reads = 0
+  on('session.cwd', () => ({ value: CWD }))
+  on('session.root', () => ({ value: CWD }))
+  on('env.get', (_$, e) => ({ value: e.name === 'HOME' ? home : undefined }))
+  on('session.repo', () => {
+    reads += 1
+    return { value: remote === undefined ? null : { root: CWD, remote, internal: false, name: null } }
+  })
+  return { reads: () => reads }
+}

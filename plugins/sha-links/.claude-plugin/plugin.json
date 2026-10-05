@@ -1,0 +1,11 @@
+{
+  "name": "sha-links",
+  "version": "0.3.0",
+  "description": "Commit SHAs in Claude's replies, and in the output of git commands, become links to the commit page when origin is on GitHub or GitLab. Display only.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

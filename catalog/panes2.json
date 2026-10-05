@@ -3,7 +3,7 @@
   "mods": [
     {
       "name": "git-pane",
-      "description": "A live side pane with the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. It refreshes after git commands and file edits. Open it with /git.",
+      "description": "A live side pane, read with git: the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. Refreshes after git commands and edits. Open it with /git.",
       "rules": ["git-pane"]
     },
     {

@@ -99,9 +99,9 @@ Ask you before a harsh or risky command runs.
 | `secret-guard` | Asks before a live API key, token or private key is written, edited or run. |  |  |
 | `env-exfil-guard` | Asks before a command prints your environment, echoes a secret variable or sends local data to a remote host. |  |  |
 | `infra-guard` | Asks before terraform destroy, kubectl delete, force-push, DROP TABLE or rm -rf. |  |  |
-| `secret-commit-guard` | Asks before a git commit that would record a credential or a secret-named file. |  |  |
-| `protect-main` | Asks before a commit, push or merge while you are on main or master. |  |  |
-| `gitignore-check` | Asks before git add or commit when secret-looking files are not ignored or are already tracked. |  |  |
+| `secret-commit-guard` | Asks before a git commit that would record a credential or a secret-named file. Reads the staged diff with git. |  |  |
+| `protect-main` | Asks before a commit, push or merge while you are on main or master. Reads the branch with git. |  |  |
+| `gitignore-check` | Asks before git add or commit when secret-looking files are not ignored or are already tracked. Checks with git ls-files. |  |  |
 | `secret-output-guard` | Tells Claude not to repeat a credential that showed up in command or file output, and names the source to rotate. |  |  |
 | `curl-pipe-guard` | Asks before a download is piped into a shell or interpreter (curl \| sh, wget -O- \| bash, bash <(curl ...)). |  |  |
 | `sudo-guard` | Asks before sudo, doas or su -c runs a command with elevated rights. |  |  |
@@ -116,20 +116,20 @@ Ask you before a harsh or risky command runs.
 | `ci-config-guard` | Asks before Write or Edit changes CI config: .github/workflows, .gitlab-ci.yml or .circleci/config.yml. |  |  |
 | `chmod-guard` | Asks before chmod makes files world-writable (777, a+w, o+w) or chmod or chown runs recursively on a broad path (/, a system folder, a home folder). |  |  |
 | `git-history-guard` | Asks before git commands that throw away work or rewrite history: reset --hard, clean, rebase, filter-branch, filter-repo, push --delete, branch -D and stash clear. |  |  |
-| `big-file-guard` | Asks before a Write creates content over 1 MB, or git add names a file over 5 MB. |  |  |
+| `big-file-guard` | Asks before a Write creates content over 1 MB, or git add names a file over 5 MB. Measures the files with find. |  |  |
 | `publish-guard` | Asks before a package is published: npm, pnpm, yarn or bun publish, cargo publish, twine upload, gem push, poetry or uv publish. Dry runs pass. |  |  |
-| `tag-guard` | Asks before release tags go to a remote: git push --tags, --follow-tags or --mirror, a push of a tag ref, and a push that deletes a remote tag. Dry runs pass. |  |  |
+| `tag-guard` | Asks before release tags go to a remote: git push --tags, --follow-tags or --mirror, a push of a tag ref, and a push that deletes a remote tag. Dry runs pass. Reads tags with git. |  |  |
 | `deploy-guard` | Asks before a production deploy: vercel --prod, netlify deploy --prod, firebase deploy, fly deploy, gcloud app deploy, eb deploy, heroku rollback, serverless deploy to prod. |  |  |
 | `db-reset-guard` | Asks before a framework wipes a database: prisma migrate reset, rails or rake db:drop and db:reset, alembic downgrade, django flush, supabase db reset, knex rollback --all. |  |  |
-| `ssh-guard` | Asks before a private key in .ssh is read, authorized_keys or the SSH config is changed, or ssh-keygen would overwrite a key. Public keys and ssh -i pass. |  |  |
+| `ssh-guard` | Asks before a private key in .ssh is read, authorized_keys or the SSH config is changed, or ssh-keygen would overwrite a key. Public keys and ssh -i pass. Reads HOME with printenv. |  |  |
 | `cron-guard` | Asks before scheduled jobs or services are wiped or stopped: crontab -r, crontab replaced from stdin or a file, launchctl unload or bootout, systemctl stop, disable or mask. |  |  |
 | `upload-guard` | Asks before local files go to a remote host: scp or rsync to host:path, piped input to nc, curl -T, sftp put. Local copies, downloads and localhost pass. |  |  |
 | `registry-push-guard` | Asks before an image or chart is pushed to a registry: docker push, docker buildx --push, podman push, helm push, gcloud artifacts docker push. Local registries pass. |  |  |
-| `guard-essentials` | Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. The quiet choice for daily work. |  | pack |
-| `guard-pack` | Every Baselane guard in one mod. |  | pack |
+| `guard-essentials` | Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. Reads git. The quiet choice for daily work. |  | pack |
+| `guard-pack` | Every Baselane guard in one mod. Some read git, measure files with find, read HOME with printenv, or check where a path really lands. |  | pack |
 | `guard-devops` | Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, broad chmod and chown, and git commands that lose work. Add infra-guard for plain kubectl delete. |  | pack |
-| `release-pack` | Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod. |  | pack |
-| `ship-safe-pack` | The release-pack guards plus db-reset-guard and upload-guard: asks before publish, tag push, production deploy, registry push, database wipes and file uploads. |  | pack |
+| `release-pack` | Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod. The tag guard reads tags with git. |  | pack |
+| `ship-safe-pack` | The release-pack guards plus db-reset-guard and upload-guard: asks before publish, tag push, production deploy, registry push, database wipes and file uploads. Reads tags with git. |  | pack |
 
 ### Reminders (17)
 
@@ -163,32 +163,32 @@ Slash commands that print a result and, where it helps, copy it.
 | --- | --- | --- | --- |
 | `receipt` | Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied. | `/receipt` |  |
 | `standup` | Adds /standup: Yesterday, Today and Blockers from your git log and this session's record, printed and copied. | `/standup` |  |
-| `changelog` | Adds /changelog: commits since the last tag (or the last 30), grouped by conventional-commit type, as Markdown. | `/changelog` |  |
-| `pr-description` | Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master. | `/pr-description` |  |
-| `handoff` | Adds /handoff: writes a session summary to .claude/handoff.md (never overwriting) and answers with the path. | `/handoff` |  |
-| `todos` | Adds /todos: TODO, FIXME and HACK lines in tracked files, grouped by file (50 lines at most). Read-only. | `/todos` |  |
-| `loc` | Adds /loc: lines of tracked text files by language, sorted, with a total. Skips lockfiles and binaries. Read-only. | `/loc` |  |
-| `hotspots` | Adds /hotspots: the 10 files changed most often in the last 90 days, with change counts. Read-only. | `/hotspots` |  |
-| `commit-msg` | Adds /commit-msg: a Conventional Commits message proposed from the staged diff. Heuristic, no model call, writes nothing. | `/commit-msg` |  |
-| `branches` | Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list. Never deletes. | `/branches` |  |
-| `tree` | Adds /tree: tracked files as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only. | `/tree` |  |
-| `deps` | Adds /deps: direct dependencies with versions from package.json, pyproject.toml, requirements.txt, go.mod and Cargo.toml at the repo root. No network, no audit. Read-only. | `/deps` |  |
-| `authors` | Adds /authors: the top 15 contributors by commit count with their last commit date. Names only, never email addresses. Read-only. | `/authors` |  |
-| `scripts` | Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts. Read-only. | `/scripts` |  |
-| `env-check` | Adds /env-check: variable names in .env.example against .env, listing missing and extra names. Reads names only, never a value. Read-only. | `/env-check` |  |
-| `size` | Adds /size: the 15 largest tracked files and the total tracked size at HEAD. Read-only. | `/size` |  |
-| `licenses` | Adds /licenses: the licence of each direct dependency, from node_modules and Python dist-info. Shows unknown when it cannot tell. Read-only. | `/licenses` |  |
-| `conflicts` | Adds /conflicts: tracked files that still hold merge conflict markers, with line numbers. Read-only. | `/conflicts` |  |
-| `secret-scan` | Adds /secret-scan: tracked files and line numbers that hold secret-shaped text. Never prints a matched value. Read-only. | `/secret-scan` |  |
-| `envinfo` | Adds /envinfo: versions of git, node, npm, python3, go, rustc and docker if installed (2 s limit each), and the OS. Read-only. | `/envinfo` |  |
+| `changelog` | Adds /changelog: commits since the last tag (or the last 30), read with git log and grouped by conventional-commit type, as Markdown. | `/changelog` |  |
+| `pr-description` | Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master, read with git. | `/pr-description` |  |
+| `handoff` | Adds /handoff: writes a session summary with the git status to .claude/handoff.md (never overwriting) and answers with the path. | `/handoff` |  |
+| `todos` | Adds /todos: TODO, FIXME and HACK lines in tracked files, found with git grep, grouped by file (50 lines at most). Read-only. | `/todos` |  |
+| `loc` | Adds /loc: lines of tracked text files by language, read with git, sorted, with a total. Skips lockfiles and binaries. Read-only. | `/loc` |  |
+| `hotspots` | Adds /hotspots: the 10 files changed most often in the last 90 days, from git log, with change counts. Read-only. | `/hotspots` |  |
+| `commit-msg` | Adds /commit-msg: a Conventional Commits message proposed from the staged diff, read with git. Heuristic, no model call, writes nothing. | `/commit-msg` |  |
+| `branches` | Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list, read with git. Never deletes. | `/branches` |  |
+| `tree` | Adds /tree: tracked files (git ls-files) as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only. | `/tree` |  |
+| `deps` | Adds /deps: direct dependencies with versions from package.json, pyproject.toml, requirements.txt, go.mod and Cargo.toml at the git repo root. No network, no audit. Read-only. | `/deps` |  |
+| `authors` | Adds /authors: the top 15 contributors by commit count with their last commit date, from git log. Names only, never email addresses. Read-only. | `/authors` |  |
+| `scripts` | Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts at the git repo root. Read-only. | `/scripts` |  |
+| `env-check` | Adds /env-check: variable names in .env.example against .env at the git repo root, listing missing and extra names. Reads names only, never a value. Read-only. | `/env-check` |  |
+| `size` | Adds /size: the 15 largest tracked files and the total tracked size at HEAD, read with git. Read-only. | `/size` |  |
+| `licenses` | Adds /licenses: the licence of each direct dependency, from node_modules and Python dist-info at the git repo root. Shows unknown when it cannot tell. Read-only. | `/licenses` |  |
+| `conflicts` | Adds /conflicts: tracked files that still hold merge conflict markers, with line numbers, found with git grep. Read-only. | `/conflicts` |  |
+| `secret-scan` | Adds /secret-scan: tracked files and line numbers that hold secret-shaped text, found with git grep. Never prints a matched value. Read-only. | `/secret-scan` |  |
+| `envinfo` | Adds /envinfo: versions of git, node, npm, python3, go, rustc and docker if installed, by running each (2 s limit), and the OS. Read-only. | `/envinfo` |  |
 | `stashes` | Adds /stashes: git stashes with their age and the branch each was made on. Read-only, never applies or drops. | `/stashes` |  |
 | `recent` | Adds /recent: your last 15 commits across all local branches (author is git user.name), with branch and date. Read-only. | `/recent` |  |
 | `file-owners` | Adds /owners <path>: the top 5 authors of a file or folder by lines, from git blame. Names only, never addresses. Read-only. | `/owners` |  |
-| `readme-check` | Adds /readme-check: which common README sections are missing (install, usage, licence, contributing) and which relative links are broken. Read-only. | `/readme-check` |  |
-| `command-pack` | Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. | `/receipt`, `/standup`, `/changelog`, `/pr-description`, `/handoff` | pack |
-| `repo-pack` | Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. | `/todos`, `/loc`, `/hotspots`, `/commit-msg`, `/branches` | pack |
-| `explore-pack` | Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. | `/tree`, `/deps`, `/authors`, `/scripts`, `/env-check` | pack |
-| `audit-pack` | Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. | `/secret-scan`, `/conflicts`, `/licenses` | pack |
+| `readme-check` | Adds /readme-check: which common README sections are missing (install, usage, licence, contributing) and which relative links are broken, at the git repo root. Read-only. | `/readme-check` |  |
+| `command-pack` | Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. They read git; /handoff also writes .claude/handoff.md. | `/receipt`, `/standup`, `/changelog`, `/pr-description`, `/handoff` | pack |
+| `repo-pack` | Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. They read git. | `/todos`, `/loc`, `/hotspots`, `/commit-msg`, `/branches` | pack |
+| `explore-pack` | Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. They read git and project files. | `/tree`, `/deps`, `/authors`, `/scripts`, `/env-check` | pack |
+| `audit-pack` | Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. They read git, project files and dependency folders. | `/secret-scan`, `/conflicts`, `/licenses` | pack |
 
 ### Band meters (23)
 
@@ -203,22 +203,22 @@ A one-line band above the prompt.
 | `pomodoro` | A band above the prompt with a 25/5 focus timer (focus 18:42, break 03:10). Start and stop it with /pomodoro; a toast marks each switch. | `/pomodoro` |  |
 | `mood-ring` | A band above the prompt with a colored dot and a word for the error and block rate of your last 20 tool calls: calm (green) under 10 percent, tense (yellow) under 30, stormy (red) from 30. |  |  |
 | `session-clock` | A band above the prompt with the wall clock and how long the session has run (14:05 · 1h 12m). |  |  |
-| `branch-band` | A band above the prompt with the git branch and the count of changed files, refreshed after each Bash call and file edit. |  |  |
+| `branch-band` | A band above the prompt with the git branch and the count of changed files, read with git status after each Bash call and file edit. |  |  |
 | `tool-counter` | A band above the prompt with your tool calls this session, the top three by tool (Bash 41 · Edit 18 · Read 12). |  |  |
 | `error-meter` | A band above the prompt with how many tool calls failed this session (an error or a deny) and which tool failed last. Red from the first failure. |  |  |
 | `model-badge` | A band above the prompt with the current model name and the context percent (opus-4-1 · 62%). |  |  |
 | `turn-timer` | A band above the prompt with how long the current turn has run (turn 0:42). It shows while a turn runs and hides between turns. |  |  |
-| `ahead-behind` | A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), refreshed after each Bash call and file edit. Hidden when the branch has no upstream. |  |  |
+| `ahead-behind` | A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), read with git status after each Bash call and file edit. Hidden when the branch has no upstream. |  |  |
 | `battery-band` | A band above the prompt with the Mac battery percent and charging state (🔋 87%, ⚡ 54% while charging), read from pmset once a minute. Hidden on other systems. |  |  |
 | `now-playing` | A band above the prompt with the track Music or Spotify plays on your Mac (♪ Song - Artist), asked through osascript once a minute. Hidden when nothing plays. |  |  |
 | `ci-band` | A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes. Hidden without gh. |  |  |
-| `todo-count` | A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), refreshed after edits. Hidden when there are none. |  |  |
+| `todo-count` | A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), counted with git after edits. Hidden when there are none. |  |  |
 | `cache-meter` | A band above the prompt with the share of prompt tokens the cache served this session (cache 87%). A high share means cheaper, faster turns. |  |  |
 | `streak-flame` | A band above the prompt with your daily streak, the days in a row you finished a turn (🔥 5d). The mod keeps the count in its own store. |  |  |
 | `band-pack` | Every Baselane band meter in one row above the prompt: session cost, lattes, context bar, today's spend, the focus timer and the mood ring. | `/pomodoro` | needs setup, pack |
-| `dev-band` | The developer band in one row above the prompt: git branch and changed files, wall clock and session age, tool counts, and failed tool calls. |  | pack |
-| `creator-band` | The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines, and the daily streak flame. |  | pack |
-| `ops-band` | The ops band in one row above the prompt: commits ahead and behind the upstream, the latest GitHub Actions run of your branch, and the Mac battery. |  | pack |
+| `dev-band` | The developer band in one row above the prompt: git branch and changed files (read with git status), wall clock and session age, tool counts, and failed tool calls. |  | pack |
+| `creator-band` | The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines (read with git), and the daily streak flame. |  | pack |
+| `ops-band` | The ops band in one row above the prompt: commits ahead and behind the upstream (git), the latest GitHub Actions run of your branch (gh), and the Mac battery (pmset). |  | pack |
 
 ### Panes (10)
 
@@ -227,7 +227,7 @@ Live side panes that you open with a slash command.
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
 | `agent-firewall` | A live pane of every tool call the agent makes: green when it ran, red when it was blocked, with counters. Open it with /firewall. | `/firewall` |  |
-| `git-pane` | A live side pane with the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. It refreshes after git commands and file edits. Open it with /git. | `/git` |  |
+| `git-pane` | A live side pane, read with git: the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. Refreshes after git commands and edits. Open it with /git. | `/git` |  |
 | `test-pane` | A live side pane with the last test run (vitest, jest, pytest, go test, cargo test, bun test, claude plugin test): runner, pass, fail and skip counts, duration and first failures. Open it with /tests. | `/tests` |  |
 | `port-watch` | A live side pane of the local TCP ports that listen, with the process name and pid, refreshed every 10 seconds while open. Reads lsof (macOS, most Linux). Open it with /ports. | `/ports` |  |
 | `todo-pane` | A live side pane of the TODO, FIXME and HACK lines in tracked files (git grep), grouped by file and capped at 30. It refreshes after file edits while open. Open it with /todo-pane. | `/todo-pane` |  |
@@ -318,7 +318,7 @@ Change how rows and replies look on your screen. What Claude reads does not chan
 | `sha-links` | Commit SHAs in Claude's replies, and in the output of git commands, become links to the commit page when origin is on GitHub or GitLab. Display only. |  |  |
 | `issue-links` | #123 references in Claude's replies become links to that issue when the repository's origin is on GitHub or GitLab. Display only. |  |  |
 | `path-shorten` | Tool rows draw long absolute file paths shorter: the project root as ./ and your home folder as ~. Display only; Bash commands are drawn as they ran. |  |  |
-| `render-pack` | Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies. |  | pack |
+| `render-pack` | Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies (a click puts @path in the prompt). |  | pack |
 | `render-plus` | Three row badges in one: time-badge, exit-badge and size-badge. |  | pack |
 
 ### Lifecycle and notify (11)
@@ -334,9 +334,9 @@ Act on session events: format files, push a notification, keep a journal.
 | `desktop-notify` | Shows a desktop notification when Claude Code needs your input: osascript on macOS, notify-send elsewhere when it is installed. The text is the project name and a short status only. |  |  |
 | `slack-notify` | Posts to a Slack incoming webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL. |  | needs setup |
 | `discord-notify` | Posts to a Discord webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL. |  | needs setup |
-| `say-done` | On macOS, says "Claude is done" when a turn ends after more than 30 seconds. Does nothing on other platforms. |  |  |
+| `say-done` | On macOS, speaks "Claude is done" with the say command when a turn ends after more than 30 seconds. Does nothing on other platforms. |  |  |
 | `auto-lint` | Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits, only when the project has that linter's config, and tells Claude what is left. |  |  |
-| `lifecycle-pack` | Every Baselane lifecycle mod in one: auto-format, long-run and input pushes, and the session journal. |  | needs setup, pack |
-| `notify-pack` | Local alerts in one: a desktop notification when Claude Code needs your input, and a spoken line on macOS when a long turn ends. |  | pack |
+| `lifecycle-pack` | Every Baselane lifecycle mod in one: runs your formatter, sends ntfy.sh pushes for long commands and input waits, and appends to ~/.claude/journal.log. |  | needs setup, pack |
+| `notify-pack` | Local alerts in one: a desktop notification when Claude Code needs your input (osascript or notify-send), and a spoken line (say) on macOS when a long turn ends. |  | pack |
 
 <!-- catalog:end -->

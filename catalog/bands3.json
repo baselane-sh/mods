@@ -8,7 +8,7 @@
     },
     {
       "name": "ahead-behind",
-      "description": "A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), refreshed after each Bash call and file edit. Hidden when the branch has no upstream.",
+      "description": "A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), read with git status after each Bash call and file edit. Hidden when the branch has no upstream.",
       "rules": ["ahead-behind"]
     },
     {
@@ -28,7 +28,7 @@
     },
     {
       "name": "todo-count",
-      "description": "A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), refreshed after edits. Hidden when there are none.",
+      "description": "A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), counted with git after edits. Hidden when there are none.",
       "rules": ["todo-count"]
     },
     {
@@ -43,12 +43,12 @@
     },
     {
       "name": "creator-band",
-      "description": "The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines, and the daily streak flame.",
+      "description": "The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines (read with git), and the daily streak flame.",
       "rules": ["turn-timer", "todo-count", "streak-flame"]
     },
     {
       "name": "ops-band",
-      "description": "The ops band in one row above the prompt: commits ahead and behind the upstream, the latest GitHub Actions run of your branch, and the Mac battery.",
+      "description": "The ops band in one row above the prompt: commits ahead and behind the upstream (git), the latest GitHub Actions run of your branch (gh), and the Mac battery (pmset).",
       "rules": ["ahead-behind", "ci-band", "battery-band"]
     }
   ]

@@ -8,7 +8,7 @@
     },
     {
       "name": "tag-guard",
-      "description": "Asks before release tags go to a remote: git push --tags, --follow-tags or --mirror, a push of a tag ref, and a push that deletes a remote tag. Dry runs pass.",
+      "description": "Asks before release tags go to a remote: git push --tags, --follow-tags or --mirror, a push of a tag ref, and a push that deletes a remote tag. Dry runs pass. Reads tags with git.",
       "rules": ["tag"]
     },
     {
@@ -23,7 +23,7 @@
     },
     {
       "name": "ssh-guard",
-      "description": "Asks before a private key in .ssh is read, authorized_keys or the SSH config is changed, or ssh-keygen would overwrite a key. Public keys and ssh -i pass.",
+      "description": "Asks before a private key in .ssh is read, authorized_keys or the SSH config is changed, or ssh-keygen would overwrite a key. Public keys and ssh -i pass. Reads HOME with printenv.",
       "rules": ["ssh"]
     },
     {
@@ -43,12 +43,12 @@
     },
     {
       "name": "release-pack",
-      "description": "Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod.",
+      "description": "Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod. The tag guard reads tags with git.",
       "rules": ["publish", "tag", "deploy", "registry-push"]
     },
     {
       "name": "ship-safe-pack",
-      "description": "The release-pack guards plus db-reset-guard and upload-guard: asks before publish, tag push, production deploy, registry push, database wipes and file uploads.",
+      "description": "The release-pack guards plus db-reset-guard and upload-guard: asks before publish, tag push, production deploy, registry push, database wipes and file uploads. Reads tags with git.",
       "rules": ["publish", "tag", "deploy", "registry-push", "db-reset", "upload"]
     }
   ]

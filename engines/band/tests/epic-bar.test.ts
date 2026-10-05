@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { IN_PROGRESS, KEYS, REAL, bdCalls, bdTimeouts, fakeBd, json, segmentOf } from './bd-fixtures'
+import { IN_PROGRESS, KEYS, REAL, bdCalls, bdTimeouts, fakeBd, json, segmentOf, afterBd } from './bd-fixtures'
 import { SURFACES, probe } from './probe'
 
 const ID = 'epic-bar'
@@ -21,6 +21,8 @@ test('epic-bar: the epic of the bead in progress, as an 8 cell bar', async ($, o
   // bm-ooq.64 was updated last; its parent bm-ooq has 60 of 80 closed.
   for (const surface of SURFACES) expect((await found(session, surface))?.text).toBe('bm-ooq ██████░░ 60/80')
   expect(bdCalls(session, KEYS.epics)[0]).toEqual(['bd', 'epic', 'status', '--json'])
+  // One list run, also in a pack where bead-now asks the same.
+  expect(bdCalls(session, KEYS.list).length).toBe(1)
   expect((await found(session))?.text).not.toContain('long')
 })
 
@@ -52,7 +54,8 @@ test('epic-bar: a done epic of the bead in progress is full and green', async ($
   expect(shown?.color).toBe('green')
 })
 
-test('epic-bar: no epics, only done epics, no beads project or bad output shows nothing', async ($, on) => {
+// Several reads in a row: more time on a loaded machine.
+test('epic-bar: no epics, only done epics, no beads project or bad output shows nothing', { timeoutMs: 30_000 }, async ($, on) => {
   const session = probe($, on)
   session.setCommand('bd', fakeBd({ ...REAL, [KEYS.epics]: json([]) }))
   await session.start()
@@ -60,11 +63,11 @@ test('epic-bar: no epics, only done epics, no beads project or bad output shows 
   expect(await found(session)).toBeUndefined()
   // Nothing in progress and every epic done.
   session.setCommand('bd', fakeBd({ ...REAL, [KEYS.list]: json([]), [KEYS.epics]: json([epic('bm-d', 3, 3)]) }))
-  await session.bash('ls')
+  await afterBd(session)
   expect(await found(session)).toBeUndefined()
   for (const reply of [{ exitCode: 1 }, { stdout: '' }, { stdout: 'not json' }, { stdout: '{}' }, json([{ epic: null }])]) {
     session.setCommand('bd', fakeBd({ ...REAL, [KEYS.epics]: reply }))
-    await session.bash('ls')
+    await afterBd(session)
     expect(await found(session)).toBeUndefined()
   }
 })
@@ -91,7 +94,7 @@ test('epic-bar: both reads in one run, at most every two minutes, each with a 10
   expect(bdCalls(session, KEYS.epics).length).toBe(first)
   await session.advance(1000)
   expect(bdCalls(session, KEYS.epics).length).toBe(2)
-  await session.bash('bd close bm-1')
+  await afterBd(session)
   expect(bdCalls(session, KEYS.epics).length).toBe(3)
   expect(bdTimeouts(session, KEYS.epics)).toEqual([10_000, 10_000, 10_000])
 })

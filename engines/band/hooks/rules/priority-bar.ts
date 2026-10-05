@@ -1,5 +1,5 @@
 import type { Fetched } from '../../types'
-import { bdJson, isCount, isRecord } from '../beads'
+import { bdJson, isCount, isRecord, ranBd } from '../beads'
 import type { BandRule } from '../rule'
 
 // Always named, so a P0 of 0 says so; a lower priority only when it has beads.
@@ -40,18 +40,19 @@ export const priorityLine = (all: unknown, closed: unknown): Fetched | null => {
 }
 
 // Open beads by priority, read with `bd count --by-priority` every two minutes
-// and after each Bash call or edit. No open beads, no bd or no beads project:
+// and after a Bash call that ran bd. No open beads, no bd or no beads project:
 // hidden.
 export const rule: BandRule = {
   id: 'priority-bar',
   fetch: {
     everyMs: 120_000,
     onEdit: true,
+    onEditWhen: ranBd,
     timeoutMs: 10_000,
-    read: async run => {
-      const all = await bdJson(run, ['count', '--by-priority'])
+    read: async (run, _git, now) => {
+      const all = await bdJson(run, ['count', '--by-priority'], now)
       if (all === null) return null
-      return priorityLine(all, await bdJson(run, ['count', '--by-priority', '--status', 'closed']))
+      return priorityLine(all, await bdJson(run, ['count', '--by-priority', '--status', 'closed'], now))
     },
   },
   segment: ({ fetched }) => {

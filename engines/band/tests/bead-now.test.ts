@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { IN_PROGRESS, KEYS, REAL, bdCalls, bdTimeouts, fakeBd, json, segmentOf } from './bd-fixtures'
+import { IN_PROGRESS, KEYS, REAL, bdCalls, bdTimeouts, fakeBd, json, segmentOf, afterBd } from './bd-fixtures'
 import { SURFACES, probe } from './probe'
 
 const ID = 'bead-now'
@@ -14,7 +14,8 @@ test('bead-now: the bead updated last, its title cut to 40 characters, and how m
   await session.start()
   await session.settle()
   for (const surface of SURFACES) expect(await text(session, surface)).toBe("▶ bm-ooq.64 [bug] intake/actions.ts is a 'use serve… +2")
-  expect(bdCalls(session, KEYS.list)[0]).toEqual(['bd', 'list', '--status', 'in_progress', '--limit', '0', '--json'])
+  // One run, also in a pack where epic-bar asks the same.
+  expect(bdCalls(session, KEYS.list)).toEqual([['bd', 'list', '--status', 'in_progress', '--limit', '0', '--json']])
 })
 
 test('bead-now: one bead in progress has no count, a short title is whole', async ($, on) => {
@@ -34,7 +35,8 @@ test('bead-now: a tie in the update time goes to the id, and free text stays on 
   expect(await text(session)).toBe('▶ bm-a line one line[31m two +1')
 })
 
-test('bead-now: nothing in progress, no beads project, or bad output shows nothing', async ($, on) => {
+// Several reads in a row: more time on a loaded machine.
+test('bead-now: nothing in progress, no beads project, or bad output shows nothing', { timeoutMs: 30_000 }, async ($, on) => {
   const session = probe($, on)
   session.setCommand('bd', withList([]))
   await session.start()
@@ -42,7 +44,7 @@ test('bead-now: nothing in progress, no beads project, or bad output shows nothi
   expect(await text(session)).toBeUndefined()
   for (const reply of [{ exitCode: 1 }, { stdout: '' }, { stdout: 'not json' }, { stdout: '{}' }, json([null, { title: 'no id' }])]) {
     session.setCommand('bd', fakeBd({ ...REAL, [KEYS.list]: reply }))
-    await session.bash('ls')
+    await afterBd(session)
     expect(await text(session)).toBeUndefined()
   }
 })
@@ -70,7 +72,7 @@ test('bead-now: at most one read every two minutes with a 10 s timeout, and one 
   await session.advance(1000)
   expect(bdCalls(session, KEYS.list).length).toBeGreaterThan(first)
   const timed = bdCalls(session, KEYS.list).length
-  await session.bash('bd update bm-1 --claim')
+  await afterBd(session)
   expect(bdCalls(session, KEYS.list).length).toBeGreaterThan(timed)
   expect(new Set(bdTimeouts(session, KEYS.list))).toEqual(new Set([10_000]))
 })

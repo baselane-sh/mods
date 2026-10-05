@@ -1,6 +1,6 @@
 import type { Fetched } from '../../types'
 import { bar, cellsOf } from '../bar'
-import { IN_PROGRESS, bdJson, isCount, isRecord, latestFirst, oneLine } from '../beads'
+import { IN_PROGRESS, bdJson, isCount, isRecord, latestFirst, oneLine, ranBd } from '../beads'
 import type { BandRule } from '../rule'
 
 const CELLS = 8
@@ -41,18 +41,19 @@ export const epicLine = (epic: Epic | null): Fetched | null => {
 }
 
 // One epic's progress, read with `bd epic status` and `bd list --status
-// in_progress` every two minutes and after each Bash call or edit. No epic,
+// in_progress` every two minutes and after a Bash call that ran bd. No epic,
 // no bd or no beads project: hidden.
 export const rule: BandRule = {
   id: 'epic-bar',
   fetch: {
     everyMs: 120_000,
     onEdit: true,
+    onEditWhen: ranBd,
     timeoutMs: 10_000,
-    read: async run => {
-      const epics = await bdJson(run, ['epic', 'status'])
+    read: async (run, _git, now) => {
+      const epics = await bdJson(run, ['epic', 'status'], now)
       if (!Array.isArray(epics) || epics.length === 0) return null
-      return epicLine(pickEpic(epics, await bdJson(run, IN_PROGRESS)))
+      return epicLine(pickEpic(epics, await bdJson(run, IN_PROGRESS, now)))
     },
   },
   segment: ({ fetched }) => {

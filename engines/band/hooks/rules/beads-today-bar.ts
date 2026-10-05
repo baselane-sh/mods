@@ -1,7 +1,7 @@
 import type { PluginOptions } from 'claude-code'
 
 import { bar, cellsOf } from '../bar'
-import { bdJson, isCount, isRecord } from '../beads'
+import { bdJson, isCount, isRecord, ranBd } from '../beads'
 import { localDate } from '../date'
 import type { BandRule } from '../rule'
 
@@ -23,7 +23,7 @@ export const todayLine = (count: number, goal: number): { text: string; color?: 
 }
 
 // Beads closed since local midnight, read with `bd count --closed-after` every
-// two minutes and after each Bash call or edit. bd reads a bare date as local
+// two minutes and after a Bash call that ran bd. bd reads a bare date as local
 // midnight and counts what closed after it. The figure keeps the date it is
 // for, so yesterday's count is not drawn after midnight. No bd or no beads
 // project: hidden.
@@ -32,10 +32,11 @@ export const rule: BandRule = {
   fetch: {
     everyMs: 120_000,
     onEdit: true,
+    onEditWhen: ranBd,
     timeoutMs: 10_000,
     read: async (run, _git, now) => {
       const date = localDate(now)
-      const answer = await bdJson(run, ['count', '--closed-after', date])
+      const answer = await bdJson(run, ['count', '--closed-after', date], now)
       const count = isRecord(answer) ? answer['count'] : undefined
       return isCount(count) ? { text: String(count), tag: date } : null
     },

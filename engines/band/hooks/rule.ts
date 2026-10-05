@@ -84,6 +84,13 @@ export type BandRule = {
   everyMinute?: (reading: Reading) => boolean
 }
 
+// A file-touching tool call that can start an edit run: the tool, and the
+// command text of a Bash call.
+export type EditCall = {
+  tool: string
+  command?: string
+}
+
 // How a rule gets a figure from a command, never in a tool call's way: the
 // engine runs it beside the call, at most one run at a time per rule.
 export type Fetcher = {
@@ -92,6 +99,8 @@ export type Fetcher = {
   everyMs?: number
   // Also run after a tool call that can change files (a Bash call, an edit).
   onEdit?: true
+  // With onEdit, run only after the calls this answers true for.
+  onEditWhen?: (call: EditCall) => boolean
   // A run is killed after this long and its figure is dropped.
   timeoutMs: number
   // `run` takes an argv (no shell). Answer what to draw, null to hide the

@@ -1,5 +1,5 @@
 import type { Fetched } from '../../types'
-import { bdJson, isCount, summaryOf } from '../beads'
+import { bdJson, isCount, ranBd, summaryOf } from '../beads'
 import type { BandRule } from '../rule'
 
 // `bd status --json` as a line: ready always, active and blocked when above 0.
@@ -13,15 +13,16 @@ export const statusLine = (status: unknown): Fetched | null => {
 }
 
 // The beads project's ready, in progress and blocked counts, read with
-// `bd status` every two minutes and after each Bash call or edit. No bd or no
+// `bd status` every two minutes and after a Bash call that ran bd. No bd or no
 // beads project: hidden.
 export const rule: BandRule = {
   id: 'beads-band',
   fetch: {
     everyMs: 120_000,
     onEdit: true,
+    onEditWhen: ranBd,
     timeoutMs: 10_000,
-    read: async run => statusLine(await bdJson(run, ['status'])),
+    read: async (run, _git, now) => statusLine(await bdJson(run, ['status'], now)),
   },
   segment: ({ fetched }) => {
     const found = fetched['beads-band']

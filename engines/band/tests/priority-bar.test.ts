@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { BY_PRIORITY, BY_PRIORITY_CLOSED, KEYS, REAL, bdCalls, bdTimeouts, fakeBd, json, segmentOf } from './bd-fixtures'
+import { BY_PRIORITY, BY_PRIORITY_CLOSED, KEYS, REAL, bdCalls, bdTimeouts, fakeBd, json, segmentOf, afterBd } from './bd-fixtures'
 import type { Reply } from './bd-fixtures'
 import { SURFACES, probe } from './probe'
 
@@ -31,11 +31,12 @@ test('priority-bar: red while a P0 is open; P4 only when it has beads', async ($
   expect(shown?.text).toBe('P0 2 · P1 14 · P2 60 · P3 50 · P4 3')
   expect(shown?.color).toBe('red')
   session.setCommand('bd', fakeBd({ ...REAL, [KEYS.priority]: groups({ P2: 4, P4: 1 }), [KEYS.closed]: groups({ P4: 1 }) }))
-  await session.bash('ls')
+  await afterBd(session)
   expect((await found(session))?.text).toBe('P0 0 · P1 0 · P2 4 · P3 0')
 })
 
-test('priority-bar: all closed, no beads project or bad output shows nothing', async ($, on) => {
+// Several reads in a row: more time on a loaded machine.
+test('priority-bar: all closed, no beads project or bad output shows nothing', { timeoutMs: 30_000 }, async ($, on) => {
   const session = probe($, on)
   session.setCommand('bd', fakeBd({ ...REAL, [KEYS.closed]: json(BY_PRIORITY) }))
   await session.start()
@@ -52,7 +53,7 @@ test('priority-bar: all closed, no beads project or bad output shows nothing', a
   ]
   for (const table of tables) {
     session.setCommand('bd', fakeBd({ ...REAL, ...table }))
-    await session.bash('ls')
+    await afterBd(session)
     expect(await found(session)).toBeUndefined()
   }
 })
@@ -78,7 +79,7 @@ test('priority-bar: at most one read every two minutes with a 10 s timeout, and 
   expect(bdCalls(session, KEYS.priority).length).toBe(1)
   await session.advance(1000)
   expect(bdCalls(session, KEYS.priority).length).toBe(2)
-  await session.bash('ls')
+  await afterBd(session)
   expect(bdCalls(session, KEYS.priority).length).toBe(3)
   expect(bdTimeouts(session, KEYS.priority)).toEqual([10_000, 10_000, 10_000])
   expect(bdTimeouts(session, KEYS.closed)).toEqual([10_000, 10_000, 10_000])

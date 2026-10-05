@@ -3,12 +3,12 @@
   "mods": [
     {
       "name": "beads-band",
-      "description": "A band above the prompt with your beads counts (bd 97 ready · 45 active · 29 blocked), read with bd status every 2 minutes and after Bash calls. Hidden without bd or a beads project.",
+      "description": "A band above the prompt with your beads counts (bd 97 ready · 45 active · 29 blocked), read with bd status every 2 minutes and after Claude runs bd. Hidden without bd or a beads project.",
       "rules": ["beads-band"]
     },
     {
       "name": "bead-now",
-      "description": "A band above the prompt with the bead in progress you updated last and how many more are in progress, read with bd list every 2 minutes and after Bash calls. Hidden when none is.",
+      "description": "A band above the prompt with the bead in progress you updated last and how many more are in progress, read with bd list every 2 minutes and after Claude runs bd. Hidden when none is.",
       "rules": ["bead-now"]
     },
     {
@@ -33,7 +33,7 @@
     },
     {
       "name": "beads-bars",
-      "description": "All six beads bands in one row: counts, the bead in progress, epic progress, done percent, closed today and open by priority, read with bd every 2 minutes and after Bash calls.",
+      "description": "All six beads bands in one row: counts, the bead in progress, epic progress, done percent, closed today and open by priority, read with bd every 2 minutes and after Claude runs bd.",
       "rules": ["beads-band", "bead-now", "epic-bar", "beads-done-bar", "beads-today-bar", "priority-bar"]
     }
   ]

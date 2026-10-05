@@ -1,5 +1,5 @@
 import type { Fetched } from '../../types'
-import { IN_PROGRESS, bdJson, cutTitle, latestFirst } from '../beads'
+import { IN_PROGRESS, bdJson, cutTitle, latestFirst, ranBd } from '../beads'
 import type { BandRule } from '../rule'
 
 // The bead in progress that was updated last, and how many more are in progress.
@@ -12,15 +12,16 @@ export const nowLine = (list: unknown): Fetched | null => {
 }
 
 // The bead you work on, read with `bd list --status in_progress` every two
-// minutes and after each Bash call or edit. Nothing in progress, no bd or no
+// minutes and after a Bash call that ran bd. Nothing in progress, no bd or no
 // beads project: hidden.
 export const rule: BandRule = {
   id: 'bead-now',
   fetch: {
     everyMs: 120_000,
     onEdit: true,
+    onEditWhen: ranBd,
     timeoutMs: 10_000,
-    read: async run => nowLine(await bdJson(run, IN_PROGRESS)),
+    read: async (run, _git, now) => nowLine(await bdJson(run, IN_PROGRESS, now)),
   },
   segment: ({ fetched }) => {
     const found = fetched['bead-now']

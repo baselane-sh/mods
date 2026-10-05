@@ -3,15 +3,46 @@
 // that does not parse: null, and the rule hides.
 import type { ProcessRunResult } from 'claude-code'
 
+import type { EditCall } from './rule'
+
 export type Run = (argv: readonly string[]) => Promise<ProcessRunResult>
+
+// Text in quotes is an argument, never a command.
+const QUOTED = /'[^']*'|"(?:[^"\\]|\\.)*"/g
+// `bd` as a command word: at the start, after a separator (; & | ( or a new
+// line, so also && || and $( ), after NAME=value prefixes, or as a path
+// ending in /bd.
+const BD_WORD = /(?:^|[;&|(\n])\s*(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*(?:\S*\/)?bd(?=$|[\s;&|)])/
+
+// Whether a tool call ran bd, so the beads figures may have moved.
+export const ranBd = (call: EditCall): boolean =>
+  call.tool === 'Bash' && typeof call.command === 'string' && BD_WORD.test(call.command.replace(QUOTED, "''"))
+
+const SHARE_MS = 3000
+
+// Runs the rules of one mod share: the same argv started within 3 s of another
+// reuses that run, so a pack runs each bd command once per refresh. Keyed by
+// the clock at the start of the asking rule's run. Bookkeeping, not drawn
+// state; a hot reload resets it.
+const shared = new Map<string, { at: number; ran: Promise<ProcessRunResult> }>()
+
+const runShared = (run: Run, argv: readonly string[], now: number): Promise<ProcessRunResult> => {
+  const key = argv.join('\u0000')
+  const held = shared.get(key)
+  if (held !== undefined && Math.abs(now - held.at) < SHARE_MS) return held.ran
+  for (const [old, entry] of shared) if (Math.abs(now - entry.at) >= SHARE_MS) shared.delete(old)
+  const ran = run(argv)
+  shared.set(key, { at: now, ran })
+  return ran
+}
 
 export const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
 export const isCount = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0
 
-export const bdJson = async (run: Run, args: readonly string[]): Promise<unknown> => {
-  const ran = await run(['bd', ...args, '--json'])
+export const bdJson = async (run: Run, args: readonly string[], now: number): Promise<unknown> => {
+  const ran = await runShared(run, ['bd', ...args, '--json'], now)
   if (ran.exitCode !== 0 || ran.stdout.trim() === '') return null
   try {
     return JSON.parse(ran.stdout) as unknown

@@ -87,3 +87,9 @@ export const segmentOf = async (session: BandProbe, key: string, surface: Surfac
   await ui.unmount()
   return found
 }
+
+// A Bash call that ran bd, past the 3 s in which runs share a read.
+export const afterBd = async (session: BandProbe): Promise<void> => {
+  await session.advance(3000)
+  await session.bash('bd close bm-1')
+}

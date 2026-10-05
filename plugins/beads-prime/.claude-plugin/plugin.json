@@ -1,0 +1,10 @@
+{
+  "name": "beads-prime",
+  "version": "0.5.0",
+  "description": "Runs bd prime once per session and adds the beads workflow text it prints, from the repo's own .beads files, to the system prompt (max 8 KB). bd setup claude hooks may add it twice.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

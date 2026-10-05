@@ -1,6 +1,6 @@
 {
   "name": "git-pane",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A live side pane, read with git: the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. Refreshes after git commands and edits. Open it with /git.",
   "author": {
     "name": "Baselane",

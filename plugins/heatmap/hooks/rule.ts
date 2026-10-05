@@ -46,6 +46,20 @@ export type Ended = View & {
   sessionCalls?: number
 }
 
+// What a rule sees when a tool call has finished (a denied call included).
+export type Call = {
+  /** The local date, YYYY-MM-DD. */
+  date: string
+  /** The clock, in ms. */
+  now: number
+  tool: string
+  /** The command of a Bash call. */
+  command?: string
+  /** True when the call ran and did not fail: not denied, not an error. */
+  ok: boolean
+  store: Store
+}
+
 // Text to print, or `{ text, copy: false }` for a message that is not a result.
 export type Composed = string | { text: string; copy: false }
 
@@ -60,6 +74,8 @@ export type StatsRule = {
   }
   /** Has the engine keep files edited per type under the store key `langs`. */
   langs?: boolean
+  /** Toast lines to show after each tool call, in order. Only a mod with such a rule runs it. */
+  call?: (ctx: Call) => Promise<readonly string[]>
   /** Toast lines to show, in order. */
   after?: (ctx: After) => Promise<readonly string[]>
   ended?: (ctx: Ended) => Promise<void>

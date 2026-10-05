@@ -1,6 +1,6 @@
 {
   "name": "docstring-mode",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Every new or changed public function gets a short doc comment in the language's normal style.",
   "author": {
     "name": "Baselane",

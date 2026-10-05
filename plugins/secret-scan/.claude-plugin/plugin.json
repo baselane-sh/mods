@@ -1,6 +1,6 @@
 {
   "name": "secret-scan",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Adds /secret-scan: tracked files and line numbers that hold secret-shaped text, found with git grep. Never prints a matched value. Read-only.",
   "author": {
     "name": "Baselane",

@@ -1,0 +1,10 @@
+{
+  "name": "bead-commit-nudge",
+  "version": "0.5.0",
+  "description": "At turn end, if a git commit named no bead id while a bead is in progress, shows a toast and reminds Claude at your next prompt. Reads with bd count and bd where; quiet without bd.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

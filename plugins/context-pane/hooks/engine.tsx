@@ -12,13 +12,14 @@ import { paneTree } from './view'
 // written only by the plugin that owns it.
 const views = atom({ plugin: 'context-pane', key: 'views' } as const, {})
 
-// A pane reads the world at most once a second, however many calls ask.
+// A pane reads the world at most once a second, however many calls ask,
+// unless its rule asks for a longer gap (`minGapMs`).
 const MIN_GAP_MS = 1_000
 
 // How long a load asked for at `now` must wait, given the last one began at
-// `last`: nothing, or the rest of the second since it.
-export const waitBeforeLoad = (last: number | undefined, now: number): number =>
-  last === undefined ? 0 : Math.max(0, MIN_GAP_MS - (now - last))
+// `last`: nothing, or the rest of the gap since it.
+export const waitBeforeLoad = (last: number | undefined, now: number, gap: number = MIN_GAP_MS): number =>
+  last === undefined ? 0 : Math.max(0, gap - (now - last))
 
 // What the engine's loads need from `$`, as closures built in a hook. A timer
 // keeps them past the hook's dispatch, as `$.clock.every` documents.
@@ -86,13 +87,13 @@ export const createPanes = (): Panes => {
     await live.write(id, { at: await live.now(), lines: redactLines(lines) })
   }
 
-  // Loads now, or once the second since the last load is out. A burst of
-  // asks inside that second ends in one load.
+  // Loads now, or once the gap since the last load is out. A burst of asks
+  // inside that gap ends in one load.
   const request = async (rule: PaneRule, live: Live): Promise<void> => {
     const id = rule.pane.id
     if (trailing.has(id)) return
     const now = await live.now()
-    const wait = waitBeforeLoad(loadedAt.get(id), now)
+    const wait = waitBeforeLoad(loadedAt.get(id), now, Math.max(MIN_GAP_MS, rule.minGapMs ?? MIN_GAP_MS))
     if (wait > 0) {
       trailing.set(
         id,

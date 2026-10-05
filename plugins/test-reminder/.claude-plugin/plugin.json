@@ -1,6 +1,6 @@
 {
   "name": "test-reminder",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Reminds you at turn end when source files changed but no test command ran since.",
   "author": {
     "name": "Baselane",

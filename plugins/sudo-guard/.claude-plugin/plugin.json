@@ -1,6 +1,6 @@
 {
   "name": "sudo-guard",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Asks before sudo, doas or su -c runs a command with elevated rights.",
   "author": {
     "name": "Baselane",

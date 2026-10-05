@@ -1,6 +1,6 @@
 {
   "name": "package-guard",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Asks before a new dependency is installed (npm, pnpm, yarn, bun, pip, uv, poetry, cargo, go, gem) and names the packages.",
   "author": {
     "name": "Baselane",

@@ -1,6 +1,6 @@
 {
   "name": "mood-ring",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A band above the prompt with a colored dot and a word for the error and block rate of your last 20 tool calls: calm (green) under 10 percent, tense (yellow) under 30, stormy (red) from 30.",
   "author": {
     "name": "Baselane",

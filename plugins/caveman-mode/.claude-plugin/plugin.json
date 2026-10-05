@@ -1,6 +1,6 @@
 {
   "name": "caveman-mode",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Prose in short caveman speech (\"Fix bug. Test pass.\"), still accurate. Code and commands stay exact.",
   "author": {
     "name": "Baselane",

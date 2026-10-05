@@ -1,7 +1,7 @@
 import type { ProcessRunResult } from 'claude-code'
 
 import type { Fetched, GitState } from '../types'
-import type { BandRule, Fetcher } from './rule'
+import type { BandRule, EditCall, Fetcher } from './rule'
 
 // What a run needs, as closures over `$`: `$` itself is never passed on.
 export type FetchDeps = {
@@ -19,9 +19,15 @@ export type FetchWhy = 'time' | 'edit'
 // running, and which were asked again while running. A hot reload resets it.
 const startedAt = new Map<string, number>()
 const running = new Set<string>()
-const again = new Set<string>()
+// The call behind each edit asked for again.
+const again = new Map<string, EditCall | undefined>()
 
-const isAsked = (fetch: Fetcher, why: FetchWhy): boolean => (why === 'edit' ? fetch.onEdit === true : fetch.everyMs !== undefined)
+// An edit run is asked for by any file-touching call, or only by the calls a
+// rule's `onEditWhen` picks.
+const isAsked = (fetch: Fetcher, why: FetchWhy, call: EditCall | undefined): boolean =>
+  why === 'edit'
+    ? fetch.onEdit === true && (fetch.onEditWhen === undefined || (call !== undefined && fetch.onEditWhen(call)))
+    : fetch.everyMs !== undefined
 
 // A rate equal to the minute tick would skip every other tick when the last
 // run started a few ms after its own: a run this close to its rate is due.
@@ -30,11 +36,11 @@ const RATE_SLACK_MS = 1000
 const isTooSoon = (fetch: Fetcher, last: number | undefined, now: number): boolean =>
   last !== undefined && fetch.everyMs !== undefined && now - last < fetch.everyMs - RATE_SLACK_MS
 
-const runOne = async (id: string, fetch: Fetcher, why: FetchWhy, deps: FetchDeps): Promise<void> => {
-  if (!isAsked(fetch, why)) return
+const runOne = async (id: string, fetch: Fetcher, why: FetchWhy, deps: FetchDeps, call?: EditCall): Promise<void> => {
+  if (!isAsked(fetch, why, call)) return
   if (running.has(id)) {
     // A file edit during a run may not be in its answer: run once more after it.
-    if (why === 'edit') again.add(id)
+    if (why === 'edit') again.set(id, call)
     return
   }
   // Marked running before the first await, so two triggers at once start one
@@ -42,12 +48,12 @@ const runOne = async (id: string, fetch: Fetcher, why: FetchWhy, deps: FetchDeps
   running.add(id)
   const last = startedAt.get(id)
   try {
+    const now = await deps.now()
     if (why === 'time') {
-      const now = await deps.now()
       if (isTooSoon(fetch, last, now)) return
       startedAt.set(id, now)
     }
-    const value = await fetch.read(argv => deps.run(argv, fetch.timeoutMs), await deps.git())
+    const value = await fetch.read(argv => deps.run(argv, fetch.timeoutMs), await deps.git(), now)
     if (value === undefined) {
       // Nothing to ask yet: the run does not count against the rate.
       if (why === 'time') last === undefined ? startedAt.delete(id) : startedAt.set(id, last)
@@ -60,18 +66,23 @@ const runOne = async (id: string, fetch: Fetcher, why: FetchWhy, deps: FetchDeps
     if (isChange) await deps.log(`band: ${id} skipped, ${error instanceof Error ? error.message : String(error)}`)
   } finally {
     running.delete(id)
-    if (again.delete(id)) void runOne(id, fetch, 'edit', deps).catch(() => undefined)
+    if (again.has(id)) {
+      const asked = again.get(id)
+      again.delete(id)
+      void runOne(id, fetch, 'edit', deps, asked).catch(() => undefined)
+    }
   }
 }
 
 // Starts the runs that are due for `why`. Not awaited by a tool call or a
-// turn end: each run is bounded by its own timeout.
-export const runFetchers = async (rules: readonly BandRule[], why: FetchWhy, deps: FetchDeps): Promise<void> => {
+// turn end: each run is bounded by its own timeout. `call` is the tool call
+// behind an edit run.
+export const runFetchers = async (rules: readonly BandRule[], why: FetchWhy, deps: FetchDeps, call?: EditCall): Promise<void> => {
   await Promise.all(
     rules.map(rule =>
       rule.fetch === undefined
         ? undefined
-        : runOne(rule.id, rule.fetch, why, deps).catch(error => deps.log(`band: ${rule.id} skipped, ${String(error)}`)),
+        : runOne(rule.id, rule.fetch, why, deps, call).catch(error => deps.log(`band: ${rule.id} skipped, ${String(error)}`)),
     ),
   )
 }

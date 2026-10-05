@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerStyles } from './engine'
+import { addStaticSections } from './hosts/static'
 import { rule as rubberDuck } from './rules/rubber-duck'
 
-export const register: Register = (on, options) => registerStyles(on, [rubberDuck], options)
+export const register: Register = (on, options) => {
+  const rules = [rubberDuck]
+  addStaticSections(on, rules, options)
+}

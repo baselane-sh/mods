@@ -23,6 +23,10 @@ export type Fakes = {
   // Exit codes for a program (a git key or a full argv joined with spaces); the
   // default is 0 when the program has an answer and 1 when it has none.
   exit?: Readonly<Record<string, number>>
+  // What a program wrote to stderr, by the same keys.
+  stderr?: Readonly<Record<string, string>>
+  // Programs that are not installed: the call rejects at once.
+  missing?: readonly string[]
   // Programs that run past their timeout: the call rejects and the clock moves by the timeout.
   timeout?: readonly string[]
   // Directory listings by path: names, a trailing "/" marks a folder. A path
@@ -118,6 +122,7 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
     ranIn = [...ranIn, e.init?.cwd]
     const prefix = `git -C ${cwd} `
     const key = command.startsWith(prefix) ? command.slice(prefix.length) : command
+    if (fakes.missing?.includes(key) === true) throw new Error(`spawn ${e.argv[0]} ENOENT`)
     if (fakes.timeout?.includes(key) === true) {
       // The host rejects after the program's timeout.
       waited += e.init?.timeoutMs ?? 0
@@ -127,7 +132,7 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
     const result: ProcessRunResult = {
       exitCode: fakes.exit?.[key] ?? (stdout === undefined ? 1 : 0),
       stdout: stdout ?? '',
-      stderr: '',
+      stderr: fakes.stderr?.[key] ?? '',
       isStdoutTruncated: fakes.truncated?.includes(key) ?? false,
       isStderrTruncated: false,
     }

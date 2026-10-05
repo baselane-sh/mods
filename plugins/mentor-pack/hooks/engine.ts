@@ -1,27 +1,22 @@
-import type { On, PluginOptions } from 'claude-code'
+import type { PluginOptions } from 'claude-code'
+
+// Runs a program and gives back what it printed (a closure over `$.process.run`).
+export type Run = (argv: readonly string[]) => Promise<{ exitCode: number; stdout: string }>
 
 // One style rule: an id and the text it adds to the system prompt. A rule
-// that depends on a userConfig value gives a function of the options.
+// that depends on a userConfig value gives a function of the options. A rule
+// whose text comes from a program gives `live` instead: a host (hosts/live.ts)
+// calls it once per session and adds what it returns, and the rule's
+// `section` is then unused. `live` answers undefined to add nothing.
 export type StyleRule = {
   id: string
   section: string | ((options: PluginOptions) => string)
+  live?: (run: Run) => Promise<string | undefined>
 }
 
 // The section id for a rule. A plugin's own id is `<plugin>:<name>`, so two
 // style mods installed together never collide.
 export const sectionId = (rule: StyleRule): string => `${rule.id}:style`
 
-const textOf = (rule: StyleRule, options: PluginOptions): string =>
+export const textOf = (rule: StyleRule, options: PluginOptions): string =>
   typeof rule.section === 'function' ? rule.section(options) : rule.section
-
-// Answers prompt.compose with everything the engine and the plugins beneath
-// composed, plus one section per rule at the end. A section that already has
-// the same id is replaced, so the ids in the list stay unique.
-export const registerStyles = (on: On, rules: readonly StyleRule[], options: PluginOptions): void => {
-  on('prompt.compose', async (_$, e, next) => {
-    const { sections } = await next(e)
-    const added = rules.map(rule => ({ id: sectionId(rule), text: textOf(rule, options), scope: 'session' as const }))
-    const ids = new Set(added.map(section => section.id))
-    return { sections: [...sections.filter(section => !ids.has(section.id)), ...added] }
-  })
-}

@@ -1,6 +1,6 @@
 {
   "name": "readme-check",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Adds /readme-check: which common README sections are missing (install, usage, licence, contributing) and which relative links are broken, at the git repo root. Read-only.",
   "author": {
     "name": "Baselane",

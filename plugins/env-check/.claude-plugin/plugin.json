@@ -1,6 +1,6 @@
 {
   "name": "env-check",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Adds /env-check: variable names in .env.example against .env at the git repo root, listing missing and extra names. Reads names only, never a value. Read-only.",
   "author": {
     "name": "Baselane",

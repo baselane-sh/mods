@@ -1,0 +1,11 @@
+{
+  "name": "beads-done-bar",
+  "version": "0.5.0",
+  "description": "A band above the prompt with how much of your beads project is closed, as a bar and a percent (beads █████████░ 88%), read with bd status every 2 minutes. Hidden without bd.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

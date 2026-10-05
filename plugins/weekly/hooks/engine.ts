@@ -119,12 +119,37 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
   // Only a mod with a rule that reads file types keeps them.
   const keepsLangs = rules.some(rule => rule.langs === true)
 
+  const callers = rules.filter(rule => rule.call !== undefined)
+
   on('tool.call', async ($, e, next) => {
     const ran = await next(e)
     try {
       await update($, pending, so_far => observe(so_far, e, ran))
     } catch (error) {
       await $.ui.log(failed(`record ${e.tool}`, error))
+    }
+    if (callers.length > 0) {
+      try {
+        const now = await $.clock.now()
+        const store: Store = { get: key => $.store.get(key), set: (key, value) => $.store.set(key, value) }
+        const ctx = {
+          date: localDate(now),
+          now,
+          tool: e.tool,
+          ...(e.tool === 'Bash' ? { command: e.command } : {}),
+          ok: ran.deny === undefined && ran.isError !== true,
+          store,
+        }
+        for (const rule of callers) {
+          try {
+            for (const line of (await rule.call?.(ctx)) ?? []) await $.ui.toast(line)
+          } catch (error) {
+            await $.ui.log(failed(rule.id, error))
+          }
+        }
+      } catch (error) {
+        await $.ui.log(failed('call', error))
+      }
     }
     return ran
   })

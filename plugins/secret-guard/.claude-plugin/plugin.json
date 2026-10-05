@@ -1,6 +1,6 @@
 {
   "name": "secret-guard",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Asks before a live API key, token or private key is written, edited or run.",
   "author": {
     "name": "Baselane",

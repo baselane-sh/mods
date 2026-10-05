@@ -1,6 +1,6 @@
 {
   "name": "streaks",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Counts consecutive days you used Claude Code: a Day N streak toast at session start, and /streak to ask.",
   "author": {
     "name": "Baselane",

@@ -1,6 +1,6 @@
 {
   "name": "render-pack",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Both original rendering mods in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies (a click puts @path in the prompt).",
   "author": {
     "name": "Baselane",

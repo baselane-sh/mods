@@ -1,6 +1,6 @@
 {
   "name": "file-links",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "In Claude's replies, path/to/file.ts:42 references to files in your project become links. Click one to put @path/to/file.ts in the prompt.",
   "author": {
     "name": "Baselane",

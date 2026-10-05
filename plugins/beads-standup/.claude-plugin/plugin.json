@@ -1,0 +1,11 @@
+{
+  "name": "beads-standup",
+  "version": "0.5.0",
+  "description": "Adds /beads-standup: beads closed since yesterday, in progress, and the next 5 ready. Read with bd, the beads tracker. Read-only. Prints only, copies nothing.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

@@ -102,16 +102,17 @@ MIT. Copyright (c) 2026 Baselane, LLC. Read [LICENSE](LICENSE).
 
 <!-- catalog:start -->
 
-**180 mods** in 10 families.
+**199 mods** in 10 families.
 
 "needs setup" means the mod has options that you set with `claude plugin configure <mod>`. Its description tells you if it works before you set them. "pack" means one mod with several rules.
 
-### Guards (35)
+### Guards (36)
 
 Ask you before a harsh or risky command runs.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
+| `beads-guard` | Asks before bd commands that delete issues or rewrite history: delete, purge, prune, flatten, compact, gc, sql, admin, init --force, dolt push --force. Reads only the command text, runs no bd. |  |  |
 | `secret-filename-guard` | Asks before a Bash command touches a secret-looking file (.env, private keys, credentials). |  |  |
 | `secret-guard` | Asks before a live API key, token or private key is written, edited or run. |  |  |
 | `env-exfil-guard` | Asks before a command prints your environment, echoes a secret variable or sends local data to a remote host. |  |  |
@@ -148,12 +149,14 @@ Ask you before a harsh or risky command runs.
 | `release-pack` | Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod. The tag guard reads tags with git. |  | pack |
 | `ship-safe-pack` | The release-pack guards plus db-reset-guard and upload-guard: asks before publish, tag push, production deploy, registry push, database wipes and file uploads. Reads tags with git. |  | pack |
 
-### Reminders (17)
+### Reminders (19)
 
 One quiet toast at turn end when something needs your attention.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
+| `bead-claim-nudge` | At turn end, if Claude edited a file and no bead is in progress, shows a toast and reminds Claude at your next prompt, once per session. Reads with bd count; quiet without bd. |  |  |
+| `bead-commit-nudge` | At turn end, if a git commit named no bead id while a bead is in progress, shows a toast and reminds Claude at your next prompt. Reads with bd count and bd where; quiet without bd. |  |  |
 | `test-reminder` | Reminds you at turn end when source files changed but no test command ran since. |  |  |
 | `ctx-nudge` | Reminds you to /clear or /compact when the context window passes 75 percent. |  |  |
 | `clippy` | One helpful toast per session per trigger, in the classic paperclip voice: when you edit a migrations folder, a Dockerfile or a GitHub workflow, or run rm -rf. At most one toast per turn. |  |  |
@@ -172,12 +175,15 @@ One quiet toast at turn end when something needs your attention.
 | `focus-pack` | Three quiet nudges in one mod: commit after 8 edits, TODO/FIXME/HACK lines added, and debug prints added. |  | pack |
 | `quality-pack` | Three quiet nudges in one mod: type check after TypeScript edits, lockfile after dependency edits, and a split suggestion past 500 changed lines. |  | pack |
 
-### Commands (28)
+### Commands (31)
 
 Slash commands that print a result and, where it helps, copy it.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
+| `ready` | Adds /ready: the 20 top ready beads, one line each, and the total. Read with bd, the beads tracker. Read-only. Prints only, copies nothing. | `/ready` |  |
+| `bead` | Adds /bead <id>: one bead with status, priority, labels, description, blockers and children. Read with bd, the beads tracker. Read-only. Prints only, copies nothing. | `/bead` |  |
+| `beads-standup` | Adds /beads-standup: beads closed since yesterday, in progress, and the next 5 ready. Read with bd, the beads tracker. Read-only. Prints only, copies nothing. | `/beads-standup` |  |
 | `receipt` | Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied. | `/receipt` |  |
 | `standup` | Adds /standup: Yesterday, Today and Blockers from your git log and this session's record, printed and copied. | `/standup` |  |
 | `changelog` | Adds /changelog: commits since the last tag (or the last 30), read with git log and grouped by conventional-commit type, as Markdown. | `/changelog` |  |
@@ -207,7 +213,7 @@ Slash commands that print a result and, where it helps, copy it.
 | `explore-pack` | Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. They read git and project files. | `/tree`, `/deps`, `/authors`, `/scripts`, `/env-check` | pack |
 | `audit-pack` | Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. They read git, project files and dependency folders. | `/secret-scan`, `/conflicts`, `/licenses` | pack |
 
-### Band meters (23)
+### Band meters (30)
 
 A one-line band above the prompt.
 
@@ -232,17 +238,26 @@ A one-line band above the prompt.
 | `todo-count` | A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), counted with git after edits. Hidden when there are none. |  |  |
 | `cache-meter` | A band above the prompt with the share of prompt tokens the cache served this session (cache 87%). A high share means cheaper, faster turns. |  |  |
 | `streak-flame` | A band above the prompt with your daily streak, the days in a row you finished a turn (🔥 5d). The mod keeps the count in its own store. |  |  |
+| `beads-band` | A band above the prompt with your beads counts (bd 97 ready · 45 active · 29 blocked), read with bd status every 2 minutes and after Claude runs bd. Hidden without bd or a beads project. |  |  |
+| `bead-now` | A band above the prompt with the bead in progress you updated last and how many more are in progress, read with bd list every 2 minutes and after Claude runs bd. Hidden when none is. |  |  |
+| `epic-bar` | A band above the prompt with the progress of the epic you work on, or of the open epic nearest to done (bm-ooq ███████░ 7/8), read with bd. Hidden without epics or bd. |  |  |
+| `beads-done-bar` | A band above the prompt with how much of your beads project is closed, as a bar and a percent (beads █████████░ 88%), read with bd status every 2 minutes. Hidden without bd. |  |  |
+| `beads-today-bar` | A band above the prompt with the beads closed today against a daily goal you set (today ▮▮▮▯▯ 3/5), green when met, read with bd count. Hidden without bd or a beads project. |  | needs setup |
+| `priority-bar` | A band above the prompt with your open beads by priority (P0 2 · P1 14 · P2 60 · P3 50), red while a P0 is open, read with bd count every 2 minutes. Hidden without bd. |  |  |
 | `band-pack` | The first six Baselane band meters in one row above the prompt: session cost, lattes, context bar, today's spend, the focus timer and the mood ring. | `/pomodoro` | needs setup, pack |
 | `dev-band` | The developer band in one row above the prompt: git branch and changed files (read with git status), wall clock and session age, tool counts, and failed tool calls. |  | pack |
 | `creator-band` | The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines (read with git), and the daily streak flame. |  | pack |
 | `ops-band` | The ops band in one row above the prompt: commits ahead and behind the upstream (git), the latest GitHub Actions run of your branch (gh), and the Mac battery (pmset). |  | pack |
+| `beads-bars` | All six beads bands in one row: counts, the bead in progress, epic progress, done percent, closed today and open by priority, read with bd every 2 minutes and after Claude runs bd. |  | needs setup, pack |
 
-### Panes (10)
+### Panes (12)
 
 Live side panes that you open with a slash command.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
+| `beads-pane` | A live side pane of your beads: in progress, ready and blocked issues, 10 each, with counts. Read with bd, read-only, after Bash calls. Open it with /beads. | `/beads` |  |
+| `epics-pane` | A live side pane of each open beads epic: a bar of closed and total children, and a mark when it is ready to close. Read with bd, read-only. Open it with /epics. | `/epics` |  |
 | `agent-firewall` | A live pane of every tool call the agent makes: green when it ran, red when it was blocked, with counters. Open it with /firewall. | `/firewall` |  |
 | `git-pane` | A live side pane, read with git: the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. Refreshes after git commands and edits. Open it with /git. | `/git` |  |
 | `test-pane` | A live side pane with the last test run (vitest, jest, pytest, go test, cargo test, bun test, claude plugin test): runner, pass, fail and skip counts, duration and first failures. Open it with /tests. | `/tests` |  |
@@ -254,12 +269,13 @@ Live side panes that you open with a slash command.
 | `context-pane` | A live side pane of how full the context window is: the percent as a bar, the tokens used, and a short tip past 75 percent. Open it with /context-pane. | `/context-pane` |  |
 | `process-pane` | A live side pane of the processes the session's Bash calls started that still run, with pid, age and command. Read-only: one ps every 5 seconds. Open it with /procs. | `/procs` |  |
 
-### Prompt styles (28)
+### Prompt styles (29)
 
 Change how Claude writes. Code and commands stay exact.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
+| `beads-prime` | Runs bd prime once per session and adds the beads workflow text it prints, from the repo's own .beads files, to the system prompt (max 8 KB). bd setup claude hooks may add it twice. |  |  |
 | `terse-mode` | Short answers: no preamble, no recap. |  |  |
 | `plain-english` | Writes in ASD-STE-100 Simplified Technical English: short sentences, active voice, simple words. |  |  |
 | `junior-mode` | Explains each step and why, and defines jargon once, for a learner. |  |  |
@@ -289,12 +305,13 @@ Change how Claude writes. Code and commands stay exact.
 | `fun-pack` | Fun habits in one install: caveman prose and gitmoji commit messages. They compose: caveman never touches commit messages. |  | pack |
 | `mentor-pack` | Mentor habits in one install: a hint and a guiding question first, assumptions listed before work, and a strict self-review after each change. |  | pack |
 
-### Sounds (7)
+### Sounds (8)
 
 Short sounds for passing tests, failing tests, blocked calls and turn ends.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
+| `bead-chime` | Plays a short chime when a Bash call that ran bd close (or bd done) ends with exit code 0. It reads only the command text and the result, and runs no program. |  | needs setup |
 | `sounds-retro` | 8-bit sounds: a coin when tests pass, a buzz when they fail, a chime when a turn ends. |  | needs setup |
 | `sounds-office` | Quiet office sounds: a soft click when tests pass, a low thud when they fail, paper when a call is blocked. |  | needs setup |
 | `sounds-scifi` | Sci-fi console sounds: a beep when tests pass, an alarm when they fail, a warp when a turn ends. |  | needs setup |
@@ -303,12 +320,13 @@ Short sounds for passing tests, failing tests, blocked calls and turn ends.
 | `sounds-zen` | Soft bells and singing-bowl tones: a bell when tests pass, a low bowl when they fail, a muted chime when a call is blocked, a bowl when a turn ends. |  | needs setup |
 | `sounds-arcade` | Arcade blips: a coin when tests pass, a game-over drop when they fail, a buzz when a call is blocked, a power-up when a turn ends. |  | needs setup |
 
-### Stats (9)
+### Stats (10)
 
 Local records of how you use Claude Code.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
+| `bead-streak` | Counts the days in a row you closed a bead, from Bash calls that ran bd close and exited 0. Adds /bead-streak and a toast on a new best. Reads command text only, runs no program. | `/bead-streak` |  |
 | `wrapped` | Adds /wrapped: a screenshot-ready Claude Code Wrapped for the last 7 days (or /wrapped month for 30), printed and copied. | `/wrapped` |  |
 | `streaks` | Counts consecutive days you used Claude Code: a Day N streak toast at session start, and /streak to ask. | `/streak` |  |
 | `achievements` | Unlocks eight badges once each (first session, first green test run, 100 and 1,000 tool calls, 7-day streak, 10 blocked calls, a 2 hour session, night owl), with a toast and /achievements. | `/achievements` |  |
@@ -338,12 +356,13 @@ Change how rows and replies look on your screen. What Claude reads does not chan
 | `render-pack` | Both original rendering mods in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies (a click puts @path in the prompt). |  | pack |
 | `render-plus` | Three row badges in one: time-badge, exit-badge and size-badge. |  | pack |
 
-### Lifecycle and notify (11)
+### Lifecycle and notify (12)
 
 Act on session events: format files, push a notification, keep a journal.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
+| `bead-stale-nudge` | At session start, one toast when beads in progress have had no update for 7 days, with their ids. Reads with bd stale, and says nothing without bd or a beads project. |  |  |
 | `auto-format` | Runs your project's own formatter on each file Claude writes or edits, only when the project has a formatter config, and tells Claude to re-read the file. |  |  |
 | `long-run-notify` | Sends a phone push through ntfy.sh when a Bash command ran longer than a threshold (60 seconds by default). Sends the project name and the seconds only. Does nothing until you set an ntfy topic. |  | needs setup |
 | `ntfy-notify` | Sends a phone push through ntfy.sh when Claude Code needs your input. The message is generic. Does nothing until you set an ntfy topic. |  | needs setup |

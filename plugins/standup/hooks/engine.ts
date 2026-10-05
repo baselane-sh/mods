@@ -12,6 +12,8 @@ export type Facts = {
   elapsedMs?: number
   contextPercent?: number
   costUsd?: number
+  // The engine's clock now (epoch ms), for a rule that needs the date.
+  nowMs?: number
 }
 
 // What a rule may reach beyond the record, as closures over the host calls
@@ -110,7 +112,9 @@ export type CommandReads = {
   turns: () => Promise<number>
   now: () => Promise<number>
   kept: () => Promise<CommandRecord>
-  copy: (text: string) => Promise<UiCopyResult>
+  // Absent for a host that never copies: the answer is then the text alone, and
+  // the mod does not hold the clipboard call at all.
+  copy?: (text: string) => Promise<UiCopyResult>
 }
 
 // Answers one slash command: the rule composes its text from the record, the
@@ -123,6 +127,7 @@ export const answerCommand = async (rule: CommandRule, args: string, tools: Comm
 
   const facts: Facts = {
     ...(turns === undefined ? {} : { turns }),
+    ...(now === undefined ? {} : { nowMs: now }),
     ...(usage === undefined || now === undefined ? {} : { elapsedMs: Math.max(0, now - usage.startedAt) }),
     ...(usage?.context.percent === undefined ? {} : { contextPercent: usage.context.percent }),
     ...(usage?.cost === undefined ? {} : { costUsd: usage.cost.usd }),
@@ -137,8 +142,10 @@ export const answerCommand = async (rule: CommandRule, args: string, tools: Comm
 
   if (typeof composed !== 'string') return { text: composed.text }
   const text = composed
+  const copier = reads.copy
+  if (copier === undefined) return { text }
 
-  const copy = await attempt(() => reads.copy(text))
+  const copy = await attempt(() => copier(text))
   const note = copy === undefined ? 'not copied (clipboard error)' : copy.isCopied ? 'copied to clipboard' : `not copied (${copy.reason})`
   return { text: `${text}\n\n${note}` }
 }

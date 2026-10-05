@@ -1,6 +1,6 @@
 {
   "name": "haiku-commits",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Commit messages get a normal conventional-commit first line, then a 5-7-5 haiku about the change in the body.",
   "author": {
     "name": "Baselane",

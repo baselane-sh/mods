@@ -1,6 +1,6 @@
 {
   "name": "files-pane",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A live side pane of the files Claude read, edited or wrote this session, grouped by action with a count per file, newest first. Open it with /files.",
   "author": {
     "name": "Baselane",

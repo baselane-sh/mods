@@ -85,7 +85,7 @@ MIT. Copyright (c) 2026 Baselane, LLC. Read [LICENSE](LICENSE).
 
 <!-- catalog:start -->
 
-**140 mods** in 10 families.
+**180 mods** in 10 families.
 
 "needs setup" means the mod has options that you set with `claude plugin configure <mod>`. Its description tells you if it works before you set them. "pack" means one mod with several rules.
 

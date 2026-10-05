@@ -1347,6 +1347,26 @@
       }
     },
     {
+      "name": "sounds-zen",
+      "source": "./plugins/sounds-zen",
+      "description": "Soft bells and singing-bowl tones: a bell when tests pass, a low bowl when they fail, a muted chime when a call is blocked, a bowl when a turn ends.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "sounds-arcade",
+      "source": "./plugins/sounds-arcade",
+      "description": "Arcade blips: a coin when tests pass, a game-over drop when they fail, a buzz when a call is blocked, a power-up when a turn ends.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "wrapped",
       "source": "./plugins/wrapped",
       "description": "Adds /wrapped: a screenshot-ready Claude Code Wrapped for the last 7 days (or /wrapped month for 30), printed and copied.",
@@ -1600,6 +1620,86 @@
       "name": "fun-pack",
       "source": "./plugins/fun-pack",
       "description": "Fun habits in one install: caveman prose and gitmoji commit messages. They compose: caveman never touches commit messages.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "socratic-mode",
+      "source": "./plugins/socratic-mode",
+      "description": "For learning: answers a question with a short hint and one guiding question first, and gives the full answer when you ask. Code and commands stay exact.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "rubber-duck",
+      "source": "./plugins/rubber-duck",
+      "description": "Restates the problem in its own words and lists its assumptions before it starts work.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "reviewer-mode",
+      "source": "./plugins/reviewer-mode",
+      "description": "After each code change, reviews its own diff like a strict senior reviewer and lists each issue it found and fixed.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "docstring-mode",
+      "source": "./plugins/docstring-mode",
+      "description": "Every new or changed public function gets a short doc comment in the language's normal style.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "noir-mode",
+      "source": "./plugins/noir-mode",
+      "description": "Prose like a hard-boiled detective narrator, light and clear. Code, commands, commit messages and error text stay exact.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "bullet-mode",
+      "source": "./plugins/bullet-mode",
+      "description": "Replies as short bullet lists, at most one sentence per bullet, unless you ask for code.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "british-english",
+      "source": "./plugins/british-english",
+      "description": "British spelling and terms in prose (colour, organise, licence as a noun). Code identifiers stay as they are.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "mentor-pack",
+      "source": "./plugins/mentor-pack",
+      "description": "Mentor habits in one install: a hint and a guiding question first, assumptions listed before work, and a strict self-review after each change.",
       "version": "0.3.0",
       "author": {
         "name": "Baselane",

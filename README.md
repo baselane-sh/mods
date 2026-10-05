@@ -233,7 +233,7 @@ Live side panes that you open with a slash command.
 | `todo-pane` | A live side pane of the TODO, FIXME and HACK lines in tracked files (git grep), grouped by file and capped at 30. It refreshes after file edits while open. Open it with /todo-pane. | `/todo-pane` |  |
 | `cost-pane` | A live side pane with the session cost, the cost of each of the last 10 turns as a bar, and the average per turn. Open it with /cost-pane. | `/cost-pane` |  |
 
-### Prompt styles (20)
+### Prompt styles (28)
 
 Change how Claude writes. Code and commands stay exact.
 
@@ -257,10 +257,18 @@ Change how Claude writes. Code and commands stay exact.
 | `eli5-mode` | Explains like the reader is new: analogies first, no jargon without a one-line definition. |  |  |
 | `code-only` | Replies with the code or command first and at most two short sentences of prose, unless asked to explain. |  |  |
 | `gitmoji-commits` | Commit messages start with the matching gitmoji (✨ feat, 🐛 fix). Composes with conventional-commits: emoji goes before the type. |  |  |
+| `socratic-mode` | For learning: answers a question with a short hint and one guiding question first, and gives the full answer when you ask. Code and commands stay exact. |  |  |
+| `rubber-duck` | Restates the problem in its own words and lists its assumptions before it starts work. |  |  |
+| `reviewer-mode` | After each code change, reviews its own diff like a strict senior reviewer and lists each issue it found and fixed. |  |  |
+| `docstring-mode` | Every new or changed public function gets a short doc comment in the language's normal style. |  |  |
+| `noir-mode` | Prose like a hard-boiled detective narrator, light and clear. Code, commands, commit messages and error text stay exact. |  |  |
+| `bullet-mode` | Replies as short bullet lists, at most one sentence per bullet, unless you ask for code. |  |  |
+| `british-english` | British spelling and terms in prose (colour, organise, licence as a noun). Code identifiers stay as they are. |  |  |
 | `team-pack` | Team habits in one install: Conventional Commits, test-first work and a security check on every change. |  | pack |
 | `fun-pack` | Fun habits in one install: caveman prose and gitmoji commit messages. They compose: caveman never touches commit messages. |  | pack |
+| `mentor-pack` | Mentor habits in one install: a hint and a guiding question first, assumptions listed before work, and a strict self-review after each change. |  | pack |
 
-### Sounds (5)
+### Sounds (7)
 
 Short sounds for passing tests, failing tests, blocked calls and turn ends.
 
@@ -271,6 +279,8 @@ Short sounds for passing tests, failing tests, blocked calls and turn ends.
 | `sounds-scifi` | Sci-fi console sounds: a beep when tests pass, an alarm when they fail, a warp when a turn ends. |  | needs setup |
 | `sounds-nature` | Soft nature sounds: a bird chirp when tests pass, a plunk into water when they fail, a gust of wind when a call is blocked, a water drop when a turn ends. |  | needs setup |
 | `sounds-minimal` | Very short, quiet clicks and ticks for a subtle signal: a tick when tests pass, two low ticks when they fail, a click when a call is blocked, a soft tick when a turn ends. |  | needs setup |
+| `sounds-zen` | Soft bells and singing-bowl tones: a bell when tests pass, a low bowl when they fail, a muted chime when a call is blocked, a bowl when a turn ends. |  | needs setup |
+| `sounds-arcade` | Arcade blips: a coin when tests pass, a game-over drop when they fail, a buzz when a call is blocked, a power-up when a turn ends. |  | needs setup |
 
 ### Stats (6)
 

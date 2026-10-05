@@ -1,0 +1,10 @@
+{
+  "name": "mentor-pack",
+  "version": "0.3.0",
+  "description": "Mentor habits in one install: a hint and a guiding question first, assumptions listed before work, and a strict self-review after each change.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

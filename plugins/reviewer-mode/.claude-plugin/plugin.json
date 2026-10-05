@@ -1,0 +1,10 @@
+{
+  "name": "reviewer-mode",
+  "version": "0.3.0",
+  "description": "After each code change, reviews its own diff like a strict senior reviewer and lists each issue it found and fixed.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

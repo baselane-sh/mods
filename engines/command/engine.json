@@ -1,5 +1,5 @@
 {
-  "hooks": ["engine.ts", "tracker.ts", "render.ts", "patterns.ts", "helpers.ts", "toml.ts", "manifests.ts", "tasks.ts"],
+  "hooks": ["engine.ts", "tracker.ts", "render.ts", "patterns.ts", "helpers.ts", "toml.ts", "manifests.ts", "tasks.ts", "grep.ts", "licenses.ts", "readme.ts"],
   "tests": ["probe.ts", "fixtures.ts", "engine.test.ts"],
   "register": "registerCommands",
   "ruleExport": "rule",

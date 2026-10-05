@@ -29,6 +29,9 @@ const SECRET_VALUE_SOURCES = [
 
 export const SECRET_VALUE = new RegExp(SECRET_VALUE_SOURCES.join('|'))
 
+// The same shapes for `git grep -E` (POSIX ERE has no \s, so the class is spelled out).
+export const SECRET_VALUE_ERE = SECRET_VALUE_SOURCES.join('|').replaceAll('\\s', '[:space:]')
+
 export const SECRET_VALUE_GLOBAL = new RegExp(SECRET_VALUE_SOURCES.join('|'), 'g')
 
 // Secret-looking FILE names. Whole-ish tokens to keep false positives low.

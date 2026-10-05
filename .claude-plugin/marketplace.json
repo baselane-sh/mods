@@ -137,6 +137,106 @@
       }
     },
     {
+      "name": "turn-timer",
+      "source": "./plugins/turn-timer",
+      "description": "A band above the prompt with how long the current turn has run (turn 0:42). It shows while a turn runs and hides between turns.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "ahead-behind",
+      "source": "./plugins/ahead-behind",
+      "description": "A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), refreshed after each Bash call and file edit. Hidden when the branch has no upstream.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "battery-band",
+      "source": "./plugins/battery-band",
+      "description": "A band above the prompt with the Mac battery percent and charging state (🔋 87%, ⚡ 54% while charging), read from pmset once a minute. Hidden on other systems.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "now-playing",
+      "source": "./plugins/now-playing",
+      "description": "A band above the prompt with the track Music or Spotify plays on your Mac (♪ Song - Artist), asked through osascript once a minute. Hidden when nothing plays.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "ci-band",
+      "source": "./plugins/ci-band",
+      "description": "A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes. Hidden without gh.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "todo-count",
+      "source": "./plugins/todo-count",
+      "description": "A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), refreshed after edits. Hidden when there are none.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "cache-meter",
+      "source": "./plugins/cache-meter",
+      "description": "A band above the prompt with the share of prompt tokens the cache served this session (cache 87%). A high share means cheaper, faster turns.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "streak-flame",
+      "source": "./plugins/streak-flame",
+      "description": "A band above the prompt with your daily streak, the days in a row you finished a turn (🔥 5d). The mod keeps the count in its own store.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "creator-band",
+      "source": "./plugins/creator-band",
+      "description": "The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines, and the daily streak flame.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "ops-band",
+      "source": "./plugins/ops-band",
+      "description": "The ops band in one row above the prompt: commits ahead and behind the upstream, the latest GitHub Actions run of your branch, and the Mac battery.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "receipt",
       "source": "./plugins/receipt",
       "description": "Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied.",

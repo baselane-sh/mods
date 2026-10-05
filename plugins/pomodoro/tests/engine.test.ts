@@ -1,13 +1,13 @@
 import { expect, test } from 'claude-code/testing'
 
-import { HOUR, NOON, SURFACES, probe } from './probe'
+import { HOUR, NOON, PLUGIN, SURFACES, probe } from './probe'
 
 const FULL = { usd: 1.42, percent: 62, startedAt: NOON - HOUR, model: 'claude-opus-4-1' }
 
 test('band: one row joins the segments with two spaces', async ($, on) => {
   const session = probe($, on, { usd: 1.34, percent: 50 })
-  await session.wake()
   await session.turn(FULL)
+  await session.wake()
   for (const surface of SURFACES) {
     const ui = await session.mount(surface)
     const segments = await session.segments(ui)
@@ -19,8 +19,8 @@ test('band: one row joins the segments with two spaces', async ($, on) => {
 
 test('band: the row fits the width, dropping whole segments from the right', async ($, on) => {
   const session = probe($, on, { usd: 1.34, percent: 50 })
-  await session.wake()
   await session.turn(FULL)
+  await session.wake()
   const wide = await session.mount('terminal', 200)
   const full = (await session.segments(wide)).map(segment => segment.text)
   await wide.unmount()
@@ -37,12 +37,19 @@ test('band: the row fits the width, dropping whole segments from the right', asy
   }
 })
 
+// The streak comes from the date alone, so a turn with no figures still has one.
+const NEEDS_NO_FIGURES = ['streak-flame', 'creator-band']
+
 test('band: with no figures the engine draws its own', async ($, on) => {
   const session = probe($, on)
-  await session.turn({})
+  await session.turn({}, null)
   for (const surface of SURFACES) {
     const ui = await session.mount(surface)
-    expect(await ui.find({ key: 'band' })).toBeUndefined()
+    if (NEEDS_NO_FIGURES.includes(PLUGIN)) {
+      expect((await ui.find({ key: 'band' }))?.text).toBe('🔥 1d')
+    } else {
+      expect(await ui.find({ key: 'band' })).toBeUndefined()
+    }
     await ui.unmount()
   }
 })

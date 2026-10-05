@@ -17,6 +17,13 @@ export type Reading = {
   startedAt?: number
   // The main loop's model, as /model shows it.
   model?: string
+  // Prompt cache tokens of the main loop since the session began: what the
+  // cache served, and every input token the requests were answered over.
+  cacheRead?: number
+  cacheTotal?: number
+  // The daily streak in days, and the local date (YYYY-MM-DD) of its last day.
+  streak?: number
+  streakDate?: string
 }
 
 // How one tool call ended: it ran, it errored, or a hook denied it.
@@ -43,6 +50,19 @@ export type Tally = {
 export type GitState = {
   branch: string
   changed: number
+  // Commits ahead of and behind the upstream. Both are absent when the branch
+  // has no upstream (or the upstream is gone).
+  ahead?: number
+  behind?: number
+}
+
+// What a fetching rule keeps: the text it draws and an optional color. `tag`
+// names what the text is for (the branch of a CI run), so a rule can drop a
+// figure that is about something else by the time it draws.
+export type Fetched = {
+  text: string
+  color?: string
+  tag?: string
 }
 
 declare module 'claude-code' {
@@ -61,6 +81,10 @@ declare module 'claude-code' {
       // Bumped on each minute while a rule wants it: the band reads it, so the
       // write redraws a figure that moves with the clock alone.
       minute: number
+      // What the fetching rules last read, by rule id. Null: nothing to show.
+      fetched: Readonly<Record<string, Fetched | null>>
+      // When the running turn began (the clock's own), or null between turns.
+      turnStartedAt: number | null
     }
   }
 }

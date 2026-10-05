@@ -180,7 +180,7 @@ Slash commands that print a result and, where it helps, copy it.
 | `repo-pack` | Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. | `/todos`, `/loc`, `/hotspots`, `/commit-msg`, `/branches` | pack |
 | `explore-pack` | Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. | `/tree`, `/deps`, `/authors`, `/scripts`, `/env-check` | pack |
 
-### Band meters (13)
+### Band meters (23)
 
 A one-line band above the prompt.
 
@@ -197,8 +197,18 @@ A one-line band above the prompt.
 | `tool-counter` | A band above the prompt with your tool calls this session, the top three by tool (Bash 41 · Edit 18 · Read 12). |  |  |
 | `error-meter` | A band above the prompt with how many tool calls failed this session (an error or a deny) and which tool failed last. Red from the first failure. |  |  |
 | `model-badge` | A band above the prompt with the current model name and the context percent (opus-4-1 · 62%). |  |  |
+| `turn-timer` | A band above the prompt with how long the current turn has run (turn 0:42). It shows while a turn runs and hides between turns. |  |  |
+| `ahead-behind` | A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), refreshed after each Bash call and file edit. Hidden when the branch has no upstream. |  |  |
+| `battery-band` | A band above the prompt with the Mac battery percent and charging state (🔋 87%, ⚡ 54% while charging), read from pmset once a minute. Hidden on other systems. |  |  |
+| `now-playing` | A band above the prompt with the track Music or Spotify plays on your Mac (♪ Song - Artist), asked through osascript once a minute. Hidden when nothing plays. |  |  |
+| `ci-band` | A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes. Hidden without gh. |  |  |
+| `todo-count` | A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), refreshed after edits. Hidden when there are none. |  |  |
+| `cache-meter` | A band above the prompt with the share of prompt tokens the cache served this session (cache 87%). A high share means cheaper, faster turns. |  |  |
+| `streak-flame` | A band above the prompt with your daily streak, the days in a row you finished a turn (🔥 5d). The mod keeps the count in its own store. |  |  |
 | `band-pack` | Every Baselane band meter in one row above the prompt: session cost, lattes, context bar, today's spend, the focus timer and the mood ring. | `/pomodoro` | needs setup, pack |
 | `dev-band` | The developer band in one row above the prompt: git branch and changed files, wall clock and session age, tool counts, and failed tool calls. |  | pack |
+| `creator-band` | The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines, and the daily streak flame. |  | pack |
+| `ops-band` | The ops band in one row above the prompt: commits ahead and behind the upstream, the latest GitHub Actions run of your branch, and the Mac battery. |  | pack |
 
 ### Panes (6)
 

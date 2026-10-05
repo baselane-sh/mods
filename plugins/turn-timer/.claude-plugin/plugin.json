@@ -1,0 +1,11 @@
+{
+  "name": "turn-timer",
+  "version": "0.4.0",
+  "description": "A band above the prompt with how long the current turn has run (turn 0:42). It shows while a turn runs and hides between turns.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

@@ -40,12 +40,38 @@ export const FAIL_WORD = 'FAILME'
 
 export type Segment = { key: string; text: string; color?: unknown }
 
+// What a command other than git status answers: its output, or a command that
+// cannot start (`'reject'`, the binary is not there). `delayMs` is a slow
+// command, asleep on the test's clock.
+export type CommandReply =
+  | { exitCode?: number; stdout?: string; delayMs?: number }
+  | 'reject'
+  // Answers by the argv it was run with.
+  | ((argv: readonly string[]) => Exclude<CommandReply, (argv: readonly string[]) => unknown>)
+
+// What `wake` makes the commands answer, unless a test set them.
+const SAMPLE_REPLIES: Readonly<Record<string, CommandReply>> = {
+  pmset: { stdout: "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=1)\t87%; discharging; 4:12 remaining\n" },
+  pgrep: { stdout: '123\n' },
+  osascript: { stdout: 'Song - Artist\n' },
+  gh: { stdout: '[{"status":"completed","conclusion":"success"}]' },
+  'git grep': { stdout: 'a.ts:2\n' },
+}
+
+// What a turn spent on the prompt cache, as the API reports it.
+export type CacheUsage = { input: number; cacheRead: number; cacheWrite: number }
+
+const SAMPLE_USAGE: CacheUsage = { input: 10, cacheRead: 90, cacheWrite: 0 }
+
 export type BandProbe = {
   // A whole turn: turn.start sees the cost as it stands, the turn spends,
   // then turn.complete reads the new figures.
-  turn: (after: Reading) => Promise<void>
+  // `null` is a turn whose requests reported no usage.
+  turn: (after: Reading, usage?: CacheUsage | null) => Promise<void>
   // Only the turn.complete, with no turn.start before it.
-  complete: (after: Reading, extra?: { agentId?: string }) => Promise<void>
+  complete: (after: Reading, extra?: { agentId?: string; usage?: CacheUsage }) => Promise<void>
+  // Only the turn.start: a turn that is running.
+  begin: () => Promise<void>
   mount: (surface: Surface, bodyColumns?: number, hasSurvey?: boolean) => Promise<Mounted<Surface, 'AbovePrompt'>>
   segments: (ui: Mounted<Surface, 'AbovePrompt'>) => Promise<Segment[]>
   advance: (ms: number) => Promise<void>
@@ -72,6 +98,13 @@ export type BandProbe = {
   // The next git run answers `output` (null is not a repository) once the
   // clock has moved `ms` on: a slow git, asleep on the test's clock.
   slowGit: (ms: number, output: string | null) => void
+  // What a command answers from now on, by its name (`pmset`, `gh`), or `git
+  // grep` for a git subcommand. Unset, a command exits 128 with no output.
+  setCommand: (key: string, reply: CommandReply) => void
+  // The argv of each run of a command so far, oldest first.
+  calls: (key: string) => readonly (readonly string[])[]
+  // The timeout each run of a command asked for, in milliseconds, oldest first.
+  timeouts: (key: string) => readonly (number | undefined)[]
   // Writes a state value of the mod's beneath it, as a value it held before.
   seedState: (key: string, value: unknown) => void
   // Runs `/<name>` and answers its output text.
@@ -83,8 +116,11 @@ export type BandProbe = {
   // How many times the mod read the state value `key` (any owner). A read
   // while the band draws is what makes a later write draw it again.
   stateReads: (key: string) => number
+  // How many times the mod asked the session for its model.
+  modelReads: () => number
   // Gives a mod that draws from live activity something to show: a few tool
-  // calls, and /pomodoro where the mod has it. A mod without that command
+  // calls, a turn that is running, commands that answer, and /pomodoro where
+  // the mod has it. Call it after the turn ends: a turn timer hides then. A mod without that command
   // has nothing to run, which is not a failure.
   wake: () => Promise<void>
 }
@@ -104,6 +140,9 @@ export const probe = (
   // Slow git runs to come, oldest first.
   let slow: readonly { ms: number; output: string | null }[] = []
   let failing: readonly string[] = []
+  let replies: Readonly<Record<string, CommandReply>> = {}
+  let called: Readonly<Record<string, readonly (readonly string[])[]>> = {}
+  let limits: Readonly<Record<string, readonly (number | undefined)[]>> = {}
   let logs: string[] = []
   let turns = 0
   let written: Record<string, unknown> = {}
@@ -111,6 +150,7 @@ export const probe = (
   let registered: string[] = []
   let writes: Record<string, number> = {}
   let reads: Record<string, number> = {}
+  let modelReads = 0
 
   const clock = mock.clock(on, { now: NOON })
   // The kit's mock.store answers the same four calls from memory, but only
@@ -155,9 +195,31 @@ export const probe = (
     writes = { ...writes, [e.key]: (writes[e.key] ?? 0) + 1 }
     return { value: { isSet: true as const, version: version + 1 } }
   })
-  on('session.model', () => ({ value: now.model ?? '' }))
+  on('session.model', () => {
+    modelReads += 1
+    return { value: now.model ?? '' }
+  })
   on('process.run', async (_$, e) => {
-    const isGit = e.argv[0] === 'git'
+    const isGit = e.argv[0] === 'git' && e.argv.includes('status')
+    if (e.argv[0] !== undefined && !isGit) {
+      const sub = e.argv[0] === 'git' ? e.argv.find((arg, at) => at > 0 && !arg.startsWith('-')) : undefined
+      const key = sub === undefined ? e.argv[0] : `git ${sub}`
+      called = { ...called, [key]: [...(called[key] ?? []), e.argv] }
+      limits = { ...limits, [key]: [...(limits[key] ?? []), e.init?.timeoutMs] }
+      const held = replies[key]
+      const reply = typeof held === 'function' ? held(e.argv) : held
+      if (reply === 'reject') throw new Error(`${key}: command not found`)
+      if (reply?.delayMs !== undefined) await clock.sleep(reply.delayMs)
+      return {
+        value: {
+          exitCode: reply?.exitCode ?? (reply === undefined ? 128 : 0),
+          stdout: reply?.stdout ?? '',
+          stderr: '',
+          isStdoutTruncated: false,
+          isStderrTruncated: false,
+        },
+      }
+    }
     if (isGit) gitRuns += 1
     const late = isGit ? slow[0] : undefined
     if (late !== undefined) {
@@ -201,17 +263,43 @@ export const probe = (
   on('turn.start', (_$, e) => ({ turnId: e.turnId }))
   on('turn.complete', () => ({ text: '' }))
 
-  const complete = async (after: Reading, extra: { agentId?: string } = {}) => {
+  const complete = async (after: Reading, extra: { agentId?: string; usage?: CacheUsage } = {}) => {
     now = after
     turns += 1
-    await $.turn.complete({ answer: '', durationMs: 1, isAborted: false, turnId: `t${turns}`, reason: 'answer', ...extra })
+    const { usage, ...rest } = extra
+    await $.turn.complete({
+      answer: '',
+      durationMs: 1,
+      isAborted: false,
+      turnId: `t${turns}`,
+      reason: 'answer',
+      ...rest,
+      ...(usage === undefined
+        ? {}
+        : {
+            usage: {
+              model: 'm',
+              input_tokens: usage.input,
+              output_tokens: 1,
+              cache_read_input_tokens: usage.cacheRead,
+              cache_creation_input_tokens: usage.cacheWrite,
+            },
+          }),
+    })
+    // What the turn end set going (a command) runs as far as it can.
+    await clock.settle()
   }
 
   return {
     complete,
-    turn: async after => {
+    begin: async () => {
       await $.turn.start({ text: 'go', turnId: `t${turns + 1}` })
-      await complete(after)
+      await clock.settle()
+    },
+    // A turn, like a real one, spent something on the prompt cache.
+    turn: async (after, usage = SAMPLE_USAGE) => {
+      await $.turn.start({ text: 'go', turnId: `t${turns + 1}` })
+      await complete(after, usage === null ? {} : { usage })
     },
     mount: (surface, bodyColumns = 80, hasSurvey = false) =>
       $.ui.mount({ plugin: PLUGIN, surface, component: 'AbovePrompt', props: bandProps(bodyColumns, hasSurvey) }),
@@ -247,6 +335,11 @@ export const probe = (
     slowGit: (ms, output) => {
       slow = [...slow, { ms, output }]
     },
+    setCommand: (key, reply) => {
+      replies = { ...replies, [key]: reply }
+    },
+    calls: key => called[key] ?? [],
+    timeouts: key => limits[key] ?? [],
     seedState: (key, value) => {
       const name = `${PLUGIN}.${key}`
       state.set(name, { value, version: (state.get(name)?.version ?? 0) + 1 })
@@ -261,17 +354,24 @@ export const probe = (
       (await $.command.run({ command: name, args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })).text ??
       '',
     wake: async () => {
+      // Commands nobody set answer a sample, so a mod that draws from one has a figure.
+      for (const [key, reply] of Object.entries(SAMPLE_REPLIES)) replies = { [key]: reply, ...replies }
       await $.tool.call({ tool: 'Bash', command: 'ls' })
+      await $.tool.call({ tool: 'Edit' } as Parameters<typeof $.tool.call>[0])
+      await $.turn.start({ text: 'go', turnId: `t${turns + 1}` })
       try {
         await $.command.run({ command: 'pomodoro', args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })
       } catch {
         // No /pomodoro in this mod.
       }
+      // Past two ticks of the minute, so what asks a command on a rate has asked.
+      await clock.advance(120_000)
     },
     toasts: () => toasts,
     registered: () => registered,
     stateWrites: key => writes[key] ?? 0,
     stateReads: key => reads[key] ?? 0,
+    modelReads: () => modelReads,
     logs: () => logs,
     writes: () => written,
     breakUsage: () => {

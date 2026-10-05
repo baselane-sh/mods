@@ -1,8 +1,49 @@
 {
-  "hooks": ["engine.ts", "tracker.ts", "render.ts", "patterns.ts", "helpers.ts", "toml.ts", "manifests.ts", "tasks.ts"],
   "tests": ["probe.ts", "fixtures.ts", "engine.test.ts"],
   "register": "registerCommands",
   "ruleExport": "rule",
   "types": "types/index.d.ts",
-  "stateOwner": { "name": "receipt", "files": ["hooks/engine.ts", "types/index.d.ts"] }
+  "stateOwner": {
+    "name": "receipt",
+    "files": ["hooks/engine.ts", "types/index.d.ts", "hooks/hosts/command.ts", "hooks/hosts/command-git.ts", "hooks/hosts/command-git-run.ts", "hooks/hosts/command-read.ts", "hooks/hosts/command-files.ts", "hooks/hosts/command-write.ts", "hooks/hosts/command-run.ts"]
+  },
+  "needs": {
+    "standup": ["git"],
+    "changelog": ["git"],
+    "pr-description": ["git"],
+    "todos": ["git"],
+    "loc": ["git"],
+    "hotspots": ["git"],
+    "commit-msg": ["git"],
+    "branches": ["git"],
+    "tree": ["git"],
+    "authors": ["git"],
+    "stashes": ["git"],
+    "recent": ["git"],
+    "file-owners": ["git"],
+    "handoff": ["git", "write"],
+    "deps": ["git", "read"],
+    "scripts": ["git", "read"],
+    "env-check": ["git", "read"],
+    "size": ["git", "git-run"],
+    "conflicts": ["git", "git-run"],
+    "secret-scan": ["git", "git-run"],
+    "licenses": ["git", "read", "list"],
+    "readme-check": ["git", "read", "list"],
+    "envinfo": ["run"]
+  },
+  "hosts": {
+    "command": {
+      "perRule": true,
+      "hosts": [
+        { "file": "hooks/hosts/command.ts", "export": "answerCommands", "gives": [] },
+        { "file": "hooks/hosts/command-git.ts", "export": "answerCommandsWithGit", "gives": ["git"] },
+        { "file": "hooks/hosts/command-git-run.ts", "export": "answerCommandsWithGitRun", "gives": ["git", "git-run"] },
+        { "file": "hooks/hosts/command-read.ts", "export": "answerCommandsWithRead", "gives": ["git", "read"] },
+        { "file": "hooks/hosts/command-files.ts", "export": "answerCommandsWithFiles", "gives": ["git", "read", "list"] },
+        { "file": "hooks/hosts/command-write.ts", "export": "answerCommandsWithWrite", "gives": ["git", "write"] },
+        { "file": "hooks/hosts/command-run.ts", "export": "answerCommandsWithRun", "gives": ["run"] }
+      ]
+    }
+  }
 }

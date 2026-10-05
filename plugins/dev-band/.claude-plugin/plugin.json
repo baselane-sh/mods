@@ -1,7 +1,7 @@
 {
   "name": "dev-band",
-  "version": "0.3.0",
-  "description": "The developer band in one row above the prompt: git branch and changed files, wall clock and session age, tool counts, and failed tool calls.",
+  "version": "0.4.0",
+  "description": "The developer band in one row above the prompt: git branch and changed files (read with git status), wall clock and session age, tool counts, and failed tool calls.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

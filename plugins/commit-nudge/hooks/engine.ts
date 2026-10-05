@@ -1,4 +1,4 @@
-import type { ModelCompleteRequest, ModelCompleteResult, On, PluginOptions, ToolCallEnvelope, ToolCallResult } from 'claude-code'
+import type { ModelCompleteRequest, ModelCompleteResult, PluginOptions, ToolCallEnvelope, ToolCallResult } from 'claude-code'
 
 // What a nudge may read when the turn stops. The engine forbids passing `$`
 // itself, so it hands over these functions instead.
@@ -26,7 +26,7 @@ export type Nudge = {
   atStop: (tools: NudgeTools, options: PluginOptions) => string | undefined | Promise<string | undefined>
 }
 
-const ENV_EXAMPLE = '.env.example'
+export const ENV_EXAMPLE = '.env.example'
 
 // Keeps only the NAME of each `NAME=value` line; the value is dropped here.
 export const envNames = (text: string): string[] =>
@@ -38,38 +38,52 @@ export const envNames = (text: string): string[] =>
 const failed = (id: string, error: unknown): string =>
   `${id}: skipped, ${error instanceof Error ? error.message : String(error)}`
 
-export const registerNudges = (on: On, nudges: readonly Nudge[], options: PluginOptions = {}): void => {
-  if (nudges.some(nudge => nudge.observe !== undefined)) {
-    on('tool.call', async ($, e, next) => {
-      const ran = await next(e)
-      const cwd = await $.session.cwd().catch(() => '')
-      for (const nudge of nudges) {
-        try {
-          nudge.observe?.(e, ran, cwd)
-        } catch (error) {
-          await $.ui.log(failed(nudge.id, error))
-        }
-      }
-      return ran
-    })
-  }
+// The tools a host does not give. A nudge that calls one is logged and
+// skipped, and its tests fail: name what it uses in engine.json `needs`.
+const absent = (name: string) => (): Promise<never> =>
+  Promise.reject(new Error(`${name} is not given to this mod; name it in engine.json needs`))
 
-  on('classic.Stop', async ($, e, next) => {
-    const tools: NudgeTools = {
-      contextPercent: async () => (await $.session.usage()).context.percent,
-      now: () => $.clock.now(),
-      sessionStartedAt: async () => (await $.session.usage()).startedAt,
-      envExampleNames: async () => ((await $.fs.exists(ENV_EXAMPLE)) ? envNames(await $.fs.read(ENV_EXAMPLE)) : undefined),
-      complete: request => $.model.complete(request),
+export const NO_TOOLS: NudgeTools = {
+  contextPercent: absent('contextPercent'),
+  now: absent('now'),
+  sessionStartedAt: absent('sessionStartedAt'),
+  envExampleNames: absent('envExampleNames'),
+  complete: absent('complete'),
+}
+
+// Hands each finished tool call to the nudges that watch them. `log` closes
+// over the hook's `$`.
+export const observeAll = async (
+  nudges: readonly Nudge[],
+  e: ToolCallEnvelope,
+  ran: ToolCallResult,
+  cwd: string,
+  log: (text: string) => unknown,
+): Promise<void> => {
+  for (const nudge of nudges) {
+    try {
+      nudge.observe?.(e, ran, cwd)
+    } catch (error) {
+      await log(failed(nudge.id, error))
     }
-    for (const nudge of nudges) {
-      try {
-        const reminder = await nudge.atStop(tools, options)
-        if (reminder !== undefined) await $.ui.toast(`${nudge.id}: ${reminder}`)
-      } catch (error) {
-        await $.ui.log(failed(nudge.id, error))
-      }
+  }
+}
+
+// Asks each nudge for its reminder as the turn stops and shows it as a toast.
+// `toast` and `log` close over the hook's `$`.
+export const remindAll = async (
+  nudges: readonly Nudge[],
+  tools: NudgeTools,
+  options: PluginOptions,
+  toast: (text: string) => unknown,
+  log: (text: string) => unknown,
+): Promise<void> => {
+  for (const nudge of nudges) {
+    try {
+      const reminder = await nudge.atStop(tools, options)
+      if (reminder !== undefined) await toast(`${nudge.id}: ${reminder}`)
+    } catch (error) {
+      await log(failed(nudge.id, error))
     }
-    return next(e)
-  })
+  }
 }

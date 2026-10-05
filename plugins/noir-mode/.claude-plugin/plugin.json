@@ -1,0 +1,10 @@
+{
+  "name": "noir-mode",
+  "version": "0.4.0",
+  "description": "Prose like a hard-boiled detective narrator, light and clear. Code, commands, commit messages and error text stay exact.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

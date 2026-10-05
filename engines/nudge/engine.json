@@ -1,17 +1,34 @@
 {
-  "hooks": [
-    "engine.ts",
-    "edits.ts"
-  ],
-  "tests": [
-    "probe.ts",
-    "engine.test.ts"
-  ],
-  "register": "registerNudges",
+  "tests": ["probe.ts", "engine.test.ts"],
   "ruleExport": "create",
-  "optionsFor": [
-    "sports-narrator"
-  ],
+  "needs": {
+    "test-reminder": ["observe"],
+    "clippy": ["observe"],
+    "sports-narrator": ["observe", "model"],
+    "commit-nudge": ["observe"],
+    "todo-nudge": ["observe"],
+    "docs-nudge": ["observe"],
+    "debug-print-nudge": ["observe"],
+    "typecheck-nudge": ["observe"],
+    "lockfile-nudge": ["observe"],
+    "big-diff-nudge": ["observe"],
+    "migration-nudge": ["observe"],
+    "env-example-nudge": ["observe", "env"],
+    "ctx-nudge": ["usage"],
+    "break-nudge": ["usage", "clock"]
+  },
+  "hosts": {
+    "observe": [
+      { "file": "hooks/hosts/observe.ts", "export": "observeCalls", "gives": ["observe"] }
+    ],
+    "stop": [
+      { "file": "hooks/hosts/stop.ts", "export": "remindAtStop", "gives": [] },
+      { "file": "hooks/hosts/stop-usage.ts", "export": "remindWithUsage", "gives": ["usage"] },
+      { "file": "hooks/hosts/stop-usage-clock.ts", "export": "remindWithUsageAndClock", "gives": ["usage", "clock"] },
+      { "file": "hooks/hosts/stop-env.ts", "export": "remindWithEnvNames", "gives": ["env"] },
+      { "file": "hooks/hosts/stop-model.ts", "export": "remindWithModel", "gives": ["model"], "options": true }
+    ]
+  },
   "userConfig": {
     "sports-narrator": {
       "enabled": {

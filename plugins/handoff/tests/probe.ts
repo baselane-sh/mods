@@ -20,6 +20,14 @@ export type Fakes = {
   // A key that is absent makes git exit 1, so leave out `rev-parse
   // --is-inside-work-tree` to stand for a folder outside any repo.
   git?: Readonly<Record<string, string>>
+  // Exit codes for a program (a git key or a full argv joined with spaces); the
+  // default is 0 when the program has an answer and 1 when it has none.
+  exit?: Readonly<Record<string, number>>
+  // Programs that run past their timeout: the call rejects and the clock moves by the timeout.
+  timeout?: readonly string[]
+  // Directory listings by path: names, a trailing "/" marks a folder. A path
+  // that is absent is missing.
+  dirs?: Readonly<Record<string, readonly string[]>>
   // Git answers that come back cut at the host's 4 MiB cap.
   truncated?: readonly string[]
   // Files that already exist, by path.
@@ -45,7 +53,7 @@ export type CommandProbe = {
   // Raises session.start, the way the session does.
   start: () => Promise<void>
   // Runs `/<name>` and answers its output text.
-  run: (name: string) => Promise<string>
+  run: (name: string, args?: string) => Promise<string>
   // The record as the engine last wrote it to `$.state`.
   recorded: () => CommandRecord | undefined
   registered: () => readonly { name: string; description: string }[]
@@ -54,6 +62,9 @@ export type CommandProbe = {
   written: () => Readonly<Record<string, string>>
   // Every argv the commands ran through process.run, joined with spaces.
   ran: () => readonly string[]
+  // The working directory each of those runs asked for (undefined: the
+  // session's), in the same order.
+  ranIn: () => readonly (string | undefined)[]
 }
 
 // Stands in for the engine beneath the commands. Every figure a receipt
@@ -63,6 +74,7 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
   let copied: string[] = []
   let written: Record<string, string> = {}
   let ran: string[] = []
+  let ranIn: (string | undefined)[] = []
   const cwd = fakes.cwd ?? CWD
 
   const state = new Map<string, { value: unknown; version: number }>()
@@ -77,7 +89,9 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
   on('session.end', (_$, e) => ({ sessionId: e.sessionId }))
   on('session.turns', () => ({ value: fakes.turns ?? 0 }))
-  on('clock.now', () => ({ value: fakes.now ?? 0 }))
+  // A program that times out moves the clock by its timeout, as real time would.
+  let waited = 0
+  on('clock.now', () => ({ value: (fakes.now ?? 0) + waited }))
   on('session.usage', () => ({
     value: {
       startedAt: fakes.startedAt ?? 0,
@@ -101,17 +115,36 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
   on('process.run', (_$, e) => {
     const command = e.argv.join(' ')
     ran = [...ran, command]
+    ranIn = [...ranIn, e.init?.cwd]
     const prefix = `git -C ${cwd} `
     const key = command.startsWith(prefix) ? command.slice(prefix.length) : command
+    if (fakes.timeout?.includes(key) === true) {
+      // The host rejects after the program's timeout.
+      waited += e.init?.timeoutMs ?? 0
+      throw new Error('process did not exit')
+    }
     const stdout = fakes.git?.[key]
     const result: ProcessRunResult = {
-      exitCode: stdout === undefined ? 1 : 0,
+      exitCode: fakes.exit?.[key] ?? (stdout === undefined ? 1 : 0),
       stdout: stdout ?? '',
       stderr: '',
       isStdoutTruncated: fakes.truncated?.includes(key) ?? false,
       isStderrTruncated: false,
     }
     return { value: result }
+  })
+  on('fs.list', (_$, e) => {
+    const names = fakes.dirs?.[e.path]
+    if (names === undefined) throw new Error(`ENOENT: ${e.path}`)
+    return {
+      value: names.map(name => ({
+        name: name.replace(/\/$/, ''),
+        kind: name.endsWith('/') ? ('dir' as const) : ('file' as const),
+        size: 0,
+        mtimeMs: 0,
+        isLink: false,
+      })),
+    }
   })
   on('fs.exists', (_$, e) => ({ value: (fakes.files ?? []).includes(e.path) || e.path in written }))
   on('fs.read', (_$, e) => {
@@ -139,7 +172,7 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
     start: async () => {
       await $.session.start({ cwd, surface: null, isInteractive: true })
     },
-    run: async name => (await $.command.run({ command: name, args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })).text ?? '',
+    run: async (name, args = '') => (await $.command.run({ command: name, args, origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })).text ?? '',
     // The record as the engine last wrote it to `$.state`.
     // Whatever mod name the engine runs under owns the value, so read it by key.
     recorded: () => [...state].find(([name]) => name.endsWith('.record'))?.[1].value as CommandRecord | undefined,
@@ -147,5 +180,6 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
     copied: () => copied,
     written: () => written,
     ran: () => ran,
+    ranIn: () => ranIn,
   }
 }

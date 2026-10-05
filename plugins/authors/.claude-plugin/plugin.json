@@ -1,7 +1,7 @@
 {
   "name": "authors",
-  "version": "0.3.0",
-  "description": "Adds /authors: the top 15 contributors by commit count with their last commit date. Names only, never email addresses. Read-only.",
+  "version": "0.4.0",
+  "description": "Adds /authors: the top 15 contributors by commit count with their last commit date, from git log. Names only, never email addresses. Read-only.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

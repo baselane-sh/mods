@@ -1,6 +1,11 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCalls } from './hosts/check'
+import { notePrompts } from './hosts/prompt-notes'
 import { rule as secretValue } from './rules/secret-value'
 
-export const register: Register = on => registerGuards(on, [secretValue])
+export const register: Register = on => {
+  const rules = [secretValue]
+  checkCalls(on, rules)
+  notePrompts(on, rules)
+}

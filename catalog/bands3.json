@@ -1,0 +1,55 @@
+{
+  "engine": "band",
+  "mods": [
+    {
+      "name": "turn-timer",
+      "description": "A band above the prompt with how long the current turn has run (turn 0:42). It shows while a turn runs and hides between turns.",
+      "rules": ["turn-timer"]
+    },
+    {
+      "name": "ahead-behind",
+      "description": "A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), read with git status after each Bash call and file edit. Hidden when the branch has no upstream.",
+      "rules": ["ahead-behind"]
+    },
+    {
+      "name": "battery-band",
+      "description": "A band above the prompt with the Mac battery percent and charging state (🔋 87%, ⚡ 54% while charging), read from pmset once a minute. Hidden on other systems.",
+      "rules": ["battery-band"]
+    },
+    {
+      "name": "now-playing",
+      "description": "A band above the prompt with the track Music or Spotify plays on your Mac (♪ Song - Artist), read with pgrep and osascript once a minute, only from a player that runs. Hidden when nothing plays.",
+      "rules": ["now-playing"]
+    },
+    {
+      "name": "ci-band",
+      "description": "A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes; branch read with git. Hidden without gh.",
+      "rules": ["ci-band"]
+    },
+    {
+      "name": "todo-count",
+      "description": "A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), counted with git after edits. Hidden when there are none.",
+      "rules": ["todo-count"]
+    },
+    {
+      "name": "cache-meter",
+      "description": "A band above the prompt with the share of prompt tokens the cache served this session (cache 87%). A high share means cheaper, faster turns.",
+      "rules": ["cache-meter"]
+    },
+    {
+      "name": "streak-flame",
+      "description": "A band above the prompt with your daily streak, the days in a row you finished a turn (🔥 5d). The mod keeps the count in its own store.",
+      "rules": ["streak-flame"]
+    },
+    {
+      "name": "creator-band",
+      "description": "The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines (read with git), and the daily streak flame.",
+      "rules": ["turn-timer", "todo-count", "streak-flame"]
+    },
+    {
+      "name": "ops-band",
+      "description": "The ops band in one row above the prompt: commits ahead and behind the upstream (git), the latest GitHub Actions run of your branch (gh), and the Mac battery (pmset).",
+      "rules": ["ahead-behind", "ci-band", "battery-band"]
+    }
+  ]
+}

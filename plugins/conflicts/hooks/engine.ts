@@ -1,0 +1,179 @@
+import { atom, update } from 'claude-code'
+import type { On, ProcessRunResult, SessionUsage, UiCopyResult } from 'claude-code'
+
+import type { CommandRecord } from '../types'
+import { draw } from './render'
+import { EMPTY, observe } from './tracker'
+
+// What the engine knows about the session beside the record. A figure the
+// host does not have is left out, never zeroed, so a rule can say "n/a".
+export type Facts = {
+  turns?: number
+  elapsedMs?: number
+  contextPercent?: number
+  costUsd?: number
+}
+
+// What a rule may reach beyond the record, as closures over the host calls
+// (a rule never holds `$`). A rule that needs none of it ignores the argument.
+export type CommandTools = {
+  // The session's working directory.
+  cwd: () => Promise<string>
+  // `git -C <cwd> <args>`: stdout, or undefined when git exits non-zero (which
+  // is also what a directory outside any repo answers). Output past the host's
+  // 4 MiB cap, or a git that times out, throws.
+  git: (...args: string[]) => Promise<string | undefined>
+  exists: (path: string) => Promise<boolean>
+  // The text of a file (a relative path is under the cwd), or undefined when it
+  // is missing, unreadable or over the host's 4 MiB cap.
+  read: (path: string) => Promise<string | undefined>
+  // Creates the file and its directories.
+  write: (path: string, text: string) => Promise<void>
+  // `git -C <cwd> <args>` with the exit code kept, for a command that must tell
+  // "no match" (1) from a real failure. Never throws.
+  gitRun: (...args: string[]) => Promise<Ran>
+  // Any program, killed after `timeoutMs`. Never throws: a program that is not
+  // installed answers a non-zero code.
+  run: (argv: readonly string[], timeoutMs: number) => Promise<Ran>
+  // The entries of a directory, or undefined when it is missing or unreadable.
+  list: (path: string) => Promise<{ name: string; isDir: boolean }[] | undefined>
+}
+
+// What a program answered. `timedOut` and `truncated` (output past the 4 MiB
+// cap) are set when stdout cannot be trusted as complete.
+export type Ran = { code: number; stdout: string; stderr: string; timedOut: boolean; truncated: boolean }
+
+// What a rule answers: text to print and copy, or `{ text, copy: false }` for
+// a message that is not a result (an error must not replace the clipboard).
+export type Composed = string | { text: string; copy: false }
+
+// One slash command: its name and description, and how it turns the session
+// record into the text it prints. Pure unless it uses `tools`.
+export type CommandRule = {
+  name: string
+  description: string
+  // `args` is what the person typed after the command name, trimmed.
+  compose: (record: CommandRecord, facts: Facts, tools: CommandTools, args: string) => Composed | Promise<Composed>
+}
+
+export const GIT_TIMEOUT_MS = 15_000
+
+// A state value is written only by the plugin that owns it, and the owner is
+// the mod's name. The host wants the owner as a literal, so this source writes
+// the first mod's name and scripts/build.mjs swaps in each mod's own name
+// (engine.json, stateOwner). The same swap runs in types/index.d.ts.
+const record = atom({ plugin: 'conflicts', key: 'record' } as const, EMPTY)
+
+export const attempt = async <T>(read: () => Promise<T>): Promise<T | undefined> => {
+  try {
+    return await read()
+  } catch {
+    return undefined
+  }
+}
+
+// Takes a closure that starts the program, never `$` itself. The host rejects both
+// for a program that cannot start and for one still running at the timeout, and
+// the message does not say which, so a rejection that took nearly the whole
+// timeout counts as a timeout.
+export const exec = async (start: () => Promise<ProcessRunResult>, timeoutMs: number, now: () => Promise<number>): Promise<Ran> => {
+  const began = await now()
+  try {
+    const ran = await start()
+    return { code: ran.exitCode, stdout: ran.stdout, stderr: ran.stderr, timedOut: false, truncated: ran.isStdoutTruncated }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    const slow = (await now()) - began >= timeoutMs * 0.9
+    return { code: -1, stdout: '', stderr: '', timedOut: slow || /time/i.test(message), truncated: false }
+  }
+}
+
+// The tools a host does not give. A rule that calls one fails with a message,
+// and its tests fail: name what it uses in engine.json `needs`.
+const absent = (name: string) => (): Promise<never> =>
+  Promise.reject(new Error(`${name} is not given to this mod; name it in engine.json needs`))
+
+export const NO_TOOLS: CommandTools = {
+  cwd: absent('cwd'),
+  git: absent('git'),
+  exists: absent('exists'),
+  read: absent('read'),
+  write: absent('write'),
+  gitRun: absent('gitRun'),
+  run: absent('run'),
+  list: absent('list'),
+}
+
+// What every command reads besides its tools, as closures over the hook's `$`.
+export type CommandReads = {
+  usage: () => Promise<SessionUsage>
+  turns: () => Promise<number>
+  now: () => Promise<number>
+  kept: () => Promise<CommandRecord>
+  copy: (text: string) => Promise<UiCopyResult>
+}
+
+// Answers one slash command: the rule composes its text from the record, the
+// facts and its tools, and a result is copied to the clipboard.
+export const answerCommand = async (rule: CommandRule, args: string, tools: CommandTools, reads: CommandReads): Promise<{ text: string }> => {
+  const usage = await attempt(reads.usage)
+  const turns = await attempt(reads.turns)
+  const now = await attempt(reads.now)
+  const kept = await attempt(reads.kept)
+
+  const facts: Facts = {
+    ...(turns === undefined ? {} : { turns }),
+    ...(usage === undefined || now === undefined ? {} : { elapsedMs: Math.max(0, now - usage.startedAt) }),
+    ...(usage?.context.percent === undefined ? {} : { contextPercent: usage.context.percent }),
+    ...(usage?.cost === undefined ? {} : { costUsd: usage.cost.usd }),
+  }
+
+  let composed: Composed
+  try {
+    composed = await rule.compose(kept ?? EMPTY, facts, tools, args.trim())
+  } catch (error) {
+    return { text: `${rule.name}: failed, ${error instanceof Error ? error.message : String(error)}` }
+  }
+
+  if (typeof composed !== 'string') return { text: composed.text }
+  const text = composed
+
+  const copy = await attempt(() => reads.copy(text))
+  const note = copy === undefined ? 'not copied (clipboard error)' : copy.isCopied ? 'copied to clipboard' : `not copied (${copy.reason})`
+  return { text: `${text}\n\n${note}` }
+}
+
+// The hooks every mod of the engine has. Each command's own answer is a host
+// (engine.json hosts), so a command gets only the tools its rule uses.
+export const registerCommands = (on: On, rules: readonly CommandRule[]): void => {
+  // The one tracker every rule reads. It lives in `$.state`, so a hot reload
+  // of the mod keeps the session so far.
+  on('tool.call', async ($, e, next) => {
+    const ran = await next(e)
+    try {
+      await update($, record, so_far => observe(so_far, e, ran))
+    } catch (error) {
+      await $.ui.log(`command: could not record ${e.tool}, ${error instanceof Error ? error.message : String(error)}`)
+    }
+    return ran
+  })
+
+  // /clear ends the conversation without a new session.start: start over.
+  on('session.end', async ($, e, next) => {
+    if (e.reason === 'clear') await update($, record, () => EMPTY)
+    return next(e)
+  })
+
+  on('session.start', async ($, e, next) => {
+    for (const rule of rules) await $.command.register({ name: rule.name, description: rule.description })
+    return next(e)
+  })
+
+  // A surface without Box or Text keeps the plain output row.
+  for (const rule of rules) {
+    on('ui.render', { component: 'CommandOutput', props: { command: rule.name } }, ($, e, next) => {
+      const { Box, Text } = $.ui.resolve(e)
+      return Box === undefined || Text === undefined ? next(e) : draw({ Box, Text }, e.props.text)
+    })
+  }
+}

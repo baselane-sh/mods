@@ -1,6 +1,11 @@
 import type { Register } from 'claude-code'
 
-import { registerNudges } from './engine'
+import { observeCalls } from './hosts/observe'
+import { remindAtStop } from './hosts/stop'
 import { create as clippy } from './rules/clippy'
 
-export const register: Register = on => registerNudges(on, [clippy()])
+export const register: Register = on => {
+  const rules = [clippy()]
+  observeCalls(on, rules)
+  remindAtStop(on, rules)
+}

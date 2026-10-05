@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerRender } from './engine'
+import { drawToolRows } from './hosts/row'
 import { create as sizeBadge } from './rules/size-badge'
 
-export const register: Register = on => registerRender(on, [sizeBadge()])
+export const register: Register = on => {
+  const rules = [sizeBadge()]
+  drawToolRows(on, rules)
+}

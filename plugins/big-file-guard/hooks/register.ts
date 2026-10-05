@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCallsWithAll } from './hosts/check-all'
 import { rule as bigFile } from './rules/big-file'
 
-export const register: Register = on => registerGuards(on, [bigFile])
+export const register: Register = on => {
+  const rules = [bigFile]
+  checkCallsWithAll(on, rules)
+}

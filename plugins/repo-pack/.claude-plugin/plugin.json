@@ -1,7 +1,7 @@
 {
   "name": "repo-pack",
-  "version": "0.3.0",
-  "description": "Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches.",
+  "version": "0.4.0",
+  "description": "Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. They read git.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

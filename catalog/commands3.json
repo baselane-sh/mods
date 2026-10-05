@@ -3,42 +3,42 @@
   "mods": [
     {
       "name": "tree",
-      "description": "Adds /tree: tracked files as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only.",
+      "description": "Adds /tree: tracked files (git ls-files) as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only.",
       "rules": [
         "tree"
       ]
     },
     {
       "name": "deps",
-      "description": "Adds /deps: direct dependencies with versions from package.json, pyproject.toml, requirements.txt, go.mod and Cargo.toml at the repo root. No network, no audit. Read-only.",
+      "description": "Adds /deps: direct dependencies with versions from package.json, pyproject.toml, requirements.txt, go.mod and Cargo.toml at the git repo root. No network, no audit. Read-only.",
       "rules": [
         "deps"
       ]
     },
     {
       "name": "authors",
-      "description": "Adds /authors: the top 15 contributors by commit count with their last commit date. Names only, never email addresses. Read-only.",
+      "description": "Adds /authors: the top 15 contributors by commit count with their last commit date, from git log. Names only, never email addresses. Read-only.",
       "rules": [
         "authors"
       ]
     },
     {
       "name": "scripts",
-      "description": "Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts. Read-only.",
+      "description": "Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts at the git repo root. Read-only.",
       "rules": [
         "scripts"
       ]
     },
     {
       "name": "env-check",
-      "description": "Adds /env-check: variable names in .env.example against .env, listing missing and extra names. Reads names only, never a value. Read-only.",
+      "description": "Adds /env-check: variable names in .env.example against .env at the git repo root, listing missing and extra names. Reads names only, never a value. Read-only.",
       "rules": [
         "env-check"
       ]
     },
     {
       "name": "explore-pack",
-      "description": "Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check.",
+      "description": "Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. They read git and project files.",
       "rules": [
         "tree",
         "deps",

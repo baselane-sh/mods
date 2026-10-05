@@ -13,22 +13,22 @@
     },
     {
       "name": "changelog",
-      "description": "Adds /changelog: commits since the last tag (or the last 30), grouped by conventional-commit type, as Markdown.",
+      "description": "Adds /changelog: commits since the last tag (or the last 30), read with git log and grouped by conventional-commit type, as Markdown.",
       "rules": ["changelog"]
     },
     {
       "name": "pr-description",
-      "description": "Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master.",
+      "description": "Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master, read with git.",
       "rules": ["pr-description"]
     },
     {
       "name": "handoff",
-      "description": "Adds /handoff: writes a session summary to .claude/handoff.md (never overwriting) and answers with the path.",
+      "description": "Adds /handoff: writes a session summary with the git status to .claude/handoff.md (never overwriting) and answers with the path.",
       "rules": ["handoff"]
     },
     {
       "name": "command-pack",
-      "description": "Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff.",
+      "description": "The five original slash commands in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. They read git; /handoff also writes .claude/handoff.md.",
       "rules": ["receipt", "standup", "changelog", "pr-description", "handoff"]
     }
   ]

@@ -1,6 +1,6 @@
 {
   "name": "ntfy-notify",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Sends a phone push through ntfy.sh when Claude Code needs your input. The message is generic. Does nothing until you set an ntfy topic.",
   "author": {
     "name": "Baselane",

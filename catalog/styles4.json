@@ -1,0 +1,13 @@
+{
+  "engine": "style",
+  "mods": [
+    { "name": "socratic-mode", "description": "For learning: answers a question with a short hint and one guiding question first, and gives the full answer when you ask. Code and commands stay exact.", "rules": ["socratic-mode"] },
+    { "name": "rubber-duck", "description": "Restates the problem in its own words and lists its assumptions before it starts work.", "rules": ["rubber-duck"] },
+    { "name": "reviewer-mode", "description": "After each code change, reviews its own diff like a strict senior reviewer and lists each issue it found and fixed.", "rules": ["reviewer-mode"] },
+    { "name": "docstring-mode", "description": "Every new or changed public function gets a short doc comment in the language's normal style.", "rules": ["docstring-mode"] },
+    { "name": "noir-mode", "description": "Prose like a hard-boiled detective narrator, light and clear. Code, commands, commit messages and error text stay exact.", "rules": ["noir-mode"] },
+    { "name": "bullet-mode", "description": "Replies as short bullet lists, at most one sentence per bullet, unless you ask for code.", "rules": ["bullet-mode"] },
+    { "name": "british-english", "description": "British spelling and terms in prose (colour, organise, licence as a noun). Code identifiers stay as they are.", "rules": ["british-english"] },
+    { "name": "mentor-pack", "description": "Mentor habits in one install: a hint and a guiding question first, assumptions listed before work, and a strict self-review after each change.", "rules": ["socratic-mode", "rubber-duck", "reviewer-mode"] }
+  ]
+}

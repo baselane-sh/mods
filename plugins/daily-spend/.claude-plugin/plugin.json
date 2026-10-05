@@ -1,6 +1,6 @@
 {
   "name": "daily-spend",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A band above the prompt with today's total cost across all your sessions.",
   "author": {
     "name": "Baselane",

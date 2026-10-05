@@ -1,6 +1,6 @@
 {
   "name": "focus-pack",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Three quiet nudges in one mod: commit after 8 edits, TODO/FIXME/HACK lines added, and debug prints added.",
   "author": {
     "name": "Baselane",

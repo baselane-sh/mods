@@ -1,8 +1,23 @@
 {
-  "hooks": ["engine.tsx", "view.tsx", "rule.ts", "lines.ts", "patterns.ts", "turns.ts"],
   "tests": ["probe.ts", "engine.test.ts", "view.test.ts"],
   "register": "registerPanes",
+  "shared": "createPanes",
   "ruleExport": "rule",
   "types": "types/index.d.ts",
-  "nameToken": "pane-mods"
+  "nameToken": "pane-mods",
+  "needs": {
+    "git-pane": ["run"],
+    "port-watch": ["run"],
+    "process-pane": ["run"],
+    "todo-pane": ["run"],
+    "cost-pane": ["turns"],
+    "timeline-pane": ["turns"]
+  },
+  "hosts": {
+    "panes": [
+      { "file": "hooks/hosts/panes.ts", "export": "openPanes", "gives": [], "shared": true },
+      { "file": "hooks/hosts/panes-run.ts", "export": "openPanesWithRun", "gives": ["run"], "shared": true }
+    ],
+    "turns": [{ "file": "hooks/hosts/turns.ts", "export": "measureTurns", "gives": ["turns"], "shared": true }]
+  }
 }

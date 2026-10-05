@@ -31,7 +31,7 @@
     },
     {
       "name": "nudge-pack",
-      "description": "Every Baselane turn-end reminder in one mod.",
+      "description": "Two turn-end reminders in one mod: test-reminder and ctx-nudge.",
       "rules": [
         "test-reminder",
         "ctx-nudge"

@@ -1,6 +1,6 @@
 {
   "name": "cost-pane",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A live side pane with the session cost, the cost of each of the last 10 turns as a bar, and the average per turn. Open it with /cost-pane.",
   "author": {
     "name": "Baselane",

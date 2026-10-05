@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerLifecycle } from './engine'
+import { needsInputWithRun } from './hosts/input-run'
 import { rule as desktopNotify } from './rules/desktop-notify'
 
-export const register: Register = (on, options) => registerLifecycle(on, [desktopNotify], options)
+export const register: Register = (on, options) => {
+  const rules = [desktopNotify]
+  needsInputWithRun(on, rules, options)
+}

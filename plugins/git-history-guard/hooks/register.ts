@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCalls } from './hosts/check'
 import { rule as gitHistory } from './rules/git-history'
 
-export const register: Register = on => registerGuards(on, [gitHistory])
+export const register: Register = on => {
+  const rules = [gitHistory]
+  checkCalls(on, rules)
+}

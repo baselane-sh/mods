@@ -13,7 +13,7 @@
     },
     {
       "name": "render-pack",
-      "description": "Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies.",
+      "description": "Both original rendering mods in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies (a click puts @path in the prompt).",
       "rules": ["diff-stats", "file-links"]
     }
   ]

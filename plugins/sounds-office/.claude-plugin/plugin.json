@@ -1,6 +1,6 @@
 {
   "name": "sounds-office",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Quiet office sounds: a soft click when tests pass, a low thud when they fail, paper when a call is blocked.",
   "author": {
     "name": "Baselane",

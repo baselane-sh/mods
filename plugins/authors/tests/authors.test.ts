@@ -52,8 +52,8 @@ test('authors: exactly 15 people has no more line', async ($, on) => {
 })
 
 test('authors: never an email address, even in a name', async ($, on) => {
-  const short = `5\tEve <eve@example.com>\n3\tbob@corp.io\n`
-  const log = `Eve <eve@example.com>\t2026-02-02\nbob@corp.io\t2026-02-01\n`
+  const short = `5\tEve <eve@example.com>\n3\tbob@example.com\n`
+  const log = `Eve <eve@example.com>\t2026-02-02\nbob@example.com\t2026-02-01\n`
   const session = probe($, on, repo(short, log))
   const text = await session.run('authors')
   expect(text + session.copied().join('')).not.toContain('@')

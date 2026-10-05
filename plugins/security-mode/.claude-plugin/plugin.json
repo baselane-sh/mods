@@ -1,6 +1,6 @@
 {
   "name": "security-mode",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Checks each change for injection, secrets, authorization and unsafe input, and states the risks it checked.",
   "author": {
     "name": "Baselane",

@@ -1,7 +1,7 @@
 {
   "name": "changelog",
-  "version": "0.3.0",
-  "description": "Adds /changelog: commits since the last tag (or the last 30), grouped by conventional-commit type, as Markdown.",
+  "version": "0.4.0",
+  "description": "Adds /changelog: commits since the last tag (or the last 30), read with git log and grouped by conventional-commit type, as Markdown.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

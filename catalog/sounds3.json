@@ -1,0 +1,7 @@
+{
+  "engine": "sound",
+  "mods": [
+    { "name": "sounds-zen", "description": "Soft bells and singing-bowl tones: a bell when tests pass, a low bowl when they fail, a muted chime when a call is blocked, a bowl when a turn ends.", "rules": ["zen"] },
+    { "name": "sounds-arcade", "description": "Arcade blips: a coin when tests pass, a game-over drop when they fail, a buzz when a call is blocked, a power-up when a turn ends.", "rules": ["arcade"] }
+  ]
+}

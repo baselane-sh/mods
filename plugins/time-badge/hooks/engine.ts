@@ -1,21 +1,39 @@
-import type { ElementTable, FsStat, On, RenderElement, RenderInput, RenderPropsOf } from 'claude-code'
+import type { ElementTable, FsStat, RenderElement, RenderInput, RenderPropsOf, SessionRepo } from 'claude-code'
 
 // Which tools a rule draws on: a list of names, or every tool.
 export type ToolSet = readonly string[] | 'all'
 
+// Reads a draw may make, as closures over `$` (a rule never holds `$`).
+// `repo` is the session's git repository, or null outside one.
+export type Reads = {
+  cwd: () => Promise<string>
+  repo: () => Promise<SessionRepo | null>
+}
+
+// A draw may answer at once or after its reads.
+type Drawn = RenderElement | undefined | Promise<RenderElement | undefined>
+
 // What a tool row rule draws from: the row's input, the engine's own drawing
 // of it (`next(e)`), and the surface's elements. `durationMs` is how long the
 // call ran, given to a `timed` rule once the call has ended in this session.
-export type ToolRowDraw = {
+export type ToolRowDraw = Reads & {
   e: RenderInput<'ToolUse'>
   row: RenderElement
   elements: ElementTable
   durationMs?: number
 }
 
+// What a tool row rewrite reads: the row's props, the person's home folder
+// and the session's project root.
+export type ToolRowRewrite = {
+  props: RenderPropsOf['ToolUse']
+  home: () => Promise<string | undefined>
+  root: () => Promise<string>
+}
+
 // What a tool result rule draws from: the result block's input, the engine's
 // drawing of it, and the surface's elements.
-export type ToolResultDraw = {
+export type ToolResultDraw = Reads & {
   e: RenderInput<'ToolResult'>
   row: RenderElement
   elements: ElementTable
@@ -23,124 +41,159 @@ export type ToolResultDraw = {
 
 // What an assistant text rule draws from. `$` never leaves the engine's hook,
 // so the calls a rule needs come as closures over it.
-export type AssistantDraw = {
+export type AssistantDraw = Reads & {
   e: RenderInput<'AssistantMessage'>
   elements: ElementTable
-  cwd: () => Promise<string>
   stat: (path: string) => Promise<FsStat>
   insert: (text: string) => void
 }
 
-// One rendering rule. `toolRow` draws on the ToolUse rows of the named tools;
-// `toolResult` rewrites the props of a result block (`rewrite`) or draws
-// beside it (`draw`); `assistantText` draws an assistant reply's text blocks.
-// A draw or rewrite that answers undefined, or throws, leaves the engine's.
+// What an assistant text rewrite reads: the block, and the session's reads.
+export type AssistantRewrite = Reads & { e: RenderInput<'AssistantMessage'> }
+
+// One rendering rule. `toolRow` rewrites the props of the ToolUse rows of the
+// named tools (`rewrite`, which changes the row alone) or draws beside them
+// (`draw`); `toolResult` rewrites the props of a result block (`rewrite`) or
+// draws beside it (`draw`); `assistantText` rewrites an assistant reply's
+// text (`rewrite`, handed on to the hooks beneath, so rules of several mods
+// stack) or draws the block itself (`draw`). A draw or rewrite that answers
+// undefined, or throws, leaves the engine's.
 export type RenderRule = {
   id: string
   toolRow?: {
     tools: ToolSet
     timed?: true
-    draw: (input: ToolRowDraw) => RenderElement | undefined
+    rewrite?: (input: ToolRowRewrite) => Promise<RenderPropsOf['ToolUse'] | undefined>
+    draw?: (input: ToolRowDraw) => Drawn
   }
   toolResult?: {
     tools: ToolSet
     rewrite?: (props: RenderPropsOf['ToolResult']) => RenderPropsOf['ToolResult'] | undefined
-    draw?: (input: ToolResultDraw) => RenderElement | undefined
+    draw?: (input: ToolResultDraw) => Drawn
   }
   assistantText?: {
-    draw: (input: AssistantDraw) => Promise<RenderElement | undefined>
+    rewrite?: (input: AssistantRewrite) => Promise<string | undefined>
+    draw?: (input: AssistantDraw) => Promise<RenderElement | undefined>
   }
 }
 
-// How long each call ran, by tool_use_id. The build writes the mod's name
-// over the plugin token: only the owning plugin may write the value.
-const DURATIONS = { plugin: 'time-badge', key: 'durations' } as const
-
-const reason = (error: unknown): string => (error instanceof Error ? error.message : String(error))
+export const reason = (error: unknown): string => (error instanceof Error ? error.message : String(error))
 
 const covers = (tools: ToolSet, tool: string): boolean => tools === 'all' || tools.includes(tool)
 
-// The settings hooks' PostToolUse events carry the tool's run time without
-// the permission prompt and hook time. One pair of hooks serves every rule.
-const registerTimer = (on: On): void => {
-  on('classic.PostToolUse', async ($, e, next) => {
-    if (e.duration_ms !== undefined) {
-      await $.state.set({ ...DURATIONS, id: e.tool_use_id }, e.duration_ms).catch(error => $.ui.log(`render: no duration kept, ${reason(error)}`))
-    }
-    return next(e)
-  })
-  on('classic.PostToolUseFailure', async ($, e, next) => {
-    if (e.duration_ms !== undefined) {
-      await $.state.set({ ...DURATIONS, id: e.tool_use_id }, e.duration_ms).catch(error => $.ui.log(`render: no duration kept, ${reason(error)}`))
-    }
-    return next(e)
-  })
+// The calls a host does not give. A rule that makes one has its draw logged
+// and skipped, and its tests fail: name what it uses in engine.json `needs`.
+export const absent = (name: string) => (): Promise<never> =>
+  Promise.reject(new Error(`${name} is not given to this mod; name it in engine.json needs`))
+
+export const NO_READS: Reads = { cwd: absent('cwd'), repo: absent('repo') }
+
+type Log = (text: string) => unknown
+
+// What a tool row hook hands its rule, as closures over the hook's `$`.
+export type RowHost = Reads & {
+  home: () => Promise<string | undefined>
+  root: () => Promise<string>
+  duration: () => Promise<number | undefined>
+  elements: () => ElementTable
+  log: Log
 }
 
-const registerToolRow = (on: On, id: string, toolRow: NonNullable<RenderRule['toolRow']>): void => {
-  // ToolUse carries no ctrl+o flag, so the engine's row is always kept and
-  // the rule draws beside it.
-  on('ui.render', { component: 'ToolUse' }, async ($, e, next) => {
-    if (!covers(toolRow.tools, e.props.tool)) return next(e)
-    const row = await next(e)
-    try {
-      // Read only by a timed rule, so the other rows do not redraw on a write.
-      const durationMs = toolRow.timed ? (await $.state.get({ ...DURATIONS, id: e.props.tool_use_id })).value : undefined
-      return toolRow.draw({ e, row, elements: $.ui.resolve(e), durationMs }) ?? row
-    } catch (error) {
-      await $.ui.log(`${id}: drew the engine's row, ${reason(error)}`)
-      return row
-    }
-  })
+export const NO_ROW_READS = { ...NO_READS, home: absent('home'), root: absent('root'), duration: absent('duration') }
+
+// ToolUse carries no ctrl+o flag, so the engine's row is always kept and the
+// rule draws beside it.
+export const drawToolRow = async (
+  id: string,
+  toolRow: NonNullable<RenderRule['toolRow']>,
+  e: RenderInput<'ToolUse'>,
+  next: (e: RenderInput<'ToolUse'>) => Promise<RenderElement>,
+  host: RowHost,
+): Promise<RenderElement> => {
+  const { rewrite, draw } = toolRow
+  if (!covers(toolRow.tools, e.props.tool)) return next(e)
+  let props: RenderPropsOf['ToolUse'] | undefined
+  try {
+    props = await rewrite?.({ props: e.props, home: host.home, root: host.root })
+  } catch (error) {
+    await host.log(`${id}: drew the engine's props, ${reason(error)}`)
+  }
+  const row = await next(props === undefined ? e : { ...e, props })
+  if (draw === undefined) return row
+  try {
+    // Read only by a timed rule, so the other rows do not redraw on a write.
+    const durationMs = toolRow.timed ? await host.duration() : undefined
+    const drawn = await draw({ e, row, elements: host.elements(), durationMs, cwd: host.cwd, repo: host.repo })
+    return drawn ?? row
+  } catch (error) {
+    await host.log(`${id}: drew the engine's row, ${reason(error)}`)
+    return row
+  }
 }
 
-const registerToolResult = (on: On, id: string, toolResult: NonNullable<RenderRule['toolResult']>): void => {
+// What a tool result hook hands its rule, as closures over the hook's `$`.
+export type ResultHost = Reads & { elements: () => ElementTable; log: Log }
+
+export const drawToolResult = async (
+  id: string,
+  toolResult: NonNullable<RenderRule['toolResult']>,
+  e: RenderInput<'ToolResult'>,
+  next: (e: RenderInput<'ToolResult'>) => Promise<RenderElement>,
+  host: ResultHost,
+): Promise<RenderElement> => {
   const { tools, rewrite, draw } = toolResult
-  on('ui.render', { component: 'ToolResult' }, async ($, e, next) => {
-    if (!covers(tools, e.props.tool)) return next(e)
-    let props: RenderPropsOf['ToolResult'] | undefined
-    try {
-      props = rewrite?.(e.props)
-    } catch (error) {
-      await $.ui.log(`${id}: drew the engine's props, ${reason(error)}`)
-    }
-    const row = await next(props === undefined ? e : { ...e, props })
-    if (draw === undefined) return row
-    try {
-      return draw({ e, row, elements: $.ui.resolve(e) }) ?? row
-    } catch (error) {
-      await $.ui.log(`${id}: drew the engine's result, ${reason(error)}`)
-      return row
-    }
-  })
+  if (!covers(tools, e.props.tool)) return next(e)
+  let props: RenderPropsOf['ToolResult'] | undefined
+  try {
+    props = rewrite?.(e.props)
+  } catch (error) {
+    await host.log(`${id}: drew the engine's props, ${reason(error)}`)
+  }
+  const row = await next(props === undefined ? e : { ...e, props })
+  if (draw === undefined) return row
+  try {
+    return (await draw({ e, row, elements: host.elements(), cwd: host.cwd, repo: host.repo })) ?? row
+  } catch (error) {
+    await host.log(`${id}: drew the engine's result, ${reason(error)}`)
+    return row
+  }
 }
 
-const registerAssistantText = (on: On, id: string, assistantText: NonNullable<RenderRule['assistantText']>): void => {
-  on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {
-    try {
-      const drawn = await assistantText.draw({
-        e,
-        elements: $.ui.resolve(e),
-        cwd: () => $.session.cwd(),
-        stat: path => $.fs.stat(path),
-        insert: text =>
-          void $.prompt
-            .fill({ text, mode: 'insert' })
-            .catch(error => $.ui.log(`${id}: the prompt did not take ${text.trim()}, ${reason(error)}`)),
-      })
-      return drawn ?? next(e)
-    } catch (error) {
-      await $.ui.log(`${id}: drew the engine's text, ${reason(error)}`)
-      return next(e)
-    }
-  })
+// What an assistant text hook hands its rule, as closures over the hook's `$`.
+export type TextHost = Reads & {
+  elements: () => ElementTable
+  stat: (path: string) => Promise<FsStat>
+  insert: (text: string) => void
+  log: Log
 }
 
-export const registerRender = (on: On, rules: readonly RenderRule[]): void => {
-  if (rules.some(rule => rule.toolRow?.timed)) registerTimer(on)
-  for (const rule of rules) {
-    if (rule.toolRow !== undefined) registerToolRow(on, rule.id, rule.toolRow)
-    if (rule.toolResult !== undefined) registerToolResult(on, rule.id, rule.toolResult)
-    if (rule.assistantText !== undefined) registerAssistantText(on, rule.id, rule.assistantText)
+export const NO_TEXT_READS = { ...NO_READS, stat: absent('stat'), insert: () => {
+  throw new Error('insert is not given to this mod; name it in engine.json needs')
+} }
+
+export const drawAssistantText = async (
+  id: string,
+  assistantText: NonNullable<RenderRule['assistantText']>,
+  e: RenderInput<'AssistantMessage'>,
+  next: (e: RenderInput<'AssistantMessage'>) => Promise<RenderElement>,
+  host: TextHost,
+): Promise<RenderElement> => {
+  const { rewrite, draw } = assistantText
+  let text: string | undefined
+  try {
+    text = await rewrite?.({ e, cwd: host.cwd, repo: host.repo })
+  } catch (error) {
+    await host.log(`${id}: drew the engine's text, ${reason(error)}`)
+  }
+  // The rewrite goes on through `next`, so a link rule of another mod beneath
+  // this one adds its links to ours. The other props are carried as received.
+  const passed = text === undefined || text === e.props.text ? e : { ...e, props: { ...e.props, text } }
+  if (draw === undefined) return next(passed)
+  try {
+    const drawn = await draw({ e: passed, elements: host.elements(), cwd: host.cwd, repo: host.repo, stat: host.stat, insert: host.insert })
+    return drawn ?? next(passed)
+  } catch (error) {
+    await host.log(`${id}: drew the engine's text, ${reason(error)}`)
+    return next(passed)
   }
 }

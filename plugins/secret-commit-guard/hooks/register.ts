@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCallsWithRun } from './hosts/check-run'
 import { rule as secretCommit } from './rules/secret-commit'
 
-export const register: Register = on => registerGuards(on, [secretCommit])
+export const register: Register = on => {
+  const rules = [secretCommit]
+  checkCallsWithRun(on, rules)
+}

@@ -23,7 +23,7 @@
     },
     {
       "name": "lifecycle-pack",
-      "description": "Every Baselane lifecycle mod in one: auto-format, long-run and input pushes, and the session journal.",
+      "description": "The four original lifecycle mods in one: runs your formatter, sends ntfy.sh pushes for long commands and input waits, and appends to ~/.claude/journal.log.",
       "rules": ["auto-format", "long-run-notify", "ntfy-notify", "session-journal"]
     }
   ]

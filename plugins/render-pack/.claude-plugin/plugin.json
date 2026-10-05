@@ -1,7 +1,7 @@
 {
   "name": "render-pack",
-  "version": "0.3.0",
-  "description": "Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies.",
+  "version": "0.4.0",
+  "description": "Both original rendering mods in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies (a click puts @path in the prompt).",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

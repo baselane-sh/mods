@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerLifecycle } from './engine'
+import { needsInputWithPush } from './hosts/input-push'
 import { rule as slackNotify } from './rules/slack-notify'
 
-export const register: Register = (on, options) => registerLifecycle(on, [slackNotify], options)
+export const register: Register = (on, options) => {
+  const rules = [slackNotify]
+  needsInputWithPush(on, rules, options)
+}

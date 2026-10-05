@@ -1,7 +1,7 @@
 {
   "name": "pr-description",
-  "version": "0.3.0",
-  "description": "Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master.",
+  "version": "0.4.0",
+  "description": "Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master, read with git.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

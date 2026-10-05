@@ -1,0 +1,10 @@
+{
+  "name": "socratic-mode",
+  "version": "0.4.0",
+  "description": "For learning: answers a question with a short hint and one guiding question first, and gives the full answer when you ask. Code and commands stay exact.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

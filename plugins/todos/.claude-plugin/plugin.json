@@ -1,7 +1,7 @@
 {
   "name": "todos",
-  "version": "0.3.0",
-  "description": "Adds /todos: TODO, FIXME and HACK lines in tracked files, grouped by file (50 lines at most). Read-only.",
+  "version": "0.4.0",
+  "description": "Adds /todos: TODO, FIXME and HACK lines in tracked files, found with git grep, grouped by file (50 lines at most). Read-only.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

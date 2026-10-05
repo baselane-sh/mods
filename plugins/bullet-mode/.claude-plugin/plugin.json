@@ -1,0 +1,10 @@
+{
+  "name": "bullet-mode",
+  "version": "0.4.0",
+  "description": "Replies as short bullet lists, at most one sentence per bullet, unless you ask for code.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

@@ -10,7 +10,7 @@
     },
     {
       "name": "branch-band",
-      "description": "A band above the prompt with the git branch and the count of changed files, refreshed after each Bash call and file edit.",
+      "description": "A band above the prompt with the git branch and the count of changed files, read with git status after each Bash call and file edit.",
       "rules": [
         "branch-band"
       ]
@@ -38,7 +38,7 @@
     },
     {
       "name": "dev-band",
-      "description": "The developer band in one row above the prompt: git branch and changed files, wall clock and session age, tool counts, and failed tool calls.",
+      "description": "The developer band in one row above the prompt: git branch and changed files (read with git status), wall clock and session age, tool counts, and failed tool calls.",
       "rules": [
         "branch-band",
         "session-clock",

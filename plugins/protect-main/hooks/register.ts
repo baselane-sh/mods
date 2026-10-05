@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCallsWithRun } from './hosts/check-run'
 import { rule as protectMain } from './rules/protect-main'
 
-export const register: Register = on => registerGuards(on, [protectMain])
+export const register: Register = on => {
+  const rules = [protectMain]
+  checkCallsWithRun(on, rules)
+}

@@ -18,7 +18,7 @@
     },
     {
       "name": "say-done",
-      "description": "On macOS, says \"Claude is done\" when a turn ends after more than 30 seconds. Does nothing on other platforms.",
+      "description": "On macOS, speaks \"Claude is done\" with the say command when a turn ends after more than 30 seconds. Does nothing on other platforms.",
       "rules": ["say-done"]
     },
     {
@@ -28,7 +28,7 @@
     },
     {
       "name": "notify-pack",
-      "description": "Local alerts in one: a desktop notification when Claude Code needs your input, and a spoken line on macOS when a long turn ends.",
+      "description": "Local alerts in one: a desktop notification when Claude Code needs your input (osascript or notify-send), and a spoken line (say) on macOS when a long turn ends.",
       "rules": ["desktop-notify", "say-done"]
     }
   ]

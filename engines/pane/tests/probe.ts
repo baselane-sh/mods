@@ -1,4 +1,4 @@
-import type { PaneOpenArgs, ProcessRunResult, ToolCallArgs, ToolCallResult } from 'claude-code'
+import type { PaneOpenArgs, ProcessRunResult, SessionContextUsage, ToolCallArgs, ToolCallResult } from 'claude-code'
 import type { MockClock, Mounted, TestBody } from 'claude-code/testing'
 import { mock } from 'claude-code/testing'
 
@@ -56,6 +56,9 @@ export type PaneProbe = {
   // The session cost `$.session.usage()` reports; undefined leaves `cost` out,
   // as a host with no cost ledger does.
   setUsd: (usd: number | undefined) => void
+  // The context window figures `$.session.usage()` reports (default: a
+  // 200,000 token window and no reading yet).
+  setContext: (context: SessionContextUsage) => void
   // A whole turn: turn.start, the cost moves to `usd` when given, then
   // turn.complete. A subagent's turn raises no turn.start.
   turn: (usd?: number, extra?: { agentId?: string }) => Promise<void>
@@ -85,6 +88,7 @@ export const probe = ($: Engine, on: OnFn, world: Readonly<Record<string, Answer
   let logs: string[] = []
   let next: ToolAnswer = {}
   let usd: number | undefined
+  let context: SessionContextUsage = { window: 200_000 }
   let turns = 0
 
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
@@ -119,7 +123,7 @@ export const probe = ($: Engine, on: OnFn, world: Readonly<Record<string, Answer
     return { value: { command: e.name } }
   })
   on('session.usage', () => ({
-    value: { startedAt: NOW, context: { window: 200_000 }, rateLimits: [], ...(usd === undefined ? {} : { cost: { usd } }) },
+    value: { startedAt: NOW, context, rateLimits: [], ...(usd === undefined ? {} : { cost: { usd } }) },
   }))
   on('turn.start', (_$, e) => ({ turnId: e.turnId }))
   on('turn.complete', () => ({ text: '' }))
@@ -179,6 +183,9 @@ export const probe = ($: Engine, on: OnFn, world: Readonly<Record<string, Answer
     logs: () => logs,
     setUsd: value => {
       usd = value
+    },
+    setContext: value => {
+      context = value
     },
     turn: async (after, extra = {}) => {
       turns += 1

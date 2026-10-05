@@ -3,6 +3,7 @@ import type { On } from 'claude-code'
 
 import type { Day, Life, Pending, SessionMemo } from '../types'
 import { localDate } from './date'
+import { LANGS, addLangs, readLangs } from './exts'
 import type { Composed, Days, StatsRule, Store, View } from './rule'
 import { EMPTY_LIFE, addToDay, addToLife, prune, readDays, readLife } from './rollup'
 import { EMPTY_PENDING, FRESH_SESSION, MAX_SEEN_FILES, observe } from './tracker'
@@ -92,7 +93,9 @@ type Extra = { sessions: number; turns: number; usd?: number }
 // same instant can lose one flush (the later `set` wins). The window is the
 // two awaits between the reads and the writes, and the loss is one turn of
 // one session.
-const flush = async (host: Host, extra: Extra): Promise<Rolled | undefined> => {
+//
+// With `keepsLangs`, each newly counted file's type is added to `langs` too.
+const flush = async (host: Host, extra: Extra, keepsLangs = false): Promise<Rolled | undefined> => {
   const taken = await host.takePending()
   if (isEmpty(taken) && extra.sessions === 0 && extra.turns === 0) return undefined
 
@@ -108,10 +111,14 @@ const flush = async (host: Host, extra: Extra): Promise<Rolled | undefined> => {
   const life = addToLife(readLife(await host.store.get(LIFE)), taken)
   await host.store.set(DAYS, days)
   await host.store.set(LIFE, life)
+  if (keepsLangs && fresh.length > 0) await host.store.set(LANGS, addLangs(readLangs(await host.store.get(LANGS)), fresh))
   return { date, now, days, life }
 }
 
 export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
+  // Only a mod with a rule that reads file types keeps them.
+  const keepsLangs = rules.some(rule => rule.langs === true)
+
   on('tool.call', async ($, e, next) => {
     const ran = await next(e)
     try {
@@ -160,7 +167,7 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
         now: () => $.clock.now(),
         store: { get: key => $.store.get(key), set: (key, value) => $.store.set(key, value) },
       })
-      const rolled = await flush(host, { sessions: 0, turns: 1, ...(spent === undefined ? {} : { usd: spent }) })
+      const rolled = await flush(host, { sessions: 0, turns: 1, ...(spent === undefined ? {} : { usd: spent }) }, keepsLangs)
       if (rolled === undefined) return next(e)
       const latest = await read($, session)
       const sessionCalls = latest.calls ?? 0
@@ -197,7 +204,7 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
         now: () => $.clock.now(),
         store: { get: key => $.store.get(key), set: (key, value) => $.store.set(key, value) },
       })
-      await flush(host, { sessions: 0, turns: 0 })
+      await flush(host, { sessions: 0, turns: 0 }, keepsLangs)
       // A /clear goes on in this process as a new session with no session.start,
       // so its tool calls count from 0 again once the ending one is judged.
       const isClear = e.reason === 'clear'
@@ -249,7 +256,7 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
         isNew = !memo.counted
         return isNew ? { ...memo, counted: true, since: memo.since ?? startNow } : memo
       })
-      const rolled = (isNew ? await flush(host, { sessions: 1, turns: 0 }) : undefined) ?? (await load(host))
+      const rolled = (isNew ? await flush(host, { sessions: 1, turns: 0 }, keepsLangs) : undefined) ?? (await load(host))
       const usage = await attempt(() => $.session.usage())
       const memo = await read($, session)
       const sessionCalls = memo.calls ?? 0

@@ -1,0 +1,11 @@
+{
+  "name": "recent",
+  "version": "0.4.0",
+  "description": "Adds /recent: your last 15 commits across all local branches (author is git user.name), with branch and date. Read-only.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

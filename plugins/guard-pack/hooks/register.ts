@@ -1,6 +1,8 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCallsWithAll } from './hosts/check-all'
+import { noteResults } from './hosts/notes'
+import { notePrompts } from './hosts/prompt-notes'
 import { rule as secretFilename } from './rules/secret-filename'
 import { rule as secretValue } from './rules/secret-value'
 import { rule as envExfil } from './rules/env-exfil'
@@ -17,4 +19,9 @@ import { rule as newPackage } from './rules/new-package'
 import { rule as prodDb } from './rules/prod-db'
 import { rule as pathJail } from './rules/path-jail'
 
-export const register: Register = on => registerGuards(on, [secretFilename, secretValue, envExfil, infra, secretCommit, protectMain, gitignore, secretOutput, curlPipe, sudo, noVerify, lockfile, newPackage, prodDb, pathJail])
+export const register: Register = on => {
+  const rules = [secretFilename, secretValue, envExfil, infra, secretCommit, protectMain, gitignore, secretOutput, curlPipe, sudo, noVerify, lockfile, newPackage, prodDb, pathJail]
+  checkCallsWithAll(on, rules)
+  noteResults(on, rules)
+  notePrompts(on, rules)
+}

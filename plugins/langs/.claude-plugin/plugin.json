@@ -1,0 +1,11 @@
+{
+  "name": "langs",
+  "version": "0.4.0",
+  "description": "Counts the file types Claude edits across sessions and adds /langs: a bar list of the types edited most, each file counted once per session.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCalls } from './hosts/check'
 import { rule as curlPipe } from './rules/curl-pipe'
 
-export const register: Register = on => registerGuards(on, [curlPipe])
+export const register: Register = on => {
+  const rules = [curlPipe]
+  checkCalls(on, rules)
+}

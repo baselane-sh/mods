@@ -1,7 +1,7 @@
 {
   "name": "branch-band",
-  "version": "0.3.0",
-  "description": "A band above the prompt with the git branch and the count of changed files, refreshed after each Bash call and file edit.",
+  "version": "0.4.0",
+  "description": "A band above the prompt with the git branch and the count of changed files, read with git status after each Bash call and file edit.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

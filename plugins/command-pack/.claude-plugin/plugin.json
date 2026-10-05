@@ -1,7 +1,7 @@
 {
   "name": "command-pack",
-  "version": "0.3.0",
-  "description": "Every slash command in one mod: /receipt, /standup, /changelog, /pr-description and /handoff.",
+  "version": "0.4.0",
+  "description": "The five original slash commands in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. They read git; /handoff also writes .claude/handoff.md.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

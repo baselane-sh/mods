@@ -1,6 +1,6 @@
 {
   "name": "typecheck-nudge",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "At turn end, one toast when .ts or .tsx files were edited and no type check (tsc, vue-tsc, a typecheck script or a build) ran since the last edit.",
   "author": {
     "name": "Baselane",

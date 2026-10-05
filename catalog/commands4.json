@@ -1,0 +1,55 @@
+{
+  "engine": "command",
+  "mods": [
+    {
+      "name": "size",
+      "description": "Adds /size: the 15 largest tracked files and the total tracked size at HEAD, read with git. Read-only.",
+      "rules": ["size"]
+    },
+    {
+      "name": "licenses",
+      "description": "Adds /licenses: the licence of each direct dependency, from node_modules and Python dist-info at the git repo root. Shows unknown when it cannot tell. Read-only.",
+      "rules": ["licenses"]
+    },
+    {
+      "name": "conflicts",
+      "description": "Adds /conflicts: tracked files that still hold merge conflict markers, with line numbers, found with git grep. Read-only.",
+      "rules": ["conflicts"]
+    },
+    {
+      "name": "secret-scan",
+      "description": "Adds /secret-scan: tracked files and line numbers that hold secret-shaped text, found with git grep. Never prints a matched value. Read-only.",
+      "rules": ["secret-scan"]
+    },
+    {
+      "name": "envinfo",
+      "description": "Adds /envinfo: versions of git, node, npm, python3, go, rustc and docker if installed, by running each (2 s limit), and the OS. Read-only.",
+      "rules": ["envinfo"]
+    },
+    {
+      "name": "stashes",
+      "description": "Adds /stashes: git stashes with their age and the branch each was made on. Read-only, never applies or drops.",
+      "rules": ["stashes"]
+    },
+    {
+      "name": "recent",
+      "description": "Adds /recent: your last 15 commits across all local branches (author is git user.name), with branch and date. Read-only.",
+      "rules": ["recent"]
+    },
+    {
+      "name": "file-owners",
+      "description": "Adds /owners <path>: the top 5 authors of a file or folder by lines, from git blame. Names only, never addresses. Read-only.",
+      "rules": ["file-owners"]
+    },
+    {
+      "name": "readme-check",
+      "description": "Adds /readme-check: which common README sections are missing (install, usage, licence, contributing) and which relative links are broken, at the git repo root. Read-only.",
+      "rules": ["readme-check"]
+    },
+    {
+      "name": "audit-pack",
+      "description": "Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. They read git, project files and dependency folders.",
+      "rules": ["secret-scan", "conflicts", "licenses"]
+    }
+  ]
+}

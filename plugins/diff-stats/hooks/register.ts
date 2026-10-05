@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerRender } from './engine'
+import { drawToolRows } from './hosts/row'
 import { create as diffStats } from './rules/diff-stats'
 
-export const register: Register = on => registerRender(on, [diffStats()])
+export const register: Register = on => {
+  const rules = [diffStats()]
+  drawToolRows(on, rules)
+}

@@ -23,17 +23,17 @@
     },
     {
       "name": "secret-commit-guard",
-      "description": "Asks before a git commit that would record a credential or a secret-named file.",
+      "description": "Asks before a git commit that would record a credential or a secret-named file. Reads the staged diff with git.",
       "rules": ["secret-commit"]
     },
     {
       "name": "protect-main",
-      "description": "Asks before a commit, push or merge while you are on main or master.",
+      "description": "Asks before a commit, push or merge while you are on main or master. Reads the branch with git.",
       "rules": ["protect-main"]
     },
     {
       "name": "gitignore-check",
-      "description": "Asks before git add or commit when secret-looking files are not ignored or are already tracked.",
+      "description": "Asks before git add or commit when secret-looking files are not ignored or are already tracked. Checks with git ls-files.",
       "rules": ["gitignore"]
     },
     {
@@ -78,12 +78,12 @@
     },
     {
       "name": "guard-essentials",
-      "description": "Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. The quiet choice for daily work.",
+      "description": "Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. Reads git. The quiet choice for daily work.",
       "rules": ["infra", "prod-db", "curl-pipe", "sudo", "env-exfil", "secret-value", "secret-commit", "secret-output"]
     },
     {
       "name": "guard-pack",
-      "description": "Every Baselane guard in one mod.",
+      "description": "The 15 core Baselane guards in one mod (secrets, git, infra, packages, path jail). Some read git, measure files with find, read HOME with printenv, or check where a path really lands.",
       "rules": ["secret-filename", "secret-value", "env-exfil", "infra", "secret-commit", "protect-main", "gitignore", "secret-output", "curl-pipe", "sudo", "no-verify", "lockfile", "new-package", "prod-db", "path-jail"]
     }
   ]

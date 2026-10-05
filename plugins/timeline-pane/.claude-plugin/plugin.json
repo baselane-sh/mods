@@ -1,0 +1,11 @@
+{
+  "name": "timeline-pane",
+  "version": "0.4.0",
+  "description": "A live side pane of this session's turns, newest first: start time, length, tool calls and cost of each, with a total. Open it with /timeline.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

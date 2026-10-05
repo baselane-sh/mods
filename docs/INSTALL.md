@@ -146,7 +146,7 @@ claude plugin install pirate-mode@baselane-mods
 claude plugin install wrapped@baselane-mods
 ```
 
-- Sound packs: `sounds-retro`, `sounds-office`, `sounds-scifi`, `sounds-nature`, `sounds-minimal`. Install only one.
+- Sound packs: `sounds-retro`, `sounds-office`, `sounds-scifi`, `sounds-nature`, `sounds-minimal`, `sounds-zen`, `sounds-arcade`. Install only one.
 - Voices: `pirate-mode` or `yoda-mode`. Install only one. Code, commands and commit messages stay normal.
 - `wrapped` adds `/wrapped`, a recap of your last 7 days, ready for a screenshot.
 

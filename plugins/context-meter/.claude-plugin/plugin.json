@@ -1,6 +1,6 @@
 {
   "name": "context-meter",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A band above the prompt with a 10 cell bar of the context window used, yellow from 60 percent, red from 80.",
   "author": {
     "name": "Baselane",

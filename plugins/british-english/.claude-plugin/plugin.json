@@ -1,0 +1,10 @@
+{
+  "name": "british-english",
+  "version": "0.4.0",
+  "description": "British spelling and terms in prose (colour, organise, licence as a noun). Code identifiers stay as they are.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

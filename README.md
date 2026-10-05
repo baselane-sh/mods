@@ -38,19 +38,36 @@ Most mods have one rule. A pack is one mod with several rules from the same fami
 
 The catalog below marks each pack with "pack".
 
+## Beads mods
+
+[Beads](https://github.com/steveyegge/beads) (`bd`) is an issue tracker that lives in your repo. 19 mods show your beads in Claude Code: bars above the prompt, panes, slash commands, a guard and reminders. They need `bd` 1.2 or later and a repo with a `.beads` folder. Without these, they do nothing.
+
+The core set in one go (the bars, the panes, `/ready` and the guard):
+
+```sh
+claude plugin install beads-bars@baselane-mods
+claude plugin install beads-pane@baselane-mods
+claude plugin install epics-pane@baselane-mods
+claude plugin install ready@baselane-mods
+claude plugin install beads-guard@baselane-mods
+```
+
+Each beads mod is also in the catalog below, in its family.
+
 ## Safety
 
 - **Guards ask. They do not block.** A guard stops a harsh command and asks you first. You decide. If a guard check fails, it asks you. It does not let the call through without a question.
 - **Your data stays on your machine.** No mod sends data out unless you set a destination yourself, such as an ntfy topic for `ntfy-notify` or `long-run-notify`, or a webhook URL for `slack-notify` or `discord-notify`. With a destination set, those mods send a short message only: a generic "needs input" text with the project folder name, or the project name and the seconds. One exception needs no setup: `ci-band` and `ops-band` ask GitHub, through your own gh login, for the latest Actions run of your branch every 2 minutes, sending the repository and branch name. Without gh, or with gh not logged in, they do nothing.
 - **One mod can make a model call, and it is off by default.** `sports-narrator` makes one small model call at the end of a turn that used tools. It sends tool names, file names and the first two words of each shell command, never file contents. It spends tokens, so you must turn it on.
-- **Display mods do not change what Claude reads.** The mods in "Display and render" change only how rows and replies look on your screen. Other families can add text for Claude: prompt styles change how Claude writes, `secret-output-guard` tells Claude not to repeat a credential, and `auto-format` and `auto-lint` tell Claude to read a file again.
+- **Beads mods only read your beads.** They run read commands of your own `bd` on your machine, such as `bd status --json` and `bd ready --json`. No beads mod creates, changes or closes a bead. `beads-guard` asks before a `bd` command that deletes or rewrites beads.
+- **Display mods do not change what Claude reads.** The mods in "Display and render" change only how rows and replies look on your screen. Other families can add text for Claude: prompt styles change how Claude writes, `secret-output-guard` tells Claude not to repeat a credential, `auto-format` and `auto-lint` tell Claude to read a file again, `beads-prime` adds the workflow text that `bd prime` prints from your repo's `.beads` files, and `bead-claim-nudge` and `bead-commit-nudge` add a one-line reminder at your next prompt.
 - **Stats stay local.** Streaks, achievements and `/wrapped` read records that the mods keep on your machine.
 - **Mods that write files say so.** `/handoff` writes `.claude/handoff.md` and never overwrites it. `session-journal` appends to `~/.claude/journal.log`. `auto-format` and `auto-lint` run your project's own formatter or linter fix, which can rewrite files. The descriptions say what each mod writes.
 
 ## Requirements
 
 - Claude Code 2.1.288 or later, with mods (the plugin function-hook API, in early access). Read the [Claude Code mods docs](https://code.claude.com/docs/en/plugins/mods/overview).
-- Some mods use local tools: git for the git pane, the git band and most commands, `lsof` for `port-watch`, `gh` for `ci-band`, `ps` for `process-pane`, and on macOS `pmset` for `battery-band` and `pgrep` with `osascript` for `now-playing`.
+- Some mods use local tools: git for the git pane, the git band and most commands, `lsof` for `port-watch`, `gh` for `ci-band`, `bd` 1.2 or later for the beads mods, `ps` for `process-pane`, and on macOS `pmset` for `battery-band` and `pgrep` with `osascript` for `now-playing`.
 - To build from source: Node.js.
 
 ## Build and check from source

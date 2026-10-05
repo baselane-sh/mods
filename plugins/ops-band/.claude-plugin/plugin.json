@@ -1,0 +1,11 @@
+{
+  "name": "ops-band",
+  "version": "0.3.0",
+  "description": "The ops band in one row above the prompt: commits ahead and behind the upstream, the latest GitHub Actions run of your branch, and the Mac battery.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

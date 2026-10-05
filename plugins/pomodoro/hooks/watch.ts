@@ -1,9 +1,10 @@
 import { atom, read, update } from 'claude-code'
 import type { On, Timer } from 'claude-code'
 
-import type { GitState, Outcome, Pomodoro, Reading, Tally } from '../types'
+import type { Fetched, GitState, Outcome, Pomodoro, Reading, Tally } from '../types'
+import { runFetchers, storeFetched } from './fetch'
 import { ARGV, READ_TIMEOUT_MS, TOUCHING_TOOLS, refreshGit } from './git'
-import type { BandRule } from './rule'
+import type { BandRule, Ticker } from './rule'
 import { addCall } from './tally'
 
 const WINDOW = 20
@@ -14,6 +15,7 @@ const outcomes = atom({ plugin: 'pomodoro', key: 'outcomes' } as const, [] as re
 const pomodoro = atom({ plugin: 'pomodoro', key: 'pomodoro' } as const, null as Pomodoro | null)
 const tally = atom({ plugin: 'pomodoro', key: 'tally' } as const, { calls: {}, failures: 0 } as Tally)
 const git = atom({ plugin: 'pomodoro', key: 'git' } as const, null as GitState | null)
+const fetched = atom({ plugin: 'pomodoro', key: 'fetched' } as const, {} as Readonly<Record<string, Fetched | null>>)
 
 const failed = (where: string, error: unknown): string =>
   `band: ${where} skipped, ${error instanceof Error ? error.message : String(error)}`
@@ -29,7 +31,8 @@ let gitReads = 0
 export const watchCalls = (on: On, rules: readonly BandRule[]): void => {
   const has = (flag: 'tracksOutcomes' | 'tracksTools' | 'tracksGit'): boolean => rules.some(rule => rule[flag] === true)
   const [isOutcomes, isTally, isGit] = [has('tracksOutcomes'), has('tracksTools'), has('tracksGit')]
-  if (!isOutcomes && !isTally && !isGit) return
+  const isFetch = rules.some(rule => rule.fetch?.onEdit === true)
+  if (!isOutcomes && !isTally && !isGit && !isFetch) return
 
   on('tool.call', async ($, e, next) => {
     const ran = await next(e)
@@ -48,6 +51,17 @@ export const watchCalls = (on: On, rules: readonly BandRule[]): void => {
       void refreshGit({
         run: () => $.process.run(ARGV, { timeoutMs: READ_TIMEOUT_MS }),
         set: state => (id === gitReads ? update($, git, () => state) : undefined),
+        log: text => $.ui.log(text),
+      })
+    }
+    // A rule that reads a command's output asks again after the same calls,
+    // also not awaited.
+    if (isFetch && ran.deny === undefined && TOUCHING_TOOLS.has(e.tool)) {
+      void runFetchers(rules, 'edit', {
+        now: () => $.clock.now(),
+        run: (argv, timeoutMs) => $.process.run(argv, { timeoutMs }),
+        git: () => read($, git),
+        set: (id, value) => storeFetched(change => update($, fetched, change), id, value),
         log: text => $.ui.log(text),
       })
     }
@@ -78,7 +92,9 @@ export const stopMinuteTick = (): void => {
 // none does. The first tick waits for the next whole minute, so a clock drawn
 // as HH:MM turns over when the minute does.
 export const syncMinuteTick = async (rules: readonly BandRule[], reading: Reading, deps: MinuteDeps): Promise<void> => {
-  if (!rules.some(rule => rule.everyMinute?.(reading) === true)) return stopMinuteTick()
+  // A rule that fetches on a rate needs the tick to come back to it.
+  const isWanted = (rule: BandRule): boolean => rule.everyMinute?.(reading) === true || rule.fetch?.everyMs !== undefined
+  if (!rules.some(isWanted)) return stopMinuteTick()
   const now = await deps.now()
   if (minuteTick !== undefined) return
   let every: Timer | undefined
@@ -99,16 +115,16 @@ export const syncMinuteTick = async (rules: readonly BandRule[], reading: Readin
 // the timer then freezes until its command stops it.
 const running = new Map<string, Timer>()
 
-// Registers each timer rule's command and runs its interval. The command
-// starts the timer when none runs and stops it when one does.
-export const watchTickers = (on: On, rules: readonly BandRule[]): void => {
-  const tickers = rules.flatMap(rule => (rule.ticker === undefined ? [] : [rule.ticker]))
-  if (tickers.length === 0) return
+export const tickersOf = (rules: readonly BandRule[]): Ticker[] =>
+  rules.flatMap(rule => (rule.ticker === undefined ? [] : [rule.ticker]))
 
-  on('session.start', async ($, e, next) => {
-    for (const { command } of tickers) await $.command.register(command)
-    return next(e)
-  })
+// Registers each timer rule's command handler and runs its interval. The command
+// starts the timer when none runs and stops it when one does. The engine's
+// session.start hook registers the command names (`on("session.start")` takes
+// one hook), from `tickersOf`.
+export const watchTickers = (on: On, rules: readonly BandRule[]): void => {
+  const tickers = tickersOf(rules)
+  if (tickers.length === 0) return
 
   for (const ticker of tickers) {
     const name = ticker.command.name

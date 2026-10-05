@@ -13,7 +13,20 @@ export const parseStatus = (stdout: string): GitState | null => {
   if (head === undefined || !head.startsWith('## ')) return null
   const name = head.slice(3).replace(/^No commits yet on /, '').split('...')[0]?.split(' [')[0] ?? ''
   const branch = name === '' ? null : name.startsWith('HEAD (') ? 'detached' : name
-  return branch === null ? null : { branch, changed: files.filter(line => line.trim() !== '').length }
+  return branch === null ? null : { branch, changed: files.filter(line => line.trim() !== '').length, ...aheadBehind(head) }
+}
+
+const count = (counts: string, word: 'ahead' | 'behind'): number =>
+  Number(new RegExp(`${word} (\\d+)`).exec(counts)?.[1] ?? 0)
+
+// `## main...origin/main [ahead 2, behind 1]`. A branch with an upstream and
+// no brackets is level with it; no `...` is no upstream, and `[gone]` an
+// upstream that no longer exists: neither has counts.
+const aheadBehind = (head: string): { ahead?: number; behind?: number } => {
+  const upstream = /\.\.\.\S+(?: \[(.*)\])?$/.exec(head)
+  if (upstream === null) return {}
+  const counts = upstream[1] ?? ''
+  return counts === 'gone' ? {} : { ahead: count(counts, 'ahead'), behind: count(counts, 'behind') }
 }
 
 export const ARGV = ['git', '--no-optional-locks', 'status', '--porcelain', '-b'] as const

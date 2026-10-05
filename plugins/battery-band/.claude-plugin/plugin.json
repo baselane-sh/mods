@@ -1,0 +1,11 @@
+{
+  "name": "battery-band",
+  "version": "0.3.0",
+  "description": "A band above the prompt with the Mac battery percent and charging state (🔋 87%, ⚡ 54% while charging), read from pmset once a minute. Hidden on other systems.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

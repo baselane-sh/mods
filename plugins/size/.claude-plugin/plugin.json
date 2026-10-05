@@ -1,7 +1,7 @@
 {
   "name": "size",
   "version": "0.3.0",
-  "description": "Adds /size: the 15 largest tracked files and the total tracked size at HEAD. Read-only.",
+  "description": "Adds /size: the 15 largest tracked files and the total tracked size at HEAD, read with git. Read-only.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

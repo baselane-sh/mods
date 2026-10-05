@@ -1,7 +1,7 @@
 {
   "name": "branches",
   "version": "0.3.0",
-  "description": "Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list. Never deletes.",
+  "description": "Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list, read with git. Never deletes.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

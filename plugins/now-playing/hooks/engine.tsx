@@ -1,13 +1,14 @@
 import { atom, read, update } from 'claude-code'
-import type { On, PluginOptions } from 'claude-code'
+import type { Frozen, On, PluginOptions, SessionUsage, TurnCompleteInput } from 'claude-code'
 
 import type { Fetched, GitState, Outcome, Pomodoro, Reading, Tally } from '../types'
 import { localDate } from './date'
-import { hasFetchers, runFetchers, storeFetched } from './fetch'
-import type { BandRule, Segment, TurnTokens } from './rule'
+import { hasFetchers } from './fetch'
+import { syncMinuteTick } from './minute'
+import type { MinuteDeps } from './minute'
+import type { BandRule, Segment, Ticker, TurnEnd, TurnTokens } from './rule'
 import { startTurnTimer, stopTurnTimer } from './turn'
 import { bandTree, fitSegments } from './view'
-import { stopMinuteTick, syncMinuteTick, tickersOf, watchCalls, watchTickers } from './watch'
 
 // The build writes the mod's own name in place of the token: `$.state` is
 // written only by the plugin that owns it, and the scan wants the atoms here.
@@ -27,8 +28,11 @@ const minute = atom({ plugin: 'now-playing', key: 'minute' } as const, 0)
 const fetched = atom({ plugin: 'now-playing', key: 'fetched' } as const, {} as Readonly<Record<string, Fetched | null>>)
 const turnStartedAt = atom({ plugin: 'now-playing', key: 'turnStartedAt' } as const, null as number | null)
 
-const failed = (where: string, error: unknown): string =>
+export const failed = (where: string, error: unknown): string =>
   `band: ${where} skipped, ${error instanceof Error ? error.message : String(error)}`
+
+export const tickersOf = (rules: readonly BandRule[]): Ticker[] =>
+  rules.flatMap(rule => (rule.ticker === undefined ? [] : [rule.ticker]))
 
 const segmentsOf = (rules: readonly BandRule[], draw: Parameters<BandRule['segment']>[0]): Segment[] =>
   rules.flatMap(rule => {
@@ -59,37 +63,109 @@ const modelOf = async (read: () => Promise<string>): Promise<string | undefined>
   }
 }
 
-export const registerBand = (on: On, rules: readonly BandRule[], options: PluginOptions): void => {
-  watchCalls(on, rules)
-  watchTickers(on, rules)
+// What a turn end reads and writes, as closures over the hook's `$`.
+// `refresh` runs the fetchers; only the host that runs programs gives it.
+export type TurnIo = {
+  usage: () => Promise<SessionUsage>
+  reading: () => Promise<Reading | null>
+  turnStartUsd: () => Promise<number | null>
+  keep: (now: Reading) => Promise<unknown>
+  spend: () => Promise<unknown>
+  endTimer: () => Promise<unknown>
+  model: () => Promise<string>
+  store: TurnEnd['store']
+  clock: Omit<MinuteDeps, 'tick'>
+  redraw: () => Promise<unknown>
+  log: (text: string) => unknown
+  refresh?: () => void
+}
+
+// The figures are read once, at the turn's end. A render hook never writes,
+// so they go into $.state for it to draw. A subagent's turn is not the
+// person's turn.
+export const turnComplete = async (rules: readonly BandRule[], e: Frozen<TurnCompleteInput>, io: TurnIo): Promise<void> => {
+  if (e.agentId !== undefined) return
   const isFetching = hasFetchers(rules)
   const isMinutely = isFetching || rules.some(rule => rule.everyMinute !== undefined)
+  if (rules.some(rule => rule.tracksTurn === true)) {
+    // First and on its own: a failed usage read below must not leave it running.
+    stopTurnTimer()
+    try {
+      await io.endTimer()
+    } catch (error) {
+      await io.log(failed('turn timer', error))
+    }
+  }
+  try {
+    const usage = await io.usage()
+    const usd = usage.cost?.usd
+    const percent = clampPercent(usage.context.percent)
+    const previous = await io.reading()
+    const base = (await io.turnStartUsd()) ?? previous?.usd
+    // A cost that fell (a cleared session) leaves the turn's cost unknown.
+    const turnUsd = usd !== undefined && base !== undefined && usd >= base ? usd - base : undefined
+    const date = localDate(await io.clock.now())
+    const model = await modelOf(io.model)
+
+    const usageTokens = tokensOf(e.usage)
+    let now: Reading = {
+      ...(usd === undefined ? {} : { usd }),
+      ...(turnUsd === undefined ? {} : { turnUsd }),
+      ...(percent === undefined ? {} : { percent }),
+      ...(Number.isFinite(usage.startedAt) ? { startedAt: usage.startedAt } : {}),
+      ...(model === undefined ? {} : { model }),
+    }
+    for (const rule of rules) {
+      if (rule.atTurnEnd === undefined) continue
+      try {
+        now = {
+          ...now,
+          ...(await rule.atTurnEnd({
+            reading: now,
+            previous: previous ?? {},
+            ...(usageTokens === undefined ? {} : { usage: usageTokens }),
+            turnUsd,
+            date,
+            store: io.store,
+          })),
+        }
+      } catch (error) {
+        await io.log(failed(rule.id, error))
+      }
+    }
+    await io.keep(now)
+    // Spent: a second end of the same turn adds nothing.
+    await io.spend()
+    if (isMinutely) {
+      const refresh = (): void => {
+        if (isFetching) io.refresh?.()
+      }
+      refresh()
+      await syncMinuteTick(rules, now, {
+        ...io.clock,
+        tick: async () => {
+          try {
+            refresh()
+            await io.redraw()
+          } catch (error) {
+            await io.log(failed('minute', error))
+          }
+        },
+      })
+    }
+  } catch (error) {
+    await io.log(failed('turn end', error))
+  }
+}
+
+// The hooks every band mod has: the cost as the turn begins, and the band.
+// The rest are hosts (engine.json), so a mod has only what its rules use.
+export const registerBand = (on: On, rules: readonly BandRule[], options: PluginOptions): void => {
+  const isMinutely = hasFetchers(rules) || rules.some(rule => rule.everyMinute !== undefined)
+  const isTurnTimed = rules.some(rule => rule.tracksTurn === true)
   // The band reads the minute atom, so a tick's write redraws it: each minute,
   // and each second while a turn runs.
-  const isTicking = isMinutely || rules.some(rule => rule.tracksTurn === true)
-
-  const isTurnTimed = rules.some(rule => rule.tracksTurn === true)
-  const tickers = tickersOf(rules)
-
-  // `on("session.start")` takes one hook, so it does both jobs: the slash
-  // commands of the timer rules, and the first figures of the fetching rules,
-  // which come with the session and not the first turn end. Not awaited: the
-  // session does not wait on a command.
-  if (tickers.length > 0 || isFetching) {
-    on('session.start', async ($, e, next) => {
-      for (const { command } of tickers) await $.command.register(command)
-      if (isFetching) {
-        void runFetchers(rules, 'time', {
-          now: () => $.clock.now(),
-          run: (argv, timeoutMs) => $.process.run(argv, { timeoutMs }),
-          git: () => read($, git),
-          set: (id, value) => storeFetched(change => update($, fetched, change), id, value),
-          log: text => $.ui.log(text),
-        })
-      }
-      return next(e)
-    })
-  }
+  const isTicking = isMinutely || isTurnTimed
 
   // The cost as the turn begins: what this turn's cost is measured from.
   on('turn.start', async ($, e, next) => {
@@ -120,106 +196,6 @@ export const registerBand = (on: On, rules: readonly BandRule[], options: Plugin
     }
     return next(e)
   })
-
-  // The figures are read once, here. A render hook never writes, so they go
-  // into $.state for it to draw. A subagent's turn is not the person's turn.
-  on('turn.complete', async ($, e, next) => {
-    if (e.agentId !== undefined) return next(e)
-    if (isTurnTimed) {
-      // First and on its own: a failed usage read below must not leave it running.
-      stopTurnTimer()
-      try {
-        await update($, turnStartedAt, () => null)
-      } catch (error) {
-        await $.ui.log(failed('turn timer', error))
-      }
-    }
-    try {
-      const usage = await $.session.usage()
-      const usd = usage.cost?.usd
-      const percent = clampPercent(usage.context.percent)
-      const previous = await read($, reading)
-      const base = (await read($, turnStartUsd)) ?? previous?.usd
-      // A cost that fell (a cleared session) leaves the turn's cost unknown.
-      const turnUsd = usd !== undefined && base !== undefined && usd >= base ? usd - base : undefined
-      const date = localDate(await $.clock.now())
-      const model = await modelOf(() => $.session.model())
-      const store = {
-        get: (key: string) => $.store.get(key),
-        set: (key: string, value: unknown) => $.store.set(key, value),
-      }
-
-      const usageTokens = tokensOf(e.usage)
-      let now: Reading = {
-        ...(usd === undefined ? {} : { usd }),
-        ...(turnUsd === undefined ? {} : { turnUsd }),
-        ...(percent === undefined ? {} : { percent }),
-        ...(Number.isFinite(usage.startedAt) ? { startedAt: usage.startedAt } : {}),
-        ...(model === undefined ? {} : { model }),
-      }
-      for (const rule of rules) {
-        if (rule.atTurnEnd === undefined) continue
-        try {
-          now = {
-            ...now,
-            ...(await rule.atTurnEnd({
-              reading: now,
-              previous: previous ?? {},
-              ...(usageTokens === undefined ? {} : { usage: usageTokens }),
-              turnUsd,
-              date,
-              store,
-            })),
-          }
-        } catch (error) {
-          await $.ui.log(failed(rule.id, error))
-        }
-      }
-      await update($, reading, () => now)
-      // Spent: a second end of the same turn adds nothing.
-      await update($, turnStartUsd, () => null)
-      if (isMinutely) {
-        // The callbacks close over `$`; they never pass it on.
-        const refresh = (): void => {
-          if (!isFetching) return
-          void runFetchers(rules, 'time', {
-            now: () => $.clock.now(),
-            run: (argv, timeoutMs) => $.process.run(argv, { timeoutMs }),
-            git: () => read($, git),
-            set: (id, value) => storeFetched(change => update($, fetched, change), id, value),
-            log: text => $.ui.log(text),
-          })
-        }
-        refresh()
-        await syncMinuteTick(rules, now, {
-          now: () => $.clock.now(),
-          after: (ms, fn) => $.clock.after(ms, fn),
-          every: (ms, fn) => $.clock.every(ms, fn),
-          tick: async () => {
-            try {
-              refresh()
-              await update($, minute, n => n + 1)
-            } catch (error) {
-              await $.ui.log(failed('minute', error))
-            }
-          },
-        })
-      }
-    } catch (error) {
-      await $.ui.log(failed('turn end', error))
-    }
-    return next(e)
-  })
-
-  // The tick stops with the session. A /clear or a resume goes on in this
-  // process with the band still drawn, so the tick goes on too.
-  if (isMinutely || isTurnTimed) {
-    on('session.end', async (_$, e, next) => {
-      if (e.reason !== 'clear' && e.reason !== 'resume') stopMinuteTick()
-      stopTurnTimer()
-      return next(e)
-    })
-  }
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey) return next(e)

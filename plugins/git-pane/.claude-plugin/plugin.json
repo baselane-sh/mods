@@ -1,7 +1,7 @@
 {
   "name": "git-pane",
   "version": "0.3.0",
-  "description": "A live side pane with the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. It refreshes after git commands and file edits. Open it with /git.",
+  "description": "A live side pane, read with git: the branch, ahead and behind its upstream, changed files (staged and unstaged) and the last 5 commits. Refreshes after git commands and edits. Open it with /git.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

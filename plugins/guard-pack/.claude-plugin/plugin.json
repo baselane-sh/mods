@@ -1,7 +1,7 @@
 {
   "name": "guard-pack",
   "version": "0.3.0",
-  "description": "Every Baselane guard in one mod.",
+  "description": "Every Baselane guard in one mod. Some read git, measure files with find, read HOME with printenv, or check where a path really lands.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

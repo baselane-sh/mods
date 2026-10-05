@@ -1,7 +1,7 @@
 {
   "name": "conflicts",
   "version": "0.3.0",
-  "description": "Adds /conflicts: tracked files that still hold merge conflict markers, with line numbers. Read-only.",
+  "description": "Adds /conflicts: tracked files that still hold merge conflict markers, with line numbers, found with git grep. Read-only.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

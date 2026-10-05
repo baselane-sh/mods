@@ -1,7 +1,7 @@
 {
   "name": "protect-main",
   "version": "0.3.0",
-  "description": "Asks before a commit, push or merge while you are on main or master.",
+  "description": "Asks before a commit, push or merge while you are on main or master. Reads the branch with git.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

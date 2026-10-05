@@ -1,7 +1,7 @@
 {
   "name": "explore-pack",
   "version": "0.3.0",
-  "description": "Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check.",
+  "description": "Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. They read git and project files.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

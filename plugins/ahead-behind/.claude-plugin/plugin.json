@@ -1,7 +1,7 @@
 {
   "name": "ahead-behind",
   "version": "0.3.0",
-  "description": "A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), refreshed after each Bash call and file edit. Hidden when the branch has no upstream.",
+  "description": "A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), read with git status after each Bash call and file edit. Hidden when the branch has no upstream.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

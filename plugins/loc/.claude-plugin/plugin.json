@@ -1,7 +1,7 @@
 {
   "name": "loc",
   "version": "0.3.0",
-  "description": "Adds /loc: lines of tracked text files by language, sorted, with a total. Skips lockfiles and binaries. Read-only.",
+  "description": "Adds /loc: lines of tracked text files by language, read with git, sorted, with a total. Skips lockfiles and binaries. Read-only.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

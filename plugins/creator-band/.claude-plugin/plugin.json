@@ -1,7 +1,7 @@
 {
   "name": "creator-band",
   "version": "0.3.0",
-  "description": "The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines, and the daily streak flame.",
+  "description": "The creator band in one row above the prompt: turn timer, count of TODO, FIXME and HACK lines (read with git), and the daily streak flame.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

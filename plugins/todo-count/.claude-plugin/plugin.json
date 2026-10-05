@@ -1,7 +1,7 @@
 {
   "name": "todo-count",
   "version": "0.3.0",
-  "description": "A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), refreshed after edits. Hidden when there are none.",
+  "description": "A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), counted with git after edits. Hidden when there are none.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

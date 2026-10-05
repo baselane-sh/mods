@@ -1,7 +1,7 @@
 {
   "name": "ops-band",
   "version": "0.3.0",
-  "description": "The ops band in one row above the prompt: commits ahead and behind the upstream, the latest GitHub Actions run of your branch, and the Mac battery.",
+  "description": "The ops band in one row above the prompt: commits ahead and behind the upstream (git), the latest GitHub Actions run of your branch (gh), and the Mac battery (pmset).",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

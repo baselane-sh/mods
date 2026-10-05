@@ -5,6 +5,40 @@
   "options": true,
   "types": "types/index.d.ts",
   "nameToken": "band-meters",
+  "needs": {
+    "ahead-behind": ["calls", "calls-run"],
+    "branch-band": ["calls", "calls-run"],
+    "ci-band": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
+    "todo-count": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
+    "battery-band": ["start-fetch", "turn-run", "ticks"],
+    "now-playing": ["start-fetch", "turn-run", "ticks"],
+    "error-meter": ["calls"],
+    "tool-counter": ["calls"],
+    "mood-ring": ["calls"],
+    "pomodoro": ["ticker", "start-timers"],
+    "session-clock": ["ticks"],
+    "turn-timer": ["ticks"]
+  },
+  "hosts": {
+    "calls": [
+      { "file": "hooks/hosts/calls.ts", "export": "watchCalls", "gives": ["calls"] },
+      { "file": "hooks/hosts/calls-run.ts", "export": "watchCallsWithRun", "gives": ["calls", "calls-run"] }
+    ],
+    "tickers": [
+      { "file": "hooks/hosts/tickers.ts", "export": "watchTickers", "gives": ["ticker"] }
+    ],
+    "start": [
+      { "file": "hooks/hosts/start.ts", "export": "startSession", "gives": ["start-timers"] },
+      { "file": "hooks/hosts/start-run.ts", "export": "startSessionWithFetchers", "gives": ["start-fetch"] }
+    ],
+    "turn": [
+      { "file": "hooks/hosts/turn-end.ts", "export": "endTurns", "gives": [] },
+      { "file": "hooks/hosts/turn-end-run.ts", "export": "endTurnsWithFetchers", "gives": ["turn-run"] }
+    ],
+    "end": [
+      { "file": "hooks/hosts/session-end.ts", "export": "stopTicks", "gives": ["ticks"] }
+    ]
+  },
   "userConfig": {
     "latte-meter": {
       "lattePrice": {

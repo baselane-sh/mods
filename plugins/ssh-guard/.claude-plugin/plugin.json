@@ -1,7 +1,7 @@
 {
   "name": "ssh-guard",
   "version": "0.3.0",
-  "description": "Asks before a private key in .ssh is read, authorized_keys or the SSH config is changed, or ssh-keygen would overwrite a key. Public keys and ssh -i pass.",
+  "description": "Asks before a private key in .ssh is read, authorized_keys or the SSH config is changed, or ssh-keygen would overwrite a key. Public keys and ssh -i pass. Reads HOME with printenv.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

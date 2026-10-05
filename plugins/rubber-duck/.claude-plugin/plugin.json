@@ -1,0 +1,10 @@
+{
+  "name": "rubber-duck",
+  "version": "0.3.0",
+  "description": "Restates the problem in its own words and lists its assumptions before it starts work.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

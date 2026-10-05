@@ -1,0 +1,10 @@
+{
+  "name": "docstring-mode",
+  "version": "0.3.0",
+  "description": "Every new or changed public function gets a short doc comment in the language's normal style.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

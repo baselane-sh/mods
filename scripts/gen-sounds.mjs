@@ -63,6 +63,29 @@ const mix = (...layers) => {
   return Array.from({ length }, (_, i) => layers.reduce((sum, layer) => sum + (layer[i] ?? 0), 0))
 }
 
+// A quarter-duty pulse wave: the thinner, brighter voice of arcade chips.
+const pulse = phase => (phase % 1 < 0.25 ? 1 : -1)
+
+// A struck bell: the fundamental plus two inharmonic partials that fade faster.
+const bell = (freq, gain, secs = 0.4) =>
+  mix(
+    tone({ freq, secs, decay: 0.12, gain }),
+    tone({ freq: freq * 2.76, secs, decay: 0.05, gain: gain * 0.3 }),
+    tone({ freq: freq * 5.4, secs, decay: 0.025, gain: gain * 0.1 }),
+  )
+
+// A singing bowl: two close tones beat slowly against each other.
+const bowl = (freq, gain, secs = 0.45) =>
+  mix(
+    tone({ freq, secs, decay: 0.25, gain }),
+    tone({ freq: freq * 1.012, secs, decay: 0.25, gain: gain * 0.8 }),
+    tone({ freq: freq * 2.02, secs, decay: 0.12, gain: gain * 0.2 }),
+  )
+
+// A run of equal short notes, one after the other.
+const run = (freqs, { wave = pulse, secs = 0.09, decay = 0.2, gain = 0.3 } = {}) =>
+  join2(...freqs.map(freq => tone({ wave, freq, secs, decay, gain })))
+
 // Linear fade over the last 10 ms so no file ends on a step.
 const finish = samples =>
   samples.map((s, i) => {
@@ -126,6 +149,20 @@ const PACKS = {
     fail: () => join2(tone({ freq: 700, secs: 0.015, decay: 0.004, gain: 0.2 }), silence(0.04), tone({ freq: 700, secs: 0.015, decay: 0.004, gain: 0.2 })),
     deny: () => noise({ seed: 13, secs: 0.012, decay: 0.003, gain: 0.2 }),
     done: () => tone({ freq: 1800, secs: 0.02, decay: 0.005, gain: 0.12 }),
+  },
+  // Soft and slow: a bell, a low bowl, a muted chime, a bowl.
+  zen: {
+    pass: () => bell(880, 0.4),
+    fail: () => bowl(196, 0.35),
+    deny: () => bell(523, 0.22, 0.2),
+    done: () => bowl(330, 0.3),
+  },
+  // Chip blips: a coin, a falling game-over run, a buzz, a power-up run.
+  arcade: {
+    pass: () => join2(tone({ wave: pulse, freq: 1319, secs: 0.06, decay: 1, gain: 0.3 }), tone({ wave: pulse, freq: 1760, secs: 0.25, decay: 0.1, gain: 0.3 })),
+    fail: () => run([392, 330, 262, 196], { secs: 0.1, decay: 1, gain: 0.3 }),
+    deny: () => tone({ wave: pulse, freq: t => 150 + 20 * Math.sin(2 * Math.PI * 30 * t), secs: 0.2, decay: 0.3, gain: 0.3 }),
+    done: () => run([523, 659, 784, 1047], { secs: 0.09, decay: 0.5, gain: 0.3 }),
   },
 }
 

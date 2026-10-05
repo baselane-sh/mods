@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { On } from 'claude-code'
 
 import type { Fetched, GitState, Reading } from '../../types'
-import { turnComplete } from '../engine'
+import { NO_MODEL, NO_STORE, turnComplete } from '../engine'
 import { runFetchers, storeFetched } from '../fetch'
 import type { BandRule } from '../rule'
 
@@ -17,6 +17,7 @@ const fetched = atom({ plugin: 'todo-count', key: 'fetched' } as const, {} as Re
 
 // The turn's end, for a mod whose rules read a figure from a program (a
 // fetcher): it runs them again then, and on each minute tick.
+// It gives no model read and no store (see turn-end-run-store.ts).
 export const endTurnsWithFetchers = (on: On, rules: readonly BandRule[]): void => {
   on('turn.complete', async ($, e, next) => {
     // The callbacks close over `$`; they never pass it on.
@@ -27,11 +28,8 @@ export const endTurnsWithFetchers = (on: On, rules: readonly BandRule[]): void =
       keep: (now: Reading) => update($, reading, () => now),
       spend: () => update($, turnStartUsd, () => null),
       endTimer: () => update($, turnStartedAt, () => null),
-      model: () => $.session.model(),
-      store: {
-        get: (key: string) => $.store.get(key),
-        set: (key: string, value: unknown) => $.store.set(key, value),
-      },
+      model: NO_MODEL,
+      store: NO_STORE,
       clock: {
         now: () => $.clock.now(),
         after: (ms, fn) => $.clock.after(ms, fn),

@@ -54,6 +54,16 @@ test('band: with no figures the engine draws its own', async ($, on) => {
   }
 })
 
+// Only a mod that draws the model reads it: the others get a host whose model
+// read rejects without asking the session (engine.json `needs`).
+const READS_MODEL = ['model-badge']
+
+test('band: only a mod that draws the model asks the session for it', async ($, on) => {
+  const session = probe($, on, { usd: 1.34, percent: 50 })
+  await session.turn(FULL)
+  expect({ mod: PLUGIN, readsModel: session.modelReads() > 0 }).toEqual({ mod: PLUGIN, readsModel: READS_MODEL.includes(PLUGIN) })
+})
+
 test('band: before the first turn ends there is nothing to show', async ($, on) => {
   const session = probe($, on, FULL)
   const ui = await session.mount('terminal')

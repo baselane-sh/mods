@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { On } from 'claude-code'
 
 import type { Fetched, GitState, Reading } from '../../types'
-import { turnComplete } from '../engine'
+import { NO_MODEL, turnComplete } from '../engine'
 import { runFetchers, storeFetched } from '../fetch'
 import type { BandRule } from '../rule'
 
@@ -16,8 +16,9 @@ const git = atom({ plugin: 'creator-band', key: 'git' } as const, null as GitSta
 const fetched = atom({ plugin: 'creator-band', key: 'fetched' } as const, {} as Readonly<Record<string, Fetched | null>>)
 
 // The turn's end, for a mod whose rules read a figure from a program (a
-// fetcher): it runs them again then, and on each minute tick.
-export const endTurnsWithFetchers = (on: On, rules: readonly BandRule[]): void => {
+// fetcher) and keep a figure in the mod's own store: it runs the fetchers
+// again then, and on each minute tick. It gives no model read.
+export const endTurnsWithFetchersAndStore = (on: On, rules: readonly BandRule[]): void => {
   on('turn.complete', async ($, e, next) => {
     // The callbacks close over `$`; they never pass it on.
     await turnComplete(rules, e, {
@@ -27,7 +28,7 @@ export const endTurnsWithFetchers = (on: On, rules: readonly BandRule[]): void =
       keep: (now: Reading) => update($, reading, () => now),
       spend: () => update($, turnStartUsd, () => null),
       endTimer: () => update($, turnStartedAt, () => null),
-      model: () => $.session.model(),
+      model: NO_MODEL,
       store: {
         get: (key: string) => $.store.get(key),
         set: (key: string, value: unknown) => $.store.set(key, value),

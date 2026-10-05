@@ -17,7 +17,10 @@
     "mood-ring": ["calls"],
     "pomodoro": ["ticker", "start-timers"],
     "session-clock": ["ticks"],
-    "turn-timer": ["ticks"]
+    "turn-timer": ["ticks"],
+    "daily-spend": ["store"],
+    "streak-flame": ["store"],
+    "model-badge": ["model"]
   },
   "hosts": {
     "calls": [
@@ -33,7 +36,10 @@
     ],
     "turn": [
       { "file": "hooks/hosts/turn-end.ts", "export": "endTurns", "gives": [] },
-      { "file": "hooks/hosts/turn-end-run.ts", "export": "endTurnsWithFetchers", "gives": ["turn-run"] }
+      { "file": "hooks/hosts/turn-end-model.ts", "export": "endTurnsWithModel", "gives": ["model"] },
+      { "file": "hooks/hosts/turn-end-store.ts", "export": "endTurnsWithStore", "gives": ["store"] },
+      { "file": "hooks/hosts/turn-end-run.ts", "export": "endTurnsWithFetchers", "gives": ["turn-run"] },
+      { "file": "hooks/hosts/turn-end-run-store.ts", "export": "endTurnsWithFetchersAndStore", "gives": ["turn-run", "store"] }
     ],
     "end": [
       { "file": "hooks/hosts/session-end.ts", "export": "stopTicks", "gives": ["ticks"] }

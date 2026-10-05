@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { On } from 'claude-code'
 
 import type { Reading } from '../../types'
-import { NO_MODEL, NO_STORE, turnComplete } from '../engine'
+import { NO_MODEL, turnComplete } from '../engine'
 import type { BandRule } from '../rule'
 
 // The same atoms as engine.tsx: the state scan wants each spelled in the file
@@ -12,9 +12,9 @@ const turnStartUsd = atom({ plugin: 'band-meters', key: 'turnStartUsd' } as cons
 const turnStartedAt = atom({ plugin: 'band-meters', key: 'turnStartedAt' } as const, null as number | null)
 const minute = atom({ plugin: 'band-meters', key: 'minute' } as const, 0)
 
-// The turn's end: each rule's figures, kept for the band to draw. It gives
-// no model read and no store (see turn-end-model.ts, turn-end-store.ts).
-export const endTurns = (on: On, rules: readonly BandRule[]): void => {
+// The turn's end, for a mod whose rules keep a figure across sessions in the
+// mod's own store. It gives no model read.
+export const endTurnsWithStore = (on: On, rules: readonly BandRule[]): void => {
   on('turn.complete', async ($, e, next) => {
     // The callbacks close over `$`; they never pass it on.
     await turnComplete(rules, e, {
@@ -25,7 +25,10 @@ export const endTurns = (on: On, rules: readonly BandRule[]): void => {
       spend: () => update($, turnStartUsd, () => null),
       endTimer: () => update($, turnStartedAt, () => null),
       model: NO_MODEL,
-      store: NO_STORE,
+      store: {
+        get: (key: string) => $.store.get(key),
+        set: (key: string, value: unknown) => $.store.set(key, value),
+      },
       clock: {
         now: () => $.clock.now(),
         after: (ms, fn) => $.clock.after(ms, fn),

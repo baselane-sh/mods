@@ -112,7 +112,7 @@ Ask you before a harsh or risky command runs.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
-| `beads-guard` | Asks before bd commands that delete issues or rewrite history: delete, purge, prune, flatten, compact, gc, sql, admin, init --force, dolt push --force. Reads only the command text, runs no bd. |  |  |
+| `beads-guard` | Asks before bd commands that delete data or rewrite history: delete, purge, prune, gc, sql, admin, import, rename, forget, restore, migrate and more. Reads only the command text, runs no bd. |  |  |
 | `secret-filename-guard` | Asks before a Bash command touches a secret-looking file (.env, private keys, credentials). |  |  |
 | `secret-guard` | Asks before a live API key, token or private key is written, edited or run. |  |  |
 | `env-exfil-guard` | Asks before a command prints your environment, echoes a secret variable or sends local data to a remote host. |  |  |
@@ -275,7 +275,7 @@ Change how Claude writes. Code and commands stay exact.
 
 | Mod | What it does | Command | Notes |
 | --- | --- | --- | --- |
-| `beads-prime` | Runs bd prime once per session and adds the beads workflow text it prints, from the repo's own .beads files, to the system prompt (max 8 KB). bd setup claude hooks may add it twice. |  |  |
+| `beads-prime` | Runs bd prime once per session and adds its text (max 8 KB) to the system prompt, from the repo's .beads files and bd memories. bd setup claude hooks may add it twice. |  |  |
 | `terse-mode` | Short answers: no preamble, no recap. |  |  |
 | `plain-english` | Writes in ASD-STE-100 Simplified Technical English: short sentences, active voice, simple words. |  |  |
 | `junior-mode` | Explains each step and why, and defines jargon once, for a learner. |  |  |

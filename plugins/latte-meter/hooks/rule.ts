@@ -106,11 +106,14 @@ export type Fetcher = {
   // `run` takes an argv (no shell). Answer what to draw, null to hide the
   // segment, or undefined to leave the last figure as it is and not count the
   // run (for a rule that has nothing to ask yet). A throw hides the segment.
-  // `now` is the clock at the run's start, in milliseconds.
+  // `now` is the clock at the run's start, in milliseconds. `generation`
+  // counts the edit triggers before the run: a read started in an older
+  // generation may not hold what the last edit changed.
   read: (
     run: (argv: readonly string[]) => Promise<ProcessRunResult>,
     git: GitState | null,
     now: number,
+    generation: number,
   ) => Promise<Fetched | null | undefined>
 }
 

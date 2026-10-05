@@ -119,17 +119,50 @@ test('beads-band: bd as a command word, not inside other words or quotes', () =>
   expect(ranBd({ tool: 'Edit' })).toBe(false)
 })
 
-test('beads-band: the same bd read started within 3 s is one run', async () => {
+test('beads-band: the same bd read in one generation within 3 s is one run', async () => {
   let runs: readonly (readonly string[])[] = []
   const run = async (argv: readonly string[]) => {
     runs = [...runs, argv]
     return { exitCode: 0, stdout: '{"count":1}', stderr: '', isStdoutTruncated: false, isStderrTruncated: false }
   }
-  // Far from the probe's clock, so no run of a mod under test is shared.
-  const [a, b] = await Promise.all([bdJson(run, ['count'], 1000), bdJson(run, ['count'], 3999)])
+  // Far from the probe's clock and generations, so no run of a mod under test is shared.
+  const [a, b] = await Promise.all([bdJson(run, ['count'], { now: 1000, generation: -1 }), bdJson(run, ['count'], { now: 3999, generation: -1 })])
   expect([a, b]).toEqual([{ count: 1 }, { count: 1 }])
   expect(runs.length).toBe(1)
-  await bdJson(run, ['count'], 4000)
-  await bdJson(run, ['count', '--by-priority'], 4000)
-  expect(runs.length).toBe(3)
+  // A read after an edit never reuses one from before it.
+  await bdJson(run, ['count'], { now: 1500, generation: -2 })
+  expect(runs.length).toBe(2)
+  await bdJson(run, ['count'], { now: 4500, generation: -2 })
+  await bdJson(run, ['count', '--by-priority'], { now: 4500, generation: -2 })
+  expect(runs.length).toBe(4)
+})
+
+const readyIs = (ready: number, delayMs?: number) =>
+  fakeBd({ ...REAL, [KEYS.status]: { ...json({ ...STATUS, summary: { ...STATUS.summary, ready_issues: ready } }), ...(delayMs === undefined ? {} : { delayMs }) } })
+
+test('beads-band: bd run while a timed read is under way shows the new figure', async ($, on) => {
+  const session = probe($, on)
+  session.setCommand('bd', readyIs(10, 1000))
+  await session.turn({})
+  await session.advance(300)
+  session.setCommand('bd', readyIs(9))
+  await session.bash('bd close x')
+  await session.advance(1000)
+  expect(await text(session)).toBe('bd 9 ready · 45 active · 29 blocked')
+  // The timed read, then one more after the close.
+  expect(bdCalls(session, KEYS.status).length).toBe(2)
+})
+
+test('beads-band: two bd runs 2 s apart each show their figure', async ($, on) => {
+  const session = probe($, on)
+  session.setCommand('bd', readyIs(10))
+  await session.turn({})
+  await session.advance(5000)
+  session.setCommand('bd', readyIs(9))
+  await session.bash('bd close a')
+  expect(await text(session)).toBe('bd 9 ready · 45 active · 29 blocked')
+  await session.advance(2000)
+  session.setCommand('bd', readyIs(8))
+  await session.bash('bd close b')
+  expect(await text(session)).toBe('bd 8 ready · 45 active · 29 blocked')
 })

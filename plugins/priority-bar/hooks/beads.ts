@@ -20,19 +20,24 @@ export const ranBd = (call: EditCall): boolean =>
 
 const SHARE_MS = 3000
 
-// Runs the rules of one mod share: the same argv started within 3 s of another
-// reuses that run, so a pack runs each bd command once per refresh. Keyed by
-// the clock at the start of the asking rule's run. Bookkeeping, not drawn
-// state; a hot reload resets it.
-const shared = new Map<string, { at: number; ran: Promise<ProcessRunResult> }>()
+// When a read starts: the clock, and the fetcher's edit generation.
+export type ReadAt = { now: number; generation: number }
 
-const runShared = (run: Run, argv: readonly string[], now: number): Promise<ProcessRunResult> => {
+// Runs the rules of one mod share: the same argv started within 3 s of another
+// in the same edit generation reuses that run, so a pack runs each bd command
+// once per refresh, and a read after Claude ran bd never reuses one from
+// before it. Bookkeeping, not drawn state; a hot reload resets it.
+const shared = new Map<string, ReadAt & { ran: Promise<ProcessRunResult> }>()
+
+const isFresh = (held: ReadAt, at: ReadAt): boolean => held.generation === at.generation && Math.abs(at.now - held.now) < SHARE_MS
+
+const runShared = (run: Run, argv: readonly string[], at: ReadAt): Promise<ProcessRunResult> => {
   const key = argv.join('\u0000')
   const held = shared.get(key)
-  if (held !== undefined && Math.abs(now - held.at) < SHARE_MS) return held.ran
-  for (const [old, entry] of shared) if (Math.abs(now - entry.at) >= SHARE_MS) shared.delete(old)
+  if (held !== undefined && isFresh(held, at)) return held.ran
+  for (const [old, entry] of shared) if (!isFresh(entry, at)) shared.delete(old)
   const ran = run(argv)
-  shared.set(key, { at: now, ran })
+  shared.set(key, { ...at, ran })
   return ran
 }
 
@@ -41,8 +46,8 @@ export const isRecord = (value: unknown): value is Readonly<Record<string, unkno
 
 export const isCount = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0
 
-export const bdJson = async (run: Run, args: readonly string[], now: number): Promise<unknown> => {
-  const ran = await runShared(run, ['bd', ...args, '--json'], now)
+export const bdJson = async (run: Run, args: readonly string[], at: ReadAt): Promise<unknown> => {
+  const ran = await runShared(run, ['bd', ...args, '--json'], at)
   if (ran.exitCode !== 0 || ran.stdout.trim() === '') return null
   try {
     return JSON.parse(ran.stdout) as unknown

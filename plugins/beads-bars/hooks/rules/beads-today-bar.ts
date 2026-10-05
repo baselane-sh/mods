@@ -34,9 +34,9 @@ export const rule: BandRule = {
     onEdit: true,
     onEditWhen: ranBd,
     timeoutMs: 10_000,
-    read: async (run, _git, now) => {
+    read: async (run, _git, now, generation) => {
       const date = localDate(now)
-      const answer = await bdJson(run, ['count', '--closed-after', date], now)
+      const answer = await bdJson(run, ['count', '--closed-after', date], { now, generation })
       const count = isRecord(answer) ? answer['count'] : undefined
       return isCount(count) ? { text: String(count), tag: date } : null
     },

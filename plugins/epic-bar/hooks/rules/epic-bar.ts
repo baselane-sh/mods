@@ -50,10 +50,10 @@ export const rule: BandRule = {
     onEdit: true,
     onEditWhen: ranBd,
     timeoutMs: 10_000,
-    read: async (run, _git, now) => {
-      const epics = await bdJson(run, ['epic', 'status'], now)
+    read: async (run, _git, now, generation) => {
+      const epics = await bdJson(run, ['epic', 'status'], { now, generation })
       if (!Array.isArray(epics) || epics.length === 0) return null
-      return epicLine(pickEpic(epics, await bdJson(run, IN_PROGRESS, now)))
+      return epicLine(pickEpic(epics, await bdJson(run, IN_PROGRESS, { now, generation })))
     },
   },
   segment: ({ fetched }) => {

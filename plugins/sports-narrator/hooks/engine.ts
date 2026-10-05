@@ -22,7 +22,7 @@ export const RUN_TIMEOUT_MS = 10_000
 
 // One nudge: it may watch each tool call once the tool answered, and when
 // the turn stops it may name a one-line reminder for the person. The engine
-// shows each reminder as a toast; the model never reads it. `options` are the
+// shows each reminder as a toast. The model reads it only when the mod's host keeps it as a note for the next prompt (the bead nudges do; see PendingNotes). `options` are the
 // plugin's userConfig values, empty for a mod that declares none. `cwd` is
 // the session cwd ('' when the host gave none), for `repoPath`.
 export type Nudge = {

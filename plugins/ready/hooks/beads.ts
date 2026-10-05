@@ -20,12 +20,11 @@ export type Bead = {
   parent?: string
   labels?: string[]
   description?: string
-  dependency_type?: string
-  dependencies?: Bead[]
-  dependents?: Bead[]
+  // bd list gives raw edges: the bead on the other end and the edge type.
+  dependencies?: { depends_on_id: string; type: string }[]
 }
 
-export type BdAnswer = { ok: true; json: unknown } | { ok: false; text: string; notFound?: true }
+export type BdAnswer = { ok: true; json: unknown } | { ok: false; text: string }
 
 const fail = (text: string): BdAnswer => ({ ok: false, text })
 
@@ -38,8 +37,6 @@ export const bd = async (tools: CommandTools, ...args: string[]): Promise<BdAnsw
   if (ran.code === -1) return fail(NO_BD)
   if (ran.code !== 0) {
     const said = `${ran.stderr}\n${ran.stdout}`
-    // `bd show <id>` for an id that is not there: exit 1, a JSON error on stdout.
-    if (ran.code === 1 && /no issues? found matching/i.test(said)) return { ok: false, text: NO_ANSWER, notFound: true }
     // Exit 1 outside a beads folder; other codes and other 1s are real failures.
     const noProject = ran.code === 1 && (ran.stderr.trim() === '' || /no beads|database found/i.test(said))
     return fail(noProject ? NO_PROJECT : NO_ANSWER)

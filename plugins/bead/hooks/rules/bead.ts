@@ -23,16 +23,30 @@ const describe = (b: Bead): string[] => {
   return lines.length > DESCRIPTION_LINES ? [...shown, `... (${lines.length - DESCRIPTION_LINES} more lines)`] : shown
 }
 
+const one = async (tools: CommandTools, ...args: string[]): Promise<{ beads: Bead[] } | { text: string }> => {
+  const answer = await bd(tools, ...args)
+  if (!answer.ok) return { text: answer.text }
+  const beads = asBeads(answer.json)
+  return beads === undefined ? { text: NO_ANSWER } : { beads }
+}
+
+// `bd show` writes .beads/last-touched, and a later bare `bd close` would act
+// on that bead. `bd list` does not, so every read here is a list.
 const compose = async (_record: unknown, _facts: unknown, tools: CommandTools, args: string): Promise<Composed> => {
   // One id, checked before bd runs, so it can never be read as an option.
   if (!BEAD_ID.test(args)) return message(USAGE)
-  const answer = await bd(tools, 'show', args, '--include-dependents', '--json')
-  if (!answer.ok) return message(answer.notFound === true ? `No bead ${args} in this project.` : answer.text)
-  const found = asBeads(answer.json)?.[0]
-  if (found === undefined) return message(NO_ANSWER)
+  const own = await one(tools, 'list', '--id', args, '--all', '--json')
+  if ('text' in own) return message(own.text)
+  // An id that is not there is an empty list with exit 0.
+  const found = own.beads[0]
+  if (found === undefined) return message(`No bead ${args} in this project.`)
 
-  const blockers = (found.dependencies ?? []).filter(d => d.dependency_type === 'blocks')
-  const children = (found.dependents ?? []).filter(d => d.dependency_type === 'parent-child')
+  const kids = await one(tools, 'list', '--parent', args, '--status', 'all', '--json', '-n', '0')
+  if ('text' in kids) return message(kids.text)
+  const blockerIds = (found.dependencies ?? []).filter(d => d.type === 'blocks').map(d => d.depends_on_id)
+  const blockers = blockerIds.length === 0 ? { beads: [] } : await one(tools, 'list', '--id', blockerIds.join(','), '--all', '--json')
+  if ('text' in blockers) return message(blockers.text)
+
   const head = [
     `${found.id}  ${clip(found.title, 120)}`,
     `status: ${found.status}`,
@@ -41,7 +55,7 @@ const compose = async (_record: unknown, _facts: unknown, tools: CommandTools, a
     `parent: ${found.parent ?? 'none'}`,
     `labels: ${(found.labels ?? []).join(', ') || 'none'}`,
   ]
-  const text = [...head, '', ...describe(found), ...linked('Blocked by', blockers), ...linked('Children', children)]
+  const text = [...head, '', ...describe(found), ...linked('Blocked by', blockers.beads), ...linked('Children', kids.beads)]
   return message(finish(text.join('\n')))
 }
 

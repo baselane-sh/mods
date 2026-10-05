@@ -339,7 +339,7 @@
     {
       "name": "beads-guard",
       "source": "./plugins/beads-guard",
-      "description": "Asks before bd commands that delete issues or rewrite history: delete, purge, prune, flatten, compact, gc, sql, admin, init --force, dolt push --force. Reads only the command text, runs no bd.",
+      "description": "Asks before bd commands that delete data or rewrite history: delete, purge, prune, gc, sql, admin, import, rename, forget, restore, migrate and more. Reads only the command text, runs no bd.",
       "version": "0.5.0",
       "author": {
         "name": "Baselane",
@@ -419,7 +419,7 @@
     {
       "name": "beads-prime",
       "source": "./plugins/beads-prime",
-      "description": "Runs bd prime once per session and adds the beads workflow text it prints, from the repo's own .beads files, to the system prompt (max 8 KB). bd setup claude hooks may add it twice.",
+      "description": "Runs bd prime once per session and adds its text (max 8 KB) to the system prompt, from the repo's .beads files and bd memories. bd setup claude hooks may add it twice.",
       "version": "0.5.0",
       "author": {
         "name": "Baselane",

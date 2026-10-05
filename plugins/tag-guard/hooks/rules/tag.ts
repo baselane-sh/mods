@@ -54,8 +54,11 @@ const pushDangers = async (args: readonly string[], local: ReadonlySet<string>, 
 const TAG_NOT_MADE: ReadonlyArray<readonly [string, string]> = [['--delete', 'd'], ['--list', 'l'], ['--verify', 'v']]
 const TAG_VALUE_FLAGS = new Set(['-m', '-F', '-u', '--message', '--file', '--local-user', '--cleanup', '--trailer'])
 
+// A short cluster that ends in a value option (`-am rel`) takes the next word too.
+const takesValue = (word: string): boolean => TAG_VALUE_FLAGS.has(word) || /^-[a-zA-Z]*[mFu]$/.test(word)
+
 const madeTag = (args: readonly string[]): readonly string[] =>
-  args.filter((arg, i) => !arg.startsWith('-') && !TAG_VALUE_FLAGS.has(args[i - 1] ?? '')).slice(0, 1)
+  args.filter((arg, i) => !arg.startsWith('-') && !takesValue(args[i - 1] ?? '')).slice(0, 1)
 
 // `isTag` answers whether the repo holds a local tag of that name.
 export const tagDangersIn = async (command: string, isTag: (name: string) => Promise<boolean>): Promise<readonly string[]> => {

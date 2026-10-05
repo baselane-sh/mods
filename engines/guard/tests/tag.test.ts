@@ -58,6 +58,7 @@ test('tag-guard: a tag made earlier in the same command counts before it exists'
   expect(await tagDangersIn('git tag v3.1.0 && git push origin v3.1.0 main', noTags)).toEqual(['push tag v3.1.0'])
   expect(await tagDangersIn('git tag -m "rel" -a v3.1.0 HEAD~1 && git push origin v3.1.0', noTags)).toEqual(['push tag v3.1.0'])
   expect(await tagDangersIn('git tag -f v3.1.0 && git push -f origin v3.1.0', noTags)).toEqual(['push tag v3.1.0'])
+  expect(await tagDangersIn('git tag -am rel v3.1.0 && git ' + 'push origin v3.1.0', noTags)).toEqual(['push tag v3.1.0'])
   expect(await tagDangersIn('git tag -l v3.1.0 && git push origin v3.1.0', noTags)).toEqual([])
   expect(await tagDangersIn('git tag -m v3.1.0 rel && git push origin v3.1.0', noTags)).toEqual([])
 })

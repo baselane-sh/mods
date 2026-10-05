@@ -2,7 +2,7 @@ import type { RenderElement } from 'claude-code'
 
 import type { RenderRule } from '../engine'
 import { commitHref, forgeCache } from '../forge'
-import { linkTokens, replyMarkdown } from '../marks'
+import { linkTokens } from '../marks'
 import { outputTexts } from '../output'
 import { MAX_MARKDOWN } from '../refs'
 import { MAX_SCAN } from '../urls'
@@ -33,13 +33,14 @@ export const create = (): RenderRule => {
   return {
     id: 'sha-links',
     assistantText: {
-      draw: async ({ e, elements, cwd, repo }) => {
+      // A rewrite, not a drawing of our own: the text goes on to the rules
+      // beneath, so this and another link mod both add their links.
+      rewrite: async ({ e, cwd, repo }) => {
         if (findShas(e.props.text).length === 0) return undefined
         const forge = await forgeFor(await cwd(), repo)
         if (forge === undefined) return undefined
         const text = linkTokens(e.props.text, SHA_GLOBAL, sha => commitHref(forge, sha))
-        if (text === e.props.text || text.length > MAX_MARKDOWN) return undefined
-        return replyMarkdown(elements, KEY, text, e.surface === 'terminal' && e.props.isFirstOfReply)
+        return text === e.props.text || text.length > MAX_MARKDOWN ? undefined : text
       },
     },
     toolRow: {

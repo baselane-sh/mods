@@ -95,6 +95,10 @@ export const mountAssistant = (
 ): Promise<Mounted<Surface, 'AssistantMessage'>> =>
   $.ui.mount({ plugin: PLUGIN, surface, component: 'AssistantMessage', requestId: 'msg_01', props })
 
+// The text the engine's stand-in drew for a reply: what `next(e)` was handed.
+// Only for a drawing with one Text, the stand-in's.
+export const drawnText = async (ui: Pick<Mounted, 'find'>): Promise<string | undefined> => (await ui.find({ type: 'Text' }))?.text
+
 const FILE: FsStat = { kind: 'file', size: 10, mtimeMs: 0, isLink: false }
 const DIR: FsStat = { kind: 'dir', size: 0, mtimeMs: 0, isLink: false }
 

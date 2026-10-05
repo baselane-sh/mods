@@ -52,6 +52,7 @@ export type CommandReply =
 // What `wake` makes the commands answer, unless a test set them.
 const SAMPLE_REPLIES: Readonly<Record<string, CommandReply>> = {
   pmset: { stdout: "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=1)\t87%; discharging; 4:12 remaining\n" },
+  pgrep: { stdout: '123\n' },
   osascript: { stdout: 'Song - Artist\n' },
   gh: { stdout: '[{"status":"completed","conclusion":"success"}]' },
   'git grep': { stdout: 'a.ts:2\n' },

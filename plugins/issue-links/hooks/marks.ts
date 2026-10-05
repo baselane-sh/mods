@@ -1,5 +1,3 @@
-import type { ElementTable, RenderElement } from 'claude-code'
-
 // Turns tokens in a reply's markdown into links. Fenced code, existing links,
 // autolinks and bare URLs are left as written; a code span that is exactly
 // one token becomes the link's text.
@@ -40,18 +38,4 @@ export const linkTokens = (text: string, token: RegExp, hrefOf: (found: string) 
       return out + plain(line.slice(from))
     })
     .join('\n')
-}
-
-// A reply's text block redrawn as markdown, keyed by the rule that drew it.
-// The block that opens a reply draws its bullet; drawing the block ourselves,
-// the terminal's bullet is ours to draw.
-export const replyMarkdown = (
-  { Box, Text, Markdown }: ElementTable,
-  key: string,
-  text: string,
-  bullet: boolean,
-): RenderElement => {
-  const markdown = h(Markdown, { key, text }) as RenderElement
-  if (!bullet) return markdown
-  return h(Box, { flexDirection: 'row' }, h(Text, null, '⏺ '), h(Box, { flexDirection: 'column', flexGrow: 1 }, markdown)) as RenderElement
 }

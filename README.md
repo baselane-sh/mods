@@ -210,7 +210,7 @@ A one-line band above the prompt.
 | `turn-timer` | A band above the prompt with how long the current turn has run (turn 0:42). It shows while a turn runs and hides between turns. |  |  |
 | `ahead-behind` | A band above the prompt with the commits ahead and behind the upstream (↑2 ↓1), read with git status after each Bash call and file edit. Hidden when the branch has no upstream. |  |  |
 | `battery-band` | A band above the prompt with the Mac battery percent and charging state (🔋 87%, ⚡ 54% while charging), read from pmset once a minute. Hidden on other systems. |  |  |
-| `now-playing` | A band above the prompt with the track Music or Spotify plays on your Mac (♪ Song - Artist), asked through osascript once a minute. Hidden when nothing plays. |  |  |
+| `now-playing` | A band above the prompt with the track Music or Spotify plays on your Mac (♪ Song - Artist), read with pgrep and osascript once a minute, only from a player that runs. Hidden when nothing plays. |  |  |
 | `ci-band` | A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes. Hidden without gh. |  |  |
 | `todo-count` | A band above the prompt with how many lines in tracked files hold TODO, FIXME or HACK (todo 12), counted with git after edits. Hidden when there are none. |  |  |
 | `cache-meter` | A band above the prompt with the share of prompt tokens the cache served this session (cache 87%). A high share means cheaper, faster turns. |  |  |

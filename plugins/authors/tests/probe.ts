@@ -62,6 +62,9 @@ export type CommandProbe = {
   written: () => Readonly<Record<string, string>>
   // Every argv the commands ran through process.run, joined with spaces.
   ran: () => readonly string[]
+  // The working directory each of those runs asked for (undefined: the
+  // session's), in the same order.
+  ranIn: () => readonly (string | undefined)[]
 }
 
 // Stands in for the engine beneath the commands. Every figure a receipt
@@ -71,6 +74,7 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
   let copied: string[] = []
   let written: Record<string, string> = {}
   let ran: string[] = []
+  let ranIn: (string | undefined)[] = []
   const cwd = fakes.cwd ?? CWD
 
   const state = new Map<string, { value: unknown; version: number }>()
@@ -111,6 +115,7 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
   on('process.run', (_$, e) => {
     const command = e.argv.join(' ')
     ran = [...ran, command]
+    ranIn = [...ranIn, e.init?.cwd]
     const prefix = `git -C ${cwd} `
     const key = command.startsWith(prefix) ? command.slice(prefix.length) : command
     if (fakes.timeout?.includes(key) === true) {
@@ -175,5 +180,6 @@ export const probe = ($: Engine, on: OnFn, fakes: Fakes = {}): CommandProbe => {
     copied: () => copied,
     written: () => written,
     ran: () => ran,
+    ranIn: () => ranIn,
   }
 }

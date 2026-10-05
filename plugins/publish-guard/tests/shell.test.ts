@@ -28,6 +28,16 @@ test('shell: follows sh -c and skips heredoc bodies and comments', () => {
   expect(argvs('ls 2>&1 | wc -l')).toEqual(['ls 2>&1', 'wc -l'])
 })
 
+test('shell: an unquoted redirect glued to a word starts a word of its own', () => {
+  expect(segmentsOf('cat k.pub>>~/.ssh/authorized_keys').map(segment => segment.argv)).toEqual([['cat', 'k.pub', '>>~/.ssh/authorized_keys']])
+  expect(segmentsOf('echo "a b">f').map(segment => segment.argv)).toEqual([['echo', 'a b', '>f']])
+  expect(segmentsOf('base64<key').map(segment => segment.argv)).toEqual([['base64', '<key']])
+  expect(segmentsOf('cmd>&2').map(segment => segment.argv)).toEqual([['cmd', '>&2']])
+  expect(argvs('ls 2>/dev/null x 1>&2 &>log >>out')).toEqual(['ls 2>/dev/null x 1>&2 &>log >>out'])
+  expect(segmentsOf('echo "a>b" a\\>b').map(segment => segment.argv)).toEqual([['echo', 'a>b', 'a>b']])
+  expect(argvs('cat<<EOF\nx\nEOF\nls')).toEqual(['cat', 'ls'])
+})
+
 test('shell: blankQuotes hides quoted text only', () => {
   expect(blankQuotes('echo "sudo x" && sudo y')).toBe('echo "______" && sudo y')
 })

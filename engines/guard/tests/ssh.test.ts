@@ -19,6 +19,18 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ["sed -i '' 's/22/2222/' ~/.ssh/config", 'change ~/.ssh/config'],
   ['printf "Host x\\n" >~/.ssh/config', 'change ~/.ssh/config'],
   ['rm ~/.ssh/authorized_keys', 'change ~/.ssh/authorized_keys'],
+  ['echo "ssh-rsa AAA me">>~/.ssh/authorized_keys', 'change ~/.ssh/authorized_keys'],
+  ['cat key.pub>>~/.ssh/authorized_keys', 'change ~/.ssh/authorized_keys'],
+  ['cat key.pub>> ~/.ssh/authorized_keys', 'change ~/.ssh/authorized_keys'],
+  ['echo x>~/.ssh/config', 'change ~/.ssh/config'],
+  ['base64<~/.ssh/id_rsa', 'read private key ~/.ssh/id_rsa'],
+  ['mv ~/.ssh/authorized_keys /tmp/', 'change ~/.ssh/authorized_keys'],
+  ['cat ~/.ssh/*', 'read private key ~/.ssh/*'],
+  ['cat ~/.ssh/github_ed25519', 'read private key ~/.ssh/github_ed25519'],
+  ['tar czf /tmp/k.tgz ~/.ssh', 'copy key folder ~/.ssh'],
+  ['cp -r ~/.ssh /tmp/x', 'copy key folder ~/.ssh'],
+  ['rsync -a ~/.ssh/ backup:keys/', 'copy key folder ~/.ssh/'],
+  ['tar czf k.tgz -C ~ .ssh', 'copy key folder .ssh'],
 ]
 const MISSES = [
   'cat ~/.ssh/id_rsa.pub',
@@ -35,6 +47,13 @@ const MISSES = [
   'git commit -m "rotate ~/.ssh/id_rsa"',
   'cat docs/id_rsa_setup.md',
   'cp ~/.ssh/config /tmp/ssh-config.bak',
+  'cat ~/.ssh/known_hosts.old',
+  'cat ~/.ssh/*.pub',
+  'chmod 600 ~/.ssh/*',
+  'ls ~/.ssh/*',
+  'mkdir -p ~/.ssh',
+  'chmod 700 ~/.ssh',
+  'echo "x>~/.ssh/authorized_keys"',
 ]
 
 // HOME is /Users/me there. The keys that exist: id_ed25519 and id_rsa in
@@ -70,12 +89,14 @@ const TOOL_HITS = [
   write('/Users/me/.ssh/authorized_keys'),
   edit('/Users/me/.ssh/config'),
   write('/Users/me/.ssh/id_rsa'),
+  read('/Users/me/.ssh/github_key'),
 ]
 const TOOL_MISSES = [
   read('/Users/me/.ssh/id_ed25519.pub'),
   read('/Users/me/.ssh/config'),
   write('/repo/src/ssh/config.ts'),
   read('/repo/docs/id_rsa.md'),
+  read('/Users/me/.ssh/known_hosts'),
 ]
 
 test('ssh-guard: command table', () => {

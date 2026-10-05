@@ -18,6 +18,11 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['gcloud artifacts docker push us-docker.pkg.dev/p/r/api', 'gcloud artifacts docker push'],
   ['sudo docker push acme/api', 'docker push'],
   ['docker build -t acme/api . && docker push acme/api', 'docker push'],
+  ['podman push localhost/myapp:1 docker://quay.io/me/myapp:1', 'podman push'],
+  ['podman image push localhost/myapp quay.io/me/myapp', 'podman push'],
+  ['podman manifest push list docker://quay.io/me/list', 'podman manifest push'],
+  ['docker buildx build -o type=image,name=r.io/x,push=true .', 'docker buildx --push'],
+  ['docker buildx build --output=type=image,push=true -t r.io/x .', 'docker buildx --push'],
 ]
 const MISSES = [
   'docker pull acme/api:1.2.0',
@@ -26,6 +31,9 @@ const MISSES = [
   'docker images',
   'docker push localhost:5000/api',
   'docker push 127.0.0.1:5000/api:dev',
+  'podman push localhost/myapp localhost:5000/myapp',
+  'podman push localhost/myapp localhost:5000/myapp --creds me:pw',
+  'docker buildx build -o type=image,name=r.io/x,push=false .',
   'podman pull acme/api',
   'helm package ./chart',
   'helm push chart.tgz oci://localhost:5000/charts',

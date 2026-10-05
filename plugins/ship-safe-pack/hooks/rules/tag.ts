@@ -5,7 +5,7 @@ import { base, commandsOf, hasShortFlag, subcommandOf } from '../shell'
 // Release tags on a remote are fetched by others and built from; moving or
 // deleting one breaks their builds. A bare refspec (`git push origin v1.2.0`)
 // counts as a tag when the repo has a local tag of that name, or the same
-// command deleted one (`git tag -d v1 && git push origin :v1`). Dry runs,
+// command made or deleted one (`git tag -d v1 && git push origin :v1`). Dry runs,
 // local tag commands and branch pushes pass. git-history-guard also asks on
 // every remote delete; the first guard that asks answers for the rest.
 const PUSH_VALUE_FLAGS = new Set(['--repo', '-o', '--push-option', '--receive-pack', '--exec'])
@@ -34,13 +34,13 @@ const refsOf = (refspecs: readonly string[], deletes: boolean): readonly Ref[] =
     return [{ ...ref, isTag: ref.name.startsWith(TAGS) }]
   })
 
-const pushDangers = async (args: readonly string[], deleted: ReadonlySet<string>, isTag: (name: string) => Promise<boolean>): Promise<readonly string[]> => {
+const pushDangers = async (args: readonly string[], local: ReadonlySet<string>, isTag: (name: string) => Promise<boolean>): Promise<readonly string[]> => {
   if (has(args, '--dry-run', 'n')) return []
   const whole = WHOLE_PUSHES.filter(flag => args.includes(flag)).map(flag => `git push ${flag}`)
   const refs = refsOf(positionals(args).slice(1), has(args, '--delete', 'd'))
   const named = await Promise.all(
     refs.map(async ({ name, deletes, isTag: bySyntax }) => {
-      const tagged = bySyntax || deleted.has(name) || (name !== 'HEAD' && name.length > 0 && (await isTag(name)))
+      const tagged = bySyntax || local.has(name) || (name !== 'HEAD' && name.length > 0 && (await isTag(name)))
       if (!tagged) return []
       return [deletes ? `delete remote tag ${name}` : `push tag ${name}`]
     }),
@@ -48,15 +48,25 @@ const pushDangers = async (args: readonly string[], deleted: ReadonlySet<string>
   return [...whole, ...named.flat()]
 }
 
+// `git tag` modes that make no tag, and the options whose value is the next
+// word. A tag made earlier in the command does not exist yet when the guard
+// runs, so `git tag v1 && git push origin v1` is read from the command.
+const TAG_NOT_MADE: ReadonlyArray<readonly [string, string]> = [['--delete', 'd'], ['--list', 'l'], ['--verify', 'v']]
+const TAG_VALUE_FLAGS = new Set(['-m', '-F', '-u', '--message', '--file', '--local-user', '--cleanup', '--trailer'])
+
+const madeTag = (args: readonly string[]): readonly string[] =>
+  args.filter((arg, i) => !arg.startsWith('-') && !TAG_VALUE_FLAGS.has(args[i - 1] ?? '')).slice(0, 1)
+
 // `isTag` answers whether the repo holds a local tag of that name.
 export const tagDangersIn = async (command: string, isTag: (name: string) => Promise<boolean>): Promise<readonly string[]> => {
   const gits: readonly Git[] = commandsOf(command)
     .filter(argv => argv[0] !== undefined && base(argv[0]) === 'git')
     .map(argv => subcommandOf(argv, GIT_VALUE_FLAGS))
-  const deleted = new Set(
-    gits.filter(git => git.sub === 'tag' && has(git.args, '--delete', 'd')).flatMap(git => git.args.filter(arg => !arg.startsWith('-'))),
-  )
-  const found = await Promise.all(gits.filter(git => git.sub === 'push').map(git => pushDangers(git.args, deleted, isTag)))
+  const tags = gits.filter(git => git.sub === 'tag')
+  const deleted = tags.filter(git => has(git.args, '--delete', 'd')).flatMap(git => git.args.filter(arg => !arg.startsWith('-')))
+  const created = tags.filter(git => !TAG_NOT_MADE.some(([long, letter]) => has(git.args, long, letter))).flatMap(git => madeTag(git.args))
+  const local = new Set([...deleted, ...created])
+  const found = await Promise.all(gits.filter(git => git.sub === 'push').map(git => pushDangers(git.args, local, isTag)))
   return [...new Set(found.flat())]
 }
 

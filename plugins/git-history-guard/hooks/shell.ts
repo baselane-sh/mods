@@ -138,6 +138,13 @@ const tokenize = (text: string, prefix: string): Raw[] => {
       i += isOr || next === '&' ? 2 : 1
     } else if (c === '<' && next === '<' && text[i + 2] !== '<') {
       readHeredocStart()
+    } else if ((c === '>' || c === '<') && inWord && !/^(\d*|&)[<>]*$/.test(cur)) {
+      // `key.pub>>file` is the word `key.pub` and the redirect `>>file`;
+      // `2>&1` and `&>file` stay one word.
+      endWord()
+      cur = c
+      inWord = true
+      i += 1
     } else {
       cur += c
       inWord = true

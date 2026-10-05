@@ -11,6 +11,9 @@ const PROD_STAGE = /^prod(uction)?$/i
 // previews, such as hosting:preview.
 const PREVIEW_ONLY = /^hosting:[^,]*preview[^,]*$/i
 
+// `vercel@latest` and `@scope/cli@2` name the package without the version.
+const withoutVersion = (spec: string): string => spec.replace(/^(@[^/@]+\/[^@]+|[^@]+)@.*$/, '$1')
+
 // `npx vercel` and `pnpm exec vercel` read as `vercel`.
 const withoutRunner = (argv: readonly string[]): readonly string[] => {
   const name = argv[0] === undefined ? '' : base(argv[0])
@@ -18,7 +21,7 @@ const withoutRunner = (argv: readonly string[]): readonly string[] => {
   if (from === 0) return argv
   const rest = argv.slice(from)
   const start = rest.findIndex(word => !word.startsWith('-'))
-  return start < 0 ? [] : rest.slice(start)
+  return start < 0 ? [] : [withoutVersion(rest[start]!), ...rest.slice(start + 1)]
 }
 
 const valueOf = (args: readonly string[], names: readonly string[]): string | undefined => {
@@ -50,8 +53,8 @@ const dangerOf = (argv: readonly string[]): string | undefined => {
   const name = argv[0] === undefined ? '' : base(argv[0])
   const { sub, args } = subcommandOf(argv, VALUE_FLAGS)
   if (name === 'vercel') return vercelDanger(argv.slice(1))
-  if (name === 'netlify' && sub === 'deploy') {
-    return args.some(arg => arg === '--prod' || arg === '--prod-if-unlocked') ? 'netlify deploy --prod' : undefined
+  if ((name === 'netlify' || name === 'netlify-cli') && sub === 'deploy') {
+    return args.some(arg => arg === '--prod' || arg === '-p' || arg === '--prod-if-unlocked') ? 'netlify deploy --prod' : undefined
   }
   if ((name === 'firebase' || name === 'firebase-tools') && sub === 'deploy') return firebaseDanger(args)
   if ((name === 'fly' || name === 'flyctl') && sub === 'deploy') return args.includes('--build-only') ? undefined : 'fly deploy'

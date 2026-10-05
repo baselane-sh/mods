@@ -3,9 +3,9 @@ import { expect, test } from 'claude-code/testing'
 import { bead, json, NO_PROJECT_ERR } from './bd-fixtures'
 import { probe as probeBase } from './probe'
 
-// The test sets the engine clock: 00:30 local on 5 Oct 2026, just after midnight.
-const NOW = new Date(2026, 9, 5, 0, 30).getTime()
-const yesterday = (): string => new Date(2026, 9, 4).toISOString()
+// The test sets the engine clock: 00:30 local on 15 Mar 2026, just after midnight.
+const NOW = new Date(2026, 2, 15, 0, 30).getTime()
+const yesterday = (): string => new Date(2026, 2, 14).toISOString()
 const probe = ($: Parameters<typeof probeBase>[0], on: Parameters<typeof probeBase>[1], fakes: Parameters<typeof probeBase>[2] = {}) =>
   probeBase($, on, { now: NOW, ...fakes })
 const closedKey = () => `bd list --status closed --closed-after ${yesterday()} --json -n 0`
@@ -93,6 +93,6 @@ test('beads-standup: JSON that does not parse in a later call prints "bd did not
 test('beads-standup: at 00:30 local, closed-after is the start of the previous day', async ($, on) => {
   const session = probe($, on, { git: answers([], [], []) })
   await session.run('beads-standup')
-  expect(session.ran()[0]).toBe(`bd list --status closed --closed-after ${new Date(2026, 9, 4, 0, 0, 0).toISOString()} --json -n 0`)
-  expect(session.ran()[0]).not.toContain(new Date(2026, 9, 5).toISOString())
+  expect(session.ran()[0]).toBe(`bd list --status closed --closed-after ${new Date(2026, 2, 14, 0, 0, 0).toISOString()} --json -n 0`)
+  expect(session.ran()[0]).not.toContain(new Date(2026, 2, 15).toISOString())
 })

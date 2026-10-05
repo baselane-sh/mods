@@ -7,14 +7,28 @@ import { base, commandsOf, subcommandOf } from '../shell'
 const BD_VALUE_FLAGS = new Set(['-C', '--directory', '--db', '--actor', '--dolt-auto-commit'])
 
 // Always destructive: they delete issues or history, or run raw SQL.
-const ALWAYS = new Set(['delete', 'purge', 'prune', 'flatten', 'compact', 'gc', 'rename-prefix', 'sql', 'admin'])
+const ALWAYS = new Set(['delete', 'purge', 'prune', 'flatten', 'compact', 'gc', 'rename-prefix', 'rename', 'sql', 'admin', 'import', 'forget'])
+
+// Subcommands that delete or overwrite data, by command. `migrate hooks` only
+// edits git hooks, and only with --apply.
+const SUB_DANGERS: Readonly<Record<string, ReadonlySet<string>>> = {
+  backup: new Set(['restore']),
+  mol: new Set(['burn']),
+  kv: new Set(['clear']),
+  dolt: new Set(['clean-databases']),
+  migrate: new Set(['issues', 'schema', 'sync']),
+}
 
 const firstWord = (args: readonly string[]): string | undefined => args.find(arg => !arg.startsWith('-'))
 
 const bdDanger = (argv: readonly string[]): string[] => {
   const { sub, args } = subcommandOf(argv, BD_VALUE_FLAGS)
-  if (sub === undefined || args.includes('--dry-run')) return []
+  // Help and previews write nothing.
+  if (sub === undefined || args.some(arg => arg === '--dry-run' || arg === '--help' || arg === '-h')) return []
   if (ALWAYS.has(sub)) return [`bd ${sub}`]
+  const verb = firstWord(args)
+  if (verb !== undefined && SUB_DANGERS[sub]?.has(verb)) return [`bd ${sub} ${verb}`]
+  if (sub === 'migrate' && verb === 'hooks' && args.includes('--apply')) return ['bd migrate hooks --apply']
   if (sub === 'init' && args.includes('--force')) return ['bd init --force']
   if (sub === 'duplicates' && args.includes('--auto-merge')) return ['bd duplicates --auto-merge']
   // `bd vc commit` is a plain commit; `bd vc merge` changes the data of the current branch.

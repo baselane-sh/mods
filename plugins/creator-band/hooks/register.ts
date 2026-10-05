@@ -3,7 +3,7 @@ import type { Register } from 'claude-code'
 import { registerBand } from './engine'
 import { watchCallsWithRun } from './hosts/calls-run'
 import { startSessionWithFetchers } from './hosts/start-run'
-import { endTurnsWithFetchers } from './hosts/turn-end-run'
+import { endTurnsWithFetchersAndStore } from './hosts/turn-end-run-store'
 import { stopTicks } from './hosts/session-end'
 import { rule as turnTimer } from './rules/turn-timer'
 import { rule as todoCount } from './rules/todo-count'
@@ -14,6 +14,6 @@ export const register: Register = (on, options) => {
   registerBand(on, rules, options)
   watchCallsWithRun(on, rules)
   startSessionWithFetchers(on, rules)
-  endTurnsWithFetchers(on, rules)
+  endTurnsWithFetchersAndStore(on, rules)
   stopTicks(on, rules)
 }

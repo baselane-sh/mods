@@ -63,6 +63,14 @@ const modelOf = async (read: () => Promise<string>): Promise<string | undefined>
   }
 }
 
+// The tools a turn-end host does not give. A rule that calls one is logged and
+// skipped, and its tests fail: name what it uses in engine.json `needs`.
+const absent = (name: string) => (): Promise<never> =>
+  Promise.reject(new Error(`${name} is not given to this mod; name it in engine.json needs`))
+
+export const NO_MODEL: TurnIo['model'] = absent('model')
+export const NO_STORE: TurnIo['store'] = { get: absent('store'), set: absent('store') }
+
 // What a turn end reads and writes, as closures over the hook's `$`.
 // `refresh` runs the fetchers; only the host that runs programs gives it.
 export type TurnIo = {

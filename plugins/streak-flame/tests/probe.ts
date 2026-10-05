@@ -116,6 +116,8 @@ export type BandProbe = {
   // How many times the mod read the state value `key` (any owner). A read
   // while the band draws is what makes a later write draw it again.
   stateReads: (key: string) => number
+  // How many times the mod asked the session for its model.
+  modelReads: () => number
   // Gives a mod that draws from live activity something to show: a few tool
   // calls, a turn that is running, commands that answer, and /pomodoro where
   // the mod has it. Call it after the turn ends: a turn timer hides then. A mod without that command
@@ -148,6 +150,7 @@ export const probe = (
   let registered: string[] = []
   let writes: Record<string, number> = {}
   let reads: Record<string, number> = {}
+  let modelReads = 0
 
   const clock = mock.clock(on, { now: NOON })
   // The kit's mock.store answers the same four calls from memory, but only
@@ -192,7 +195,10 @@ export const probe = (
     writes = { ...writes, [e.key]: (writes[e.key] ?? 0) + 1 }
     return { value: { isSet: true as const, version: version + 1 } }
   })
-  on('session.model', () => ({ value: now.model ?? '' }))
+  on('session.model', () => {
+    modelReads += 1
+    return { value: now.model ?? '' }
+  })
   on('process.run', async (_$, e) => {
     const isGit = e.argv[0] === 'git' && e.argv.includes('status')
     if (e.argv[0] !== undefined && !isGit) {
@@ -365,6 +371,7 @@ export const probe = (
     registered: () => registered,
     stateWrites: key => writes[key] ?? 0,
     stateReads: key => reads[key] ?? 0,
+    modelReads: () => modelReads,
     logs: () => logs,
     writes: () => written,
     breakUsage: () => {

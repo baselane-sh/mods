@@ -4,7 +4,7 @@ import { registerBand } from './engine'
 import { watchCalls } from './hosts/calls'
 import { watchTickers } from './hosts/tickers'
 import { startSession } from './hosts/start'
-import { endTurns } from './hosts/turn-end'
+import { endTurnsWithStore } from './hosts/turn-end-store'
 import { rule as costMeter } from './rules/cost-meter'
 import { rule as latteMeter } from './rules/latte-meter'
 import { rule as contextMeter } from './rules/context-meter'
@@ -18,5 +18,5 @@ export const register: Register = (on, options) => {
   watchCalls(on, rules)
   watchTickers(on, rules)
   startSession(on, rules)
-  endTurns(on, rules)
+  endTurnsWithStore(on, rules)
 }

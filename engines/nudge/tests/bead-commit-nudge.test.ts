@@ -83,3 +83,18 @@ test('bead-commit-nudge: id table', () => {
   for (const text of ['bm-', 'bm', 'xbm-a', 'bm_a', 'b.m-a']) expect({ text, named: namesBead(text, 'bm') }).toEqual({ text, named: false })
   expect(namesBead('bXm-a', 'b.m')).toBe(false) // the prefix is text, not a pattern
 })
+
+test('bead-commit-nudge: the next prompt carries the reminder as a note, once, with no commit text', async ($, on) => {
+  const session = probe($, on, 10, 'x', bd(count(1)))
+  await session.bash('git commit -m "secret message text"')
+  await session.stop()
+  expect(await session.prompt()).toEqual([reminder(1)])
+  expect(await session.prompt()).toEqual([])
+})
+
+test('bead-commit-nudge: no reminder, no note', async ($, on) => {
+  const session = probe($, on, 10, 'x', bd(count(1)))
+  await session.bash('git commit -m "bm-a: x"')
+  await session.stop()
+  expect(await session.prompt()).toEqual([])
+})

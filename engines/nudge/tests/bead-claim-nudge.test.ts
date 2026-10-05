@@ -74,3 +74,18 @@ test('bead-claim-nudge: a long file name does not matter', async ($, on) => {
   await session.write(`src/${'a'.repeat(300)}.ts`)
   expect(await session.stop()).toContain(REMINDED)
 })
+
+test('bead-claim-nudge: the next prompt carries the reminder as a note, once', async ($, on) => {
+  const session = probe($, on, 10, 'x', bdWith(count(0)))
+  await session.write('src/app.ts')
+  await session.stop()
+  expect(await session.prompt()).toEqual([REMINDER])
+  expect(await session.prompt()).toEqual([])
+})
+
+test('bead-claim-nudge: no reminder, no note', async ($, on) => {
+  const session = probe($, on, 10, 'x', bdWith(count(2)))
+  await session.write('src/app.ts')
+  await session.stop()
+  expect(await session.prompt()).toEqual([])
+})

@@ -57,6 +57,26 @@ export const NO_TOOLS: NudgeTools = {
   run: absent('run'),
 }
 
+// Reminders waiting for the person's next prompt, so Claude reads them too.
+// Made once per mod and shared by the turn-end host and the prompt host. A
+// note is fixed text, a count or an id that matched the id pattern, never a
+// title or commit text.
+export type PendingNotes = { add: (note: string) => void; take: () => readonly string[] }
+
+export const createNotes = (): PendingNotes => {
+  let pending: readonly string[] = []
+  return {
+    add: note => {
+      pending = [...pending, note]
+    },
+    take: () => {
+      const taken = pending
+      pending = []
+      return taken
+    },
+  }
+}
+
 // Hands each finished tool call to the nudges that watch them. `log` closes
 // over the hook's `$`.
 export const observeAll = async (
@@ -83,13 +103,18 @@ export const remindAll = async (
   options: PluginOptions,
   toast: (text: string) => unknown,
   log: (text: string) => unknown,
-): Promise<void> => {
+): Promise<readonly string[]> => {
+  let reminders: readonly string[] = []
   for (const nudge of nudges) {
     try {
       const reminder = await nudge.atStop(tools, options)
-      if (reminder !== undefined) await toast(`${nudge.id}: ${reminder}`)
+      if (reminder !== undefined) {
+        await toast(`${nudge.id}: ${reminder}`)
+        reminders = [...reminders, reminder]
+      }
     } catch (error) {
       await log(failed(nudge.id, error))
     }
   }
+  return reminders
 }

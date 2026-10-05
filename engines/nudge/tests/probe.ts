@@ -23,6 +23,8 @@ export type NudgeProbe = {
   asked: () => readonly ModelCompleteRequest[]
   // Every line the mod wrote to the log: a nudge that threw leaves one.
   logs: () => readonly string[]
+  // Submits a prompt and answers the context notes the mod added beside it.
+  prompt: (text?: string) => Promise<readonly string[]>
   // Every program the mod ran, as `argv` and the cwd it ran in.
   ran: () => ReadonlyArray<{ argv: readonly string[]; cwd: string | undefined }>
 }
@@ -90,6 +92,7 @@ export const probe = (
     return { value: envExample ?? '' }
   })
   on('classic.Stop', () => ({}))
+  on('prompt.submit', (_$, e) => ({ text: e.text, context: e.context }))
   if (fakeRun !== undefined) {
     on('process.run', (_$, e) => {
       runs = [...runs, { argv: e.argv, cwd: e.init?.cwd }]
@@ -130,6 +133,7 @@ export const probe = (
     asked: () => asked,
     logs: () => logs,
     ran: () => runs,
+    prompt: async (text = 'next') => (await $.prompt.submit({ text, wait: false, origin: { kind: 'composer' } })).context ?? [],
     stop: async () => {
       toasts = []
       await $.classic.Stop({ stop_hook_active: false })

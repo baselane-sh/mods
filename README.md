@@ -85,11 +85,11 @@ MIT. Copyright (c) 2026 Baselane, LLC. Read [LICENSE](LICENSE).
 
 <!-- catalog:start -->
 
-**130 mods** in 10 families.
+**140 mods** in 10 families.
 
 "needs setup" means the mod has options that you set with `claude plugin configure <mod>`. Its description tells you if it works before you set them. "pack" means one mod with several rules.
 
-### Guards (25)
+### Guards (35)
 
 Ask you before a harsh or risky command runs.
 
@@ -117,9 +117,19 @@ Ask you before a harsh or risky command runs.
 | `chmod-guard` | Asks before chmod makes files world-writable (777, a+w, o+w) or chmod or chown runs recursively on a broad path (/, a system folder, a home folder). |  |  |
 | `git-history-guard` | Asks before git commands that throw away work or rewrite history: reset --hard, clean, rebase, filter-branch, filter-repo, push --delete, branch -D and stash clear. |  |  |
 | `big-file-guard` | Asks before a Write creates content over 1 MB, or git add names a file over 5 MB. |  |  |
+| `publish-guard` | Asks before a package is published: npm, pnpm, yarn or bun publish, cargo publish, twine upload, gem push, poetry or uv publish. Dry runs pass. |  |  |
+| `tag-guard` | Asks before release tags go to a remote: git push --tags, --follow-tags or --mirror, a push of a tag ref, and a push that deletes a remote tag. Dry runs pass. |  |  |
+| `deploy-guard` | Asks before a production deploy: vercel --prod, netlify deploy --prod, firebase deploy, fly deploy, gcloud app deploy, eb deploy, heroku rollback, serverless deploy to prod. |  |  |
+| `db-reset-guard` | Asks before a framework wipes a database: prisma migrate reset, rails or rake db:drop and db:reset, alembic downgrade, django flush, supabase db reset, knex rollback --all. |  |  |
+| `ssh-guard` | Asks before a private key in .ssh is read, authorized_keys or the SSH config is changed, or ssh-keygen would overwrite a key. Public keys and ssh -i pass. |  |  |
+| `cron-guard` | Asks before scheduled jobs or services are wiped or stopped: crontab -r, crontab replaced from stdin or a file, launchctl unload or bootout, systemctl stop, disable or mask. |  |  |
+| `upload-guard` | Asks before local files go to a remote host: scp or rsync to host:path, piped input to nc, curl -T, sftp put. Local copies, downloads and localhost pass. |  |  |
+| `registry-push-guard` | Asks before an image or chart is pushed to a registry: docker push, docker buildx --push, podman push, helm push, gcloud artifacts docker push. Local registries pass. |  |  |
 | `guard-essentials` | Asks only before harsh or disaster commands: destructive infra, git and SQL, piping downloads into a shell, sudo, leaking or committing secrets. The quiet choice for daily work. |  | pack |
 | `guard-pack` | Every Baselane guard in one mod. |  | pack |
 | `guard-devops` | Asks before harsh DevOps commands: destructive Docker, Kubernetes and Helm calls, CI config edits, broad chmod and chown, and git commands that lose work. Add infra-guard for plain kubectl delete. |  | pack |
+| `release-pack` | Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod. |  | pack |
+| `ship-safe-pack` | The release-pack guards plus db-reset-guard and upload-guard: asks before publish, tag push, production deploy, registry push, database wipes and file uploads. |  | pack |
 
 ### Reminders (17)
 

@@ -1,0 +1,10 @@
+{
+  "name": "publish-guard",
+  "version": "0.3.0",
+  "description": "Asks before a package is published: npm, pnpm, yarn or bun publish, cargo publish, twine upload, gem push, poetry or uv publish. Dry runs pass.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

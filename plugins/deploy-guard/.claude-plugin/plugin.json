@@ -1,0 +1,10 @@
+{
+  "name": "deploy-guard",
+  "version": "0.3.0",
+  "description": "Asks before a production deploy: vercel --prod, netlify deploy --prod, firebase deploy, fly deploy, gcloud app deploy, eb deploy, heroku rollback, serverless deploy to prod.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

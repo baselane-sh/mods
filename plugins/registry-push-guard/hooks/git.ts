@@ -1,0 +1,34 @@
+import type { GuardTools } from './engine'
+
+// `git -C <dir>` runs against another repo. Follow it, as the kit did.
+const DASH_C = /git +(?:-[^C]\S* +\S+ +)*-C +(?:"([^"]+)"|'([^']+)'|(\S+))/
+
+export const repoDirFor = (command: string, cwd: string): string => {
+  const match = DASH_C.exec(command)
+  const dir = match?.[1] ?? match?.[2] ?? match?.[3]
+  if (dir === undefined) return cwd
+  return dir.startsWith('/') ? dir : `${cwd}/${dir}`
+}
+
+export type Repo = { git: (...args: string[]) => Promise<string | undefined> }
+
+// The repo a command works in, or undefined outside a work tree. `git`
+// answers stdout, or undefined when git exits non-zero. Output past the
+// host's 4 MiB cap throws, so the engine asks rather than scanning half a
+// diff; a git that times out rejects and takes the same path.
+export const openRepo = async (command: string, tools: GuardTools): Promise<Repo | undefined> => {
+  const cwd = await tools.cwd()
+  const dir = repoDirFor(command, cwd)
+  const git = async (...args: string[]) => {
+    const ran = await tools.run(['git', '-C', dir, ...args], cwd)
+    if (ran.isStdoutTruncated) throw new Error(`git ${args[0]} output passed the 4 MiB cap`)
+    return ran.exitCode === 0 ? ran.stdout : undefined
+  }
+  return (await git('rev-parse', '--is-inside-work-tree')) === undefined ? undefined : { git }
+}
+
+export const lines = (text: string | undefined): string[] =>
+  (text ?? '').split('\n').filter(line => line.length > 0)
+
+// git's global options that take the next word as their value.
+export const GIT_VALUE_FLAGS: ReadonlySet<string> = new Set(['-C', '-c', '--git-dir', '--work-tree', '--namespace', '--exec-path'])

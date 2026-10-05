@@ -567,6 +567,106 @@
       }
     },
     {
+      "name": "publish-guard",
+      "source": "./plugins/publish-guard",
+      "description": "Asks before a package is published: npm, pnpm, yarn or bun publish, cargo publish, twine upload, gem push, poetry or uv publish. Dry runs pass.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "tag-guard",
+      "source": "./plugins/tag-guard",
+      "description": "Asks before release tags go to a remote: git push --tags, --follow-tags or --mirror, a push of a tag ref, and a push that deletes a remote tag. Dry runs pass.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "deploy-guard",
+      "source": "./plugins/deploy-guard",
+      "description": "Asks before a production deploy: vercel --prod, netlify deploy --prod, firebase deploy, fly deploy, gcloud app deploy, eb deploy, heroku rollback, serverless deploy to prod.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "db-reset-guard",
+      "source": "./plugins/db-reset-guard",
+      "description": "Asks before a framework wipes a database: prisma migrate reset, rails or rake db:drop and db:reset, alembic downgrade, django flush, supabase db reset, knex rollback --all.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "ssh-guard",
+      "source": "./plugins/ssh-guard",
+      "description": "Asks before a private key in .ssh is read, authorized_keys or the SSH config is changed, or ssh-keygen would overwrite a key. Public keys and ssh -i pass.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "cron-guard",
+      "source": "./plugins/cron-guard",
+      "description": "Asks before scheduled jobs or services are wiped or stopped: crontab -r, crontab replaced from stdin or a file, launchctl unload or bootout, systemctl stop, disable or mask.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "upload-guard",
+      "source": "./plugins/upload-guard",
+      "description": "Asks before local files go to a remote host: scp or rsync to host:path, piped input to nc, curl -T, sftp put. Local copies, downloads and localhost pass.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "registry-push-guard",
+      "source": "./plugins/registry-push-guard",
+      "description": "Asks before an image or chart is pushed to a registry: docker push, docker buildx --push, podman push, helm push, gcloud artifacts docker push. Local registries pass.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "release-pack",
+      "source": "./plugins/release-pack",
+      "description": "Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
+      "name": "ship-safe-pack",
+      "source": "./plugins/ship-safe-pack",
+      "description": "The release-pack guards plus db-reset-guard and upload-guard: asks before publish, tag push, production deploy, registry push, database wipes and file uploads.",
+      "version": "0.3.0",
+      "author": {
+        "name": "Baselane",
+        "url": "https://baselane.sh"
+      }
+    },
+    {
       "name": "auto-format",
       "source": "./plugins/auto-format",
       "description": "Runs your project's own formatter on each file Claude writes or edits, only when the project has a formatter config, and tells Claude to re-read the file.",

@@ -21,7 +21,7 @@ export const rule: BandRule = {
     onEdit: true,
     onEditWhen: ranBd,
     timeoutMs: 10_000,
-    read: async (run, _git, now) => nowLine(await bdJson(run, IN_PROGRESS, now)),
+    read: async (run, _git, now, generation) => nowLine(await bdJson(run, IN_PROGRESS, { now, generation })),
   },
   segment: ({ fetched }) => {
     const found = fetched['bead-now']

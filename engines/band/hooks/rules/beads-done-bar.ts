@@ -29,7 +29,7 @@ export const rule: BandRule = {
     onEdit: true,
     onEditWhen: ranBd,
     timeoutMs: 10_000,
-    read: async (run, _git, now) => doneLine(await bdJson(run, ['status'], now)),
+    read: async (run, _git, now, generation) => doneLine(await bdJson(run, ['status'], { now, generation })),
   },
   segment: ({ fetched }) => {
     const found = fetched['beads-done-bar']

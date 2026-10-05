@@ -1,8 +1,110 @@
 {
-  "tests": ["probe.ts", "engine.test.ts"],
-  "register": "registerStyles",
+  "tests": [
+    "probe.ts",
+    "engine.test.ts"
+  ],
   "ruleExport": "rule",
-  "options": true,
+  "needs": {
+    "british-english": [
+      "static"
+    ],
+    "bullet-mode": [
+      "static"
+    ],
+    "caveman-mode": [
+      "static"
+    ],
+    "code-only": [
+      "static"
+    ],
+    "conventional-commits": [
+      "static"
+    ],
+    "docstring-mode": [
+      "static"
+    ],
+    "eli5-mode": [
+      "static"
+    ],
+    "gitmoji-commits": [
+      "static"
+    ],
+    "haiku-commits": [
+      "static"
+    ],
+    "junior-mode": [
+      "static"
+    ],
+    "no-em-dash": [
+      "static"
+    ],
+    "no-sycophancy": [
+      "static"
+    ],
+    "noir-mode": [
+      "static"
+    ],
+    "pirate-mode": [
+      "static"
+    ],
+    "plain-english": [
+      "static"
+    ],
+    "reply-language": [
+      "static"
+    ],
+    "reviewer-mode": [
+      "static"
+    ],
+    "rubber-duck": [
+      "static"
+    ],
+    "security-mode": [
+      "static"
+    ],
+    "shakespeare-mode": [
+      "static"
+    ],
+    "socratic-mode": [
+      "static"
+    ],
+    "ste-mode": [
+      "static"
+    ],
+    "tdd-mode": [
+      "static"
+    ],
+    "terse-mode": [
+      "static"
+    ],
+    "yoda-mode": [
+      "static"
+    ],
+    "beads-prime": [
+      "live"
+    ]
+  },
+  "hosts": {
+    "static": [
+      {
+        "file": "hooks/hosts/static.ts",
+        "export": "addStaticSections",
+        "gives": [
+          "static"
+        ],
+        "options": true
+      }
+    ],
+    "live": [
+      {
+        "file": "hooks/hosts/live.ts",
+        "export": "addLiveSections",
+        "gives": [
+          "live"
+        ]
+      }
+    ]
+  },
   "userConfig": {
     "reply-language": {
       "language": {

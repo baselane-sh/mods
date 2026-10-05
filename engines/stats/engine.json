@@ -1,5 +1,9 @@
 {
-  "tests": ["probe.ts", "engine.test.ts"],
+  "tests": [
+    "probe.ts",
+    "engine.test.ts",
+    "bead.test.ts"
+  ],
   "register": "registerStats",
   "ruleExport": "rule",
   "types": "types/index.d.ts",

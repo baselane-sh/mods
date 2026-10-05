@@ -1,0 +1,12 @@
+{
+  "engine": "lifecycle",
+  "mods": [
+    {
+      "name": "bead-stale-nudge",
+      "description": "At session start, one toast when beads in progress have had no update for 7 days, with their ids. Reads with bd stale, and says nothing without bd or a beads project.",
+      "rules": [
+        "bead-stale-nudge"
+      ]
+    }
+  ]
+}

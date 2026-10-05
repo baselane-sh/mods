@@ -23,7 +23,13 @@ export type NudgeProbe = {
   asked: () => readonly ModelCompleteRequest[]
   // Every line the mod wrote to the log: a nudge that threw leaves one.
   logs: () => readonly string[]
+  // Every program the mod ran, as `argv` and the cwd it ran in.
+  ran: () => ReadonlyArray<{ argv: readonly string[]; cwd: string | undefined }>
 }
+
+// What a fake program answers; 'missing' makes the run reject, as a program
+// that is not installed does.
+export type RunFake = { exitCode: number; stdout?: string; stderr?: string } | 'missing'
 
 // A Bash command containing this word is denied beneath the mod; one
 // containing FAIL runs and comes back as an error.
@@ -50,7 +56,13 @@ const answer = (fake: ModelFake): ModelCompleteResult => {
 
 // Stands in for the engine beneath the nudges: tools answer at once, the
 // context window reads `percent`, and each stop answers the toasts it raised.
-export const probe = ($: Engine, on: OnFn, percent = 10, model: ModelFake = 'And Claude is on the board!'): NudgeProbe => {
+export const probe = (
+  $: Engine,
+  on: OnFn,
+  percent = 10,
+  model: ModelFake = 'And Claude is on the board!',
+  fakeRun?: (argv: readonly string[]) => RunFake,
+): NudgeProbe => {
   let toasts: string[] = []
   let asked: ModelCompleteRequest[] = []
   let logs: string[] = []
@@ -59,6 +71,7 @@ export const probe = ($: Engine, on: OnFn, percent = 10, model: ModelFake = 'And
   let reads: string[] = []
   let cwd = DEFAULT_CWD
   let originals: Readonly<Record<string, string>> = {}
+  let runs: Array<{ argv: readonly string[]; cwd: string | undefined }> = []
 
   on('session.usage', () => ({ value: { startedAt: 0, context: { tokens: percent * 2000, window: 200_000, percent }, rateLimits: [] } }))
   on('clock.now', () => ({ value: now }))
@@ -77,6 +90,14 @@ export const probe = ($: Engine, on: OnFn, percent = 10, model: ModelFake = 'And
     return { value: envExample ?? '' }
   })
   on('classic.Stop', () => ({}))
+  if (fakeRun !== undefined) {
+    on('process.run', (_$, e) => {
+      runs = [...runs, { argv: e.argv, cwd: e.init?.cwd }]
+      const done = fakeRun(e.argv)
+      if (done === 'missing') throw new Error(`${e.argv[0]}: no such program`)
+      return { value: { exitCode: done.exitCode, stdout: done.stdout ?? '', stderr: done.stderr ?? '', isStdoutTruncated: false, isStderrTruncated: false } }
+    })
+  }
   on('tool.call', (_$, e) => {
     const command = e.tool === 'Bash' ? e.command : ''
     if (command.includes(DENY_WORD)) return { deny: 'blocked by test' }
@@ -108,6 +129,7 @@ export const probe = ($: Engine, on: OnFn, percent = 10, model: ModelFake = 'And
     reads: () => reads,
     asked: () => asked,
     logs: () => logs,
+    ran: () => runs,
     stop: async () => {
       toasts = []
       await $.classic.Stop({ stop_hook_active: false })

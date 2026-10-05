@@ -1,5 +1,5 @@
 {
-  "hooks": ["engine.tsx", "view.tsx", "rule.ts", "lines.ts", "patterns.ts", "turns.ts"],
+  "hooks": ["engine.tsx", "view.tsx", "rule.ts", "lines.ts", "patterns.ts", "turns.ts", "files.ts"],
   "tests": ["probe.ts", "engine.test.ts", "view.test.ts"],
   "register": "registerPanes",
   "ruleExport": "rule",

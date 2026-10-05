@@ -1,5 +1,5 @@
 {
-  "hooks": ["engine.ts", "diff.ts", "refs.ts", "badge.ts", "output.ts", "urls.ts"],
+  "hooks": ["engine.ts", "diff.ts", "refs.ts", "badge.ts", "output.ts", "urls.ts", "forge.ts", "marks.ts"],
   "tests": ["probe.ts"],
   "register": "registerRender",
   "ruleExport": "create",

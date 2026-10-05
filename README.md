@@ -85,7 +85,7 @@ MIT. Copyright (c) 2026 Baselane, LLC. Read [LICENSE](LICENSE).
 
 <!-- catalog:start -->
 
-**130 mods** in 10 families.
+**140 mods** in 10 families.
 
 "needs setup" means the mod has options that you set with `claude plugin configure <mod>`. Its description tells you if it works before you set them. "pack" means one mod with several rules.
 
@@ -190,7 +190,7 @@ A one-line band above the prompt.
 | `band-pack` | Every Baselane band meter in one row above the prompt: session cost, lattes, context bar, today's spend, the focus timer and the mood ring. | `/pomodoro` | needs setup, pack |
 | `dev-band` | The developer band in one row above the prompt: git branch and changed files, wall clock and session age, tool counts, and failed tool calls. |  | pack |
 
-### Panes (6)
+### Panes (10)
 
 Live side panes that you open with a slash command.
 
@@ -202,6 +202,10 @@ Live side panes that you open with a slash command.
 | `port-watch` | A live side pane of the local TCP ports that listen, with the process name and pid, refreshed every 10 seconds while open. Reads lsof (macOS, most Linux). Open it with /ports. | `/ports` |  |
 | `todo-pane` | A live side pane of the TODO, FIXME and HACK lines in tracked files (git grep), grouped by file and capped at 30. It refreshes after file edits while open. Open it with /todo-pane. | `/todo-pane` |  |
 | `cost-pane` | A live side pane with the session cost, the cost of each of the last 10 turns as a bar, and the average per turn. Open it with /cost-pane. | `/cost-pane` |  |
+| `files-pane` | A live side pane of the files Claude read, edited or wrote this session, grouped by action with a count per file, newest first. Open it with /files. | `/files` |  |
+| `timeline-pane` | A live side pane of this session's turns, newest first: start time, length, tool calls and cost of each, with a total. Open it with /timeline. | `/timeline` |  |
+| `context-pane` | A live side pane of how full the context window is: the percent as a bar, the tokens used, and a short tip past 75 percent. Open it with /context-pane. | `/context-pane` |  |
+| `process-pane` | A live side pane of the processes the session's Bash calls started that still run, with pid, age and command. Read-only: one ps every 5 seconds. Open it with /procs. | `/procs` |  |
 
 ### Prompt styles (20)
 
@@ -242,7 +246,7 @@ Short sounds for passing tests, failing tests, blocked calls and turn ends.
 | `sounds-nature` | Soft nature sounds: a bird chirp when tests pass, a plunk into water when they fail, a gust of wind when a call is blocked, a water drop when a turn ends. |  | needs setup |
 | `sounds-minimal` | Very short, quiet clicks and ticks for a subtle signal: a tick when tests pass, two low ticks when they fail, a click when a call is blocked, a soft tick when a turn ends. |  | needs setup |
 
-### Stats (6)
+### Stats (9)
 
 Local records of how you use Claude Code.
 
@@ -253,9 +257,12 @@ Local records of how you use Claude Code.
 | `achievements` | Unlocks eight badges once each (first session, first green test run, 100 and 1,000 tool calls, 7-day streak, 10 blocked calls, a 2 hour session, night owl), with a toast and /achievements. | `/achievements` |  |
 | `night-owl` | Records the hour of each prompt across sessions and adds /hours: a 24-hour histogram of when you work, naming your peak hour. | `/hours` |  |
 | `personal-bests` | Tracks your records across sessions (longest session, most tool calls in a session, most files edited in a day, cheapest session over 30 minutes), toasts a new one, and lists them with /bests. | `/bests` |  |
+| `heatmap` | Adds /heatmap: a 12-week calendar grid of the days you used Claude Code, like a contribution graph, shaded by turns, naming your busiest day. | `/heatmap` |  |
+| `langs` | Counts the file types Claude edits across sessions and adds /langs: a bar list of the types edited most, each file counted once per session. | `/langs` |  |
+| `weekly` | Adds /week: this week (since Monday) against last week, with sessions, turns, tool calls, files edited and cost, and the change for each. | `/week` |  |
 | `stats-pack` | Every Baselane stats mod in one: /wrapped, streaks and achievements on one shared daily rollup. | `/wrapped`, `/streak`, `/achievements` | pack |
 
-### Display and render (9)
+### Display and render (12)
 
 Change how rows and replies look on your screen. What Claude reads does not change.
 
@@ -268,6 +275,9 @@ Change how rows and replies look on your screen. What Claude reads does not chan
 | `json-pretty` | Bash output that is one long line of JSON is drawn pretty-printed, folded after 30 lines. Display only: Claude reads the output as it was. |  |  |
 | `url-links` | https links (and http://localhost) in tool output are listed as clickable links under the result, up to five. Display only: Claude reads the output as it was. |  |  |
 | `size-badge` | Read and Write rows show how much was read or written: the line count, for example 312 lines, or the file size for images and PDFs. |  |  |
+| `sha-links` | Commit SHAs in Claude's replies, and in the output of git commands, become links to the commit page when origin is on GitHub or GitLab. Display only. |  |  |
+| `issue-links` | #123 references in Claude's replies become links to that issue when the repository's origin is on GitHub or GitLab. Display only. |  |  |
+| `path-shorten` | Tool rows draw long absolute file paths shorter: the project root as ./ and your home folder as ~. Display only; Bash commands are drawn as they ran. |  |  |
 | `render-pack` | Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies. |  | pack |
 | `render-plus` | Three row badges in one: time-badge, exit-badge and size-badge. |  | pack |
 

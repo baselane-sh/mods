@@ -58,6 +58,8 @@ export type StatsRule = {
     copy: boolean
     compose: (view: View, args: string) => Promise<Composed> | Composed
   }
+  /** Has the engine keep files edited per type under the store key `langs`. */
+  langs?: boolean
   /** Toast lines to show, in order. */
   after?: (ctx: After) => Promise<readonly string[]>
   ended?: (ctx: Ended) => Promise<void>

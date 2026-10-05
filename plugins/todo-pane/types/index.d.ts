@@ -36,6 +36,23 @@ export type TurnCost = {
   ended: boolean
   // What the turn cost, once it ended and both costs were known.
   usd?: number
+  // When the turn began and ended, by the host clock (absent in a ledger
+  // written before they were kept).
+  startedAt?: number
+  endedAt?: number
+  // Tool calls made while the turn ran, subagents' included.
+  tools?: number
+}
+
+// One file Claude touched this session, with how often each action ran on it
+// (kept only for a mod whose rule asks for files).
+export type FileTouch = {
+  path: string
+  reads: number
+  edits: number
+  writes: number
+  // When it was last touched, by the host clock.
+  at: number
 }
 
 declare module 'claude-code' {
@@ -45,6 +62,8 @@ declare module 'claude-code' {
       views: Record<string, PaneView>
       // Oldest first.
       turns: TurnCost[]
+      // Oldest touch first.
+      files: FileTouch[]
     }
   }
 }

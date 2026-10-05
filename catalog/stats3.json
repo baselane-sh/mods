@@ -1,0 +1,20 @@
+{
+  "engine": "stats",
+  "mods": [
+    {
+      "name": "heatmap",
+      "description": "Adds /heatmap: a 12-week calendar grid of the days you used Claude Code, like a contribution graph, shaded by turns, naming your busiest day.",
+      "rules": ["heatmap"]
+    },
+    {
+      "name": "langs",
+      "description": "Counts the file types Claude edits across sessions and adds /langs: a bar list of the types edited most, each file counted once per session.",
+      "rules": ["langs"]
+    },
+    {
+      "name": "weekly",
+      "description": "Adds /week: this week (since Monday) against last week, with sessions, turns, tool calls, files edited and cost, and the change for each.",
+      "rules": ["weekly"]
+    }
+  ]
+}

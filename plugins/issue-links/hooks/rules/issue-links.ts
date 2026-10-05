@@ -1,6 +1,6 @@
 import type { RenderRule } from '../engine'
 import { forgeCache, issueHref } from '../forge'
-import { linkTokens, replyMarkdown } from '../marks'
+import { linkTokens } from '../marks'
 import { MAX_MARKDOWN } from '../refs'
 
 // `#123` in a reply becomes a link to that issue of the repository's GitHub
@@ -11,7 +11,6 @@ import { MAX_MARKDOWN } from '../refs'
 // followed by a word or `-`. Up to seven digits, never #0.
 const ISSUE = String.raw`(?<![\w/&#-])#[1-9]\d{0,6}(?![\w-])`
 const ISSUE_GLOBAL = new RegExp(ISSUE, 'g')
-const KEY = 'issue-links'
 
 // Each reference once, in the order first written, outside code and links.
 export const findIssues = (text: string): string[] => {
@@ -29,13 +28,14 @@ export const create = (): RenderRule => {
   return {
     id: 'issue-links',
     assistantText: {
-      draw: async ({ e, elements, cwd, repo }) => {
+      // A rewrite, not a drawing of our own: the text goes on to the rules
+      // beneath, so this and another link mod both add their links.
+      rewrite: async ({ e, cwd, repo }) => {
         if (findIssues(e.props.text).length === 0) return undefined
         const forge = await forgeFor(await cwd(), repo)
         if (forge === undefined) return undefined
         const text = linkTokens(e.props.text, ISSUE_GLOBAL, found => issueHref(forge, found.slice(1)))
-        if (text === e.props.text || text.length > MAX_MARKDOWN) return undefined
-        return replyMarkdown(elements, KEY, text, e.surface === 'terminal' && e.props.isFirstOfReply)
+        return text === e.props.text || text.length > MAX_MARKDOWN ? undefined : text
       },
     },
   }

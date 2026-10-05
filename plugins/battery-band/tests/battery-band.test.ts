@@ -118,3 +118,27 @@ test('battery-band: drawing never writes state', async ($, on) => {
   await read(session, 'desktop')
   expect(session.stateWrites('fetched')).toBe(before)
 })
+
+test('battery-band: a run a few ms short of the minute still runs at the minute tick', async ($, on) => {
+  const session = probe($, on)
+  session.setCommand('pmset', { stdout: BATT(50, 'discharging') })
+  // The run starts 10 ms past the minute, as a real clock's run does after its tick.
+  await session.advance(10)
+  await session.start()
+  await session.settle()
+  await session.turn({})
+  expect(session.calls('pmset').length).toBe(1)
+  await session.advance(59_990)
+  expect(session.calls('pmset').length).toBe(2)
+  await session.advance(60_000)
+  expect(session.calls('pmset').length).toBe(3)
+})
+
+test('battery-band: two triggers at once start one run', async ($, on) => {
+  const session = probe($, on)
+  session.setCommand('pmset', { stdout: BATT(50, 'discharging'), delayMs: 100 })
+  // Two time triggers raised together, both before either run starts.
+  await Promise.all([session.start(), session.start()])
+  await session.advance(100)
+  expect(session.calls('pmset').length).toBe(1)
+})

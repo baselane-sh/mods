@@ -4,7 +4,8 @@ import { FAKE, IN_REPO } from './fixtures'
 import { probe } from './probe'
 
 const NAME = 'config user.name'
-const LOG = 'log --branches --source -F --author=Ada Lovelace -n 15 --format=%as%x09%h%x09%S%x09%s'
+// The name exactly, then the address: never a longer name that holds it.
+const LOG = 'log --branches --source --basic-regexp --author=^Ada Lovelace < -n 15 --format=%as%x09%h%x09%S%x09%s'
 const repo = (log: string) => ({ git: { ...IN_REPO, [NAME]: 'Ada Lovelace\n', [LOG]: log } })
 
 test('recent: registers /recent with a description', async ($, on) => {
@@ -20,7 +21,7 @@ test('recent: date, hash, branch and subject, newest first', async ($, on) => {
   expect(session.copied().length).toBe(1)
 })
 
-test('recent: asks git for 15 commits matched as plain text on the configured name', async ($, on) => {
+test('recent: asks git for 15 commits whose author is exactly the configured name', async ($, on) => {
   const session = probe($, on, repo('2026-01-01\ta\trefs/heads/main\ts\n'))
   await session.run('recent')
   expect(session.ran()).toContain(`git -C /repo ${LOG}`)
@@ -58,4 +59,11 @@ test('recent: only reads, and the text has no em-dashes', async ($, on) => {
   await session.run('recent')
   expect(session.copied()[0] ?? '').not.toContain('—')
   expect(session.written()).toEqual({})
+})
+
+test('recent: a name holding pattern characters is matched as text', async ($, on) => {
+  const log = 'log --branches --source --basic-regexp --author=^J\\. \\[Dev\\]\\* (x)\\$ < -n 15 --format=%as%x09%h%x09%S%x09%s'
+  const session = probe($, on, { git: { ...IN_REPO, [NAME]: 'J. [Dev]* (x)$\n', [log]: '2026-01-01\ta\trefs/heads/main\ts\n' } })
+  const text = await session.run('recent')
+  expect(text).toContain('Your last 1 commits on local branches (J. [Dev]* (x)$)')
 })

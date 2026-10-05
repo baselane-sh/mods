@@ -2,6 +2,9 @@ import { expect, test } from 'claude-code/testing'
 
 import { SURFACES, probe } from './probe'
 
+// pgrep finds the player: a process id, exit 0.
+const RUNNING = { stdout: '123\n' }
+
 const read = async (session: ReturnType<typeof probe>, surface: (typeof SURFACES)[number] = 'terminal') => {
   const ui = await session.mount(surface, 200)
   const found = (await session.segments(ui)).find(item => item.key === 'now-playing')
@@ -11,6 +14,7 @@ const read = async (session: ReturnType<typeof probe>, surface: (typeof SURFACES
 
 test('now-playing: the track Music plays', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', { stdout: 'Kind of Blue - Miles Davis\n' })
   await session.turn({})
   for (const surface of SURFACES) expect(await read(session, surface)).toBe('♪ Kind of Blue - Miles Davis')
@@ -18,6 +22,7 @@ test('now-playing: the track Music plays', async ($, on) => {
 
 test('now-playing: it asks Music first and Spotify when Music plays nothing', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', { stdout: '' })
   await session.turn({})
   expect(session.calls('osascript').length).toBe(2)
@@ -26,6 +31,7 @@ test('now-playing: it asks Music first and Spotify when Music plays nothing', as
 
 test('now-playing: a Spotify track shows when Music is silent', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', argv => ({ stdout: argv.join(' ').includes('"Spotify"') ? 'Hey Jude - Beatles\n' : '' }))
   await session.turn({})
   expect(await read(session)).toBe('♪ Hey Jude - Beatles')
@@ -34,6 +40,7 @@ test('now-playing: a Spotify track shows when Music is silent', async ($, on) =>
 
 test('now-playing: Music wins when both play, and Spotify is not asked', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', argv => ({ stdout: argv.join(' ').includes('"Spotify"') ? 'Spot - S\n' : 'Mus - M\n' }))
   await session.turn({})
   expect(await read(session)).toBe('♪ Mus - M')
@@ -42,6 +49,7 @@ test('now-playing: Music wins when both play, and Spotify is not asked', async (
 
 test('now-playing: the script is fixed argv, with no text of the session in it', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', { stdout: '' })
   await session.bash('echo "$(whoami)"; rm -rf /')
   await session.turn({ model: 'claude-x', usd: 1 })
@@ -57,10 +65,44 @@ test('now-playing: the script is fixed argv, with no text of the session in it',
   const [music, spotify] = calls
   expect(music?.join(' ')).toContain('application "Music" is running')
   expect(spotify?.join(' ')).toContain('application "Spotify" is running')
+  expect(session.calls('pgrep')).toEqual([
+    ['pgrep', '-x', 'Music'],
+    ['pgrep', '-x', 'Spotify'],
+  ])
+})
+
+test('now-playing: a player that is not running is never named to osascript', async ($, on) => {
+  const session = probe($, on)
+  session.setCommand('pgrep', { exitCode: 1 })
+  session.setCommand('osascript', { stdout: 'Song - Artist\n' })
+  await session.turn({})
+  expect(session.calls('pgrep').length).toBe(2)
+  expect(session.calls('osascript').length).toBe(0)
+  expect(await read(session)).toBeUndefined()
+})
+
+test('now-playing: with Music running and Spotify absent, only Music is asked', async ($, on) => {
+  const session = probe($, on)
+  session.setCommand('pgrep', argv => (argv.includes('Music') ? RUNNING : { exitCode: 1 }))
+  session.setCommand('osascript', { stdout: '' })
+  await session.turn({})
+  const calls = session.calls('osascript')
+  expect(calls.length).toBe(1)
+  expect(calls[0]?.join(' ')).not.toContain('Spotify')
+})
+
+test('now-playing: a pgrep that cannot start asks no player', async ($, on) => {
+  const session = probe($, on)
+  session.setCommand('pgrep', 'reject')
+  session.setCommand('osascript', { stdout: 'Song - Artist\n' })
+  await session.turn({})
+  expect(session.calls('osascript').length).toBe(0)
+  expect(await read(session)).toBeUndefined()
 })
 
 test('now-playing: a long track is cut with an ellipsis, a second line is dropped', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', { stdout: `${'A'.repeat(60)}\nsecond line\n` })
   await session.turn({})
   expect(await read(session)).toBe(`♪ ${'A'.repeat(39)}…`)
@@ -68,6 +110,7 @@ test('now-playing: a long track is cut with an ellipsis, a second line is droppe
 
 test('now-playing: a failed or missing osascript shows nothing', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', { stdout: 'Song - Artist\n' })
   await session.turn({})
   expect(await read(session)).toBe('♪ Song - Artist')
@@ -83,6 +126,7 @@ test('now-playing: a failed or missing osascript shows nothing', async ($, on) =
 
 test('now-playing: the track changes and then stops', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', { stdout: 'One - A\n' })
   await session.turn({})
   session.setCommand('osascript', { stdout: 'Two - B\n' })
@@ -95,6 +139,7 @@ test('now-playing: the track changes and then stops', async ($, on) => {
 
 test('now-playing: at most one round of asks a minute, each with a timeout', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', { stdout: 'One - A\n' })
   await session.start()
   await session.settle()
@@ -111,6 +156,7 @@ test('now-playing: at most one round of asks a minute, each with a timeout', asy
 
 test('now-playing: a slow osascript never holds back a tool result', async ($, on) => {
   const session = probe($, on)
+  session.setCommand('pgrep', RUNNING)
   session.setCommand('osascript', { stdout: 'One - A\n', delayMs: 5000 })
   await session.turn({})
   expect(await session.bash('ls')).toEqual({ result: {} })

@@ -1,7 +1,7 @@
 {
   "name": "now-playing",
   "version": "0.3.0",
-  "description": "A band above the prompt with the track Music or Spotify plays on your Mac (♪ Song - Artist), asked through osascript once a minute. Hidden when nothing plays.",
+  "description": "A band above the prompt with the track Music or Spotify plays on your Mac (♪ Song - Artist), read with pgrep and osascript once a minute, only from a player that runs. Hidden when nothing plays.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

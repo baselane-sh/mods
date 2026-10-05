@@ -1,8 +1,9 @@
+import type { RenderElement } from 'claude-code'
 import { expect, test } from 'claude-code/testing'
 
 import { forgeOf } from '../hooks/forge'
 import { findShas } from '../hooks/rules/sha-links'
-import { assistant, bashOutput, ENGINE_KEY, mountAssistant, mountToolUse, repository, rootProps, standIn, SURFACES, toolUse } from './probe'
+import { assistant, bashOutput, drawnText, ENGINE_KEY, mountAssistant, mountToolUse, repository, rootProps, standIn, SURFACES, toolUse } from './probe'
 
 const KEY = 'sha-links'
 const GITHUB = 'git@github.com:baselane/mods.git'
@@ -10,9 +11,6 @@ const SHA = '3f9e2a1'
 const FULL = '3f9e2a1c0b8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f'
 const HREF = `https://github.com/baselane/mods/commit/${SHA}`
 
-type Ui = Awaited<ReturnType<typeof mountAssistant>>
-
-const markdown = async (ui: Ui) => ui.find({ key: KEY })
 
 test('sha-links: findShas keeps 7 to 40 lowercase hex with a digit and a letter, once each', () => {
   const text = [
@@ -41,24 +39,45 @@ test('sha-links: forgeOf reads GitHub and GitLab remotes and keeps no user or to
   expect(forgeOf(null)).toBeUndefined()
 })
 
-test('sha-links: a SHA in a reply links to its GitHub commit page on every surface', async ($, on) => {
+test('sha-links: a SHA in a reply links to its GitHub commit page on every surface, drawn by the engine', async ($, on) => {
   standIn(on)
   repository(on, GITHUB)
   for (const surface of SURFACES) {
     const ui = await mountAssistant($, surface, assistant(`Committed as ${SHA}, then \`${FULL}\`.`, false))
-    const found = await markdown(ui)
-    expect(found?.type).toBe('Markdown')
-    expect(found?.props.text).toBe(`Committed as [${SHA}](${HREF}), then [\`${FULL}\`](https://github.com/baselane/mods/commit/${FULL}).`)
-    expect(await ui.find({ key: ENGINE_KEY })).toBeUndefined()
+    expect(rootProps(await ui.drawn()).key).toBe(ENGINE_KEY)
+    expect(await drawnText(ui)).toBe(`Committed as [${SHA}](${HREF}), then [\`${FULL}\`](https://github.com/baselane/mods/commit/${FULL}).`)
     await ui.unmount()
   }
+})
+
+test('sha-links: the rewritten reply goes on to the hooks beneath, so another link rule stacks', async ($, on) => {
+  on('ui.log', () => ({ value: undefined }))
+  repository(on, GITHUB)
+  let seen: unknown[] = []
+  on('ui.render', { component: 'AssistantMessage' }, ($, e) => {
+    seen = [...seen, e.props]
+    const { Text } = $.ui.resolve(e)
+    return h(Text, { key: ENGINE_KEY }, e.props.text) as RenderElement
+  })
+  const ui = await mountAssistant($, 'terminal', { ...assistant(`Fixed in ${SHA}, closes #42.`), onScreen: null })
+  expect(seen).toEqual([{ text: `Fixed in [${SHA}](${HREF}), closes #42.`, isFirstOfReply: true, onScreen: null }])
+  await ui.unmount()
+})
+
+test('sha-links: a link another rule drew above it is kept', async ($, on) => {
+  standIn(on)
+  repository(on, GITHUB)
+  const issue = '[#42](https://github.com/baselane/mods/issues/42)'
+  const ui = await mountAssistant($, 'terminal', assistant(`Fixed in ${SHA}, closes ${issue}.`))
+  expect(await drawnText(ui)).toBe(`Fixed in [${SHA}](${HREF}), closes ${issue}.`)
+  await ui.unmount()
 })
 
 test('sha-links: a GitLab origin links under /-/commit/', async ($, on) => {
   standIn(on)
   repository(on, 'https://gitlab.com/group/sub/proj.git')
   const ui = await mountAssistant($, 'terminal', assistant(`See ${SHA}.`, false))
-  expect((await markdown(ui))?.props.text).toBe(`See [${SHA}](https://gitlab.com/group/sub/proj/-/commit/${SHA}).`)
+  expect(await drawnText(ui)).toBe(`See [${SHA}](https://gitlab.com/group/sub/proj/-/commit/${SHA}).`)
   await ui.unmount()
 })
 
@@ -67,11 +86,12 @@ for (const [name, remote] of [
   ['another host', 'git@bitbucket.org:team/repo.git'],
   ['no repository', undefined],
 ] as const) {
-  test(`sha-links: ${name} leaves the engine drawing`, async ($, on) => {
+  test(`sha-links: ${name} leaves the reply as written`, async ($, on) => {
     standIn(on)
     repository(on, remote)
     const ui = await mountAssistant($, 'terminal', assistant(`See ${SHA}.`))
     expect(rootProps(await ui.drawn()).key).toBe(ENGINE_KEY)
+    expect(await drawnText(ui)).toBe(`See ${SHA}.`)
     await ui.unmount()
   })
 }
@@ -81,7 +101,7 @@ test('sha-links: fenced code, existing links and URLs stay as written', async ($
   repository(on, GITHUB)
   const text = ['```', `git show ${SHA}`, '```', `[the fix](https://example.com/${SHA}) and https://github.com/x/y/commit/${SHA}`].join('\n')
   const ui = await mountAssistant($, 'terminal', assistant(text))
-  expect(rootProps(await ui.drawn()).key).toBe(ENGINE_KEY)
+  expect(await drawnText(ui)).toBe(text)
   await ui.unmount()
 })
 
@@ -90,7 +110,7 @@ test('sha-links: a token in the remote never reaches the drawing', async ($, on)
   const token = 'ghp_' + 'abcdefghijklmnopqrstuvwxyz0123456789'
   repository(on, `https://bob:${token}@github.com/baselane/mods.git`)
   const ui = await mountAssistant($, 'terminal', assistant(`See ${SHA}.`, false))
-  const text = String((await markdown(ui))?.props.text)
+  const text = String(await drawnText(ui))
   expect(text).toBe(`See [${SHA}](${HREF}).`)
   expect(text).not.toContain('bob')
   await ui.unmount()
@@ -117,17 +137,18 @@ test('sha-links: a reply without a SHA does not read the remote', async ($, on) 
   await ui.unmount()
 })
 
-test('sha-links: the first block of a reply keeps its bullet on the terminal only', async ($, on) => {
+test('sha-links: the rule draws no Markdown or bullet of its own; the engine keeps the reply bullet', async ($, on) => {
   standIn(on)
   repository(on, GITHUB)
-  const first = await mountAssistant($, 'terminal', assistant(`See ${SHA}.`))
-  expect(await first.find({ type: 'Text', text: '⏺ ' })).toBeDefined()
-  await first.unmount()
-  const desktop = await mountAssistant($, 'desktop', assistant(`See ${SHA}.`))
-  expect(await desktop.find({ type: 'Text', text: '⏺ ' })).toBeUndefined()
-  expect(await markdown(desktop)).toBeDefined()
-  await desktop.unmount()
+  for (const surface of SURFACES) {
+    const ui = await mountAssistant($, surface, assistant(`See ${SHA}.`))
+    expect(await ui.find({ key: KEY })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: '⏺ ' })).toBeUndefined()
+    expect(rootProps(await ui.drawn()).key).toBe(ENGINE_KEY)
+    await ui.unmount()
+  }
 })
+
 
 test('sha-links: SHAs in the output of a git command are listed as commit links under the row', async ($, on) => {
   standIn(on)
@@ -170,4 +191,17 @@ test('sha-links: other commands, a running call and a row with no SHA keep the e
     expect({ index, key: rootProps(await ui.drawn()).key }).toEqual({ index, key: ENGINE_KEY })
     await ui.unmount()
   }
+})
+
+test('sha-links: blob ids on the index line of a diff are not linked as commits', async ($, on) => {
+  standIn(on)
+  repository(on, GITHUB)
+  const show = [`commit ${FULL}`, 'Author: A <a@b.c>', '', 'diff --git a/x.ts b/x.ts', 'index 3b18e51..a9c8f2d 100644', 'index 3b18e51,a9c8f2d..4c5d6e7f', '--- a/x.ts'].join('\n')
+  const ui = await mountToolUse($, 'terminal', toolUse('Bash', { command: 'git show HEAD' }, { output: bashOutput(show) }))
+  const links = await ui.findAll({ type: 'Link' })
+  expect(links.map(link => link.props.href)).toEqual([`https://github.com/baselane/mods/commit/${FULL}`])
+  await ui.unmount()
+  const diff = await mountToolUse($, 'terminal', toolUse('Bash', { command: 'git diff' }, { output: bashOutput('index 3b18e51..a9c8f2d 100644\n') }))
+  expect(rootProps(await diff.drawn()).key).toBe(ENGINE_KEY)
+  await diff.unmount()
 })

@@ -48,12 +48,16 @@ export type AssistantDraw = Reads & {
   insert: (text: string) => void
 }
 
+// What an assistant text rewrite reads: the block, and the session's reads.
+export type AssistantRewrite = Reads & { e: RenderInput<'AssistantMessage'> }
+
 // One rendering rule. `toolRow` rewrites the props of the ToolUse rows of the
 // named tools (`rewrite`, which changes the row alone) or draws beside them
 // (`draw`); `toolResult` rewrites the props of a result block (`rewrite`) or
-// draws beside it (`draw`); `assistantText` draws an assistant reply's text
-// blocks. A draw or rewrite that answers undefined, or throws, leaves the
-// engine's.
+// draws beside it (`draw`); `assistantText` rewrites an assistant reply's
+// text (`rewrite`, handed on to the hooks beneath, so rules of several mods
+// stack) or draws the block itself (`draw`). A draw or rewrite that answers
+// undefined, or throws, leaves the engine's.
 export type RenderRule = {
   id: string
   toolRow?: {
@@ -68,7 +72,8 @@ export type RenderRule = {
     draw?: (input: ToolResultDraw) => Drawn
   }
   assistantText?: {
-    draw: (input: AssistantDraw) => Promise<RenderElement | undefined>
+    rewrite?: (input: AssistantRewrite) => Promise<string | undefined>
+    draw?: (input: AssistantDraw) => Promise<RenderElement | undefined>
   }
 }
 
@@ -173,11 +178,22 @@ export const drawAssistantText = async (
   next: (e: RenderInput<'AssistantMessage'>) => Promise<RenderElement>,
   host: TextHost,
 ): Promise<RenderElement> => {
+  const { rewrite, draw } = assistantText
+  let text: string | undefined
   try {
-    const drawn = await assistantText.draw({ e, elements: host.elements(), cwd: host.cwd, repo: host.repo, stat: host.stat, insert: host.insert })
-    return drawn ?? next(e)
+    text = await rewrite?.({ e, cwd: host.cwd, repo: host.repo })
   } catch (error) {
     await host.log(`${id}: drew the engine's text, ${reason(error)}`)
-    return next(e)
+  }
+  // The rewrite goes on through `next`, so a link rule of another mod beneath
+  // this one adds its links to ours. The other props are carried as received.
+  const passed = text === undefined || text === e.props.text ? e : { ...e, props: { ...e.props, text } }
+  if (draw === undefined) return next(passed)
+  try {
+    const drawn = await draw({ e: passed, elements: host.elements(), cwd: host.cwd, repo: host.repo, stat: host.stat, insert: host.insert })
+    return drawn ?? next(passed)
+  } catch (error) {
+    await host.log(`${id}: drew the engine's text, ${reason(error)}`)
+    return next(passed)
   }
 }

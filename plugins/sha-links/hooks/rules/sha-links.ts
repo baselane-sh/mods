@@ -2,7 +2,7 @@ import type { RenderElement } from 'claude-code'
 
 import type { RenderRule } from '../engine'
 import { commitHref, forgeCache } from '../forge'
-import { linkTokens, replyMarkdown } from '../marks'
+import { linkTokens } from '../marks'
 import { outputTexts } from '../output'
 import { MAX_MARKDOWN } from '../refs'
 import { MAX_SCAN } from '../urls'
@@ -17,6 +17,8 @@ import { MAX_SCAN } from '../urls'
 const SHA = String.raw`(?<![\w/:#@=?&-])(?<!\w\.)(?=[0-9a-f]*[a-f])(?=[0-9a-f]*\d)[0-9a-f]{7,40}(?![\w/-]|\.\w)`
 const SHA_GLOBAL = new RegExp(SHA, 'g')
 const GIT_COMMAND = /(^|[\s;&|(`])git(\s|$)/
+// A diff's `index <blob>..<blob>` line names blobs, not commits.
+const BLOB_LINE = /^index [0-9a-f]+(,[0-9a-f]+)*\.\.[0-9a-f]+/
 const KEY = 'sha-links'
 const MAX_LINKS = 5
 const LABEL = 12
@@ -33,13 +35,14 @@ export const create = (): RenderRule => {
   return {
     id: 'sha-links',
     assistantText: {
-      draw: async ({ e, elements, cwd, repo }) => {
+      // A rewrite, not a drawing of our own: the text goes on to the rules
+      // beneath, so this and another link mod both add their links.
+      rewrite: async ({ e, cwd, repo }) => {
         if (findShas(e.props.text).length === 0) return undefined
         const forge = await forgeFor(await cwd(), repo)
         if (forge === undefined) return undefined
         const text = linkTokens(e.props.text, SHA_GLOBAL, sha => commitHref(forge, sha))
-        if (text === e.props.text || text.length > MAX_MARKDOWN) return undefined
-        return replyMarkdown(elements, KEY, text, e.surface === 'terminal' && e.props.isFirstOfReply)
+        return text === e.props.text || text.length > MAX_MARKDOWN ? undefined : text
       },
     },
     toolRow: {
@@ -47,7 +50,14 @@ export const create = (): RenderRule => {
       draw: async ({ e, row, elements: { Box, Text, Link }, cwd, repo }) => {
         const command = commandOf(e.props.input)
         if (command === undefined || !GIT_COMMAND.test(command) || e.props.output === undefined) return undefined
-        const shas = findShas(outputTexts(e.props.output).join('\n'))
+        const shas = findShas(
+          outputTexts(e.props.output)
+            .join('\n')
+            .slice(0, MAX_SCAN)
+            .split('\n')
+            .filter(line => !BLOB_LINE.test(line))
+            .join('\n'),
+        )
         if (shas.length === 0) return undefined
         const forge = await forgeFor(await cwd(), repo)
         if (forge === undefined) return undefined

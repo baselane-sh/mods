@@ -71,3 +71,10 @@ test('secret-scan: only reads, and the text has no em-dashes', async ($, on) => 
   expect(session.copied()[0] ?? '').not.toContain('—')
   expect(session.written()).toEqual({})
 })
+
+test('secret-scan: two values on one line list that line once', async ($, on) => {
+  const session = probe($, on, found(hit('b.txt', 1, FAKE.github), hit('b.txt', 1, FAKE.anthropic), hit('b.txt', 3, FAKE.github)))
+  const text = await session.run('secret-scan')
+  expect(text).toContain('b.txt  lines 1, 3')
+  expect(text).not.toContain('1, 1')
+})

@@ -69,3 +69,10 @@ test('envinfo: only reads, and the text has no em-dashes', async ($, on) => {
   expect(session.copied()[0] ?? '').not.toContain('—')
   expect(session.written()).toEqual({})
 })
+
+test('envinfo: every program runs from /, so no project file can make a toolchain manager download', async ($, on) => {
+  const session = probe($, on, { cwd: '/work/rust-app', git: ANSWERS })
+  await session.run('envinfo')
+  expect(session.ranIn().length).toBe(Object.keys(ANSWERS).length)
+  expect(session.ranIn().every(dir => dir === '/')).toBe(true)
+})

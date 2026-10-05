@@ -16,13 +16,14 @@ export const parseHits = (stdout: string): Hit[] =>
     return hit === null ? [] : [{ path: hit[1] ?? '', line: Number(hit[2]), text: hit[3] ?? '' }]
   })
 
-// Line numbers by path, in git's file order.
+// Line numbers by path, in git's file order, each line once (`-o` prints a
+// row per match, so a line with two matches comes twice).
 export const byPath = (hits: readonly Hit[]): [string, number[]][] => {
   const found = new Map<string, number[]>()
   for (const { path, line } of hits) {
     const mine = found.get(path)
     if (mine === undefined) found.set(path, [line])
-    else mine.push(line)
+    else if (!mine.includes(line)) mine.push(line)
   }
   return [...found]
 }

@@ -1,0 +1,10 @@
+{
+  "engine": "guard",
+  "mods": [
+    {
+      "name": "beads-guard",
+      "description": "Asks before bd commands that delete issues or rewrite history: delete, purge, prune, flatten, compact, gc, sql, admin, init --force, dolt push --force. Reads only the command text, runs no bd.",
+      "rules": ["beads"]
+    }
+  ]
+}

@@ -1,22 +1,19 @@
-import { atom, read, update } from 'claude-code'
-import type { On, Timer } from 'claude-code'
+import { atom, read } from 'claude-code'
+import type { On, Timer, ToolCallEnvelope, ToolCallResult } from 'claude-code'
 
-import type { FileTouch, PaneLine, PaneView, TurnCost } from '../types'
-import { touchFile, touchOf } from './files'
+import type { PaneLine, PaneView } from '../types'
+import { touchOf } from './files'
+import type { FileAction } from './files'
 import { line, redactLines } from './lines'
 import type { PaneHost, PaneRule } from './rule'
-import { countTool, endTurn, startTurn } from './turns'
 import { paneTree } from './view'
 
 // The build writes the mod's own name in place of the token: `$.state` is
 // written only by the plugin that owns it.
 const views = atom({ plugin: 'port-watch', key: 'views' } as const, {})
-const turns = atom({ plugin: 'port-watch', key: 'turns' } as const, [] as TurnCost[])
-const files = atom({ plugin: 'port-watch', key: 'files' } as const, [] as FileTouch[])
 
 // A pane reads the world at most once a second, however many calls ask.
 const MIN_GAP_MS = 1_000
-const RUN_TIMEOUT_MS = 10_000
 
 // How long a load asked for at `now` must wait, given the last one began at
 // `last`: nothing, or the rest of the second since it.
@@ -25,7 +22,7 @@ export const waitBeforeLoad = (last: number | undefined, now: number): number =>
 
 // What the engine's loads need from `$`, as closures built in a hook. A timer
 // keeps them past the hook's dispatch, as `$.clock.every` documents.
-type Live = {
+export type Live = {
   host: PaneHost
   now: () => Promise<number>
   isOpen: (id: string) => Promise<boolean>
@@ -35,11 +32,25 @@ type Live = {
   every: (ms: number, fn: () => void) => Timer
 }
 
+// The pane loads every hook shares: one throttle and one timer per pane.
+export type Panes = {
+  request: (rule: PaneRule, live: Live) => Promise<void>
+  stop: (id: string) => void
+}
+
+export const RUN_TIMEOUT_MS = 10_000
+
+// A host that does not give `run`. A rule that calls it shows the failure in
+// its pane, and its tests fail: name it in engine.json `needs`.
+export const noRun = (): Promise<never> => Promise.reject(new Error('run is not given to this mod; name it in engine.json needs'))
+
 const message = (error: unknown): string => (error instanceof Error ? error.message : String(error))
 
 const failedLines = (error: unknown): PaneLine[] => [line('failed', { text: `Could not read: ${message(error)}`, color: 'red' })]
 
-export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
+// The loads every hook of the mod shares. Made once per load of the module,
+// by register.ts (engine.json shared).
+export const createPanes = (): Panes => {
   // Timers and load times by pane id. Not drawn, so not kept in $.state; a
   // hot reload drops them with the module, and the next load starts again.
   const pollers = new Map<string, Timer>()
@@ -96,6 +107,12 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
     await load(rule, live)
   }
 
+  return { request, stop }
+}
+
+// The hooks every pane mod has. The slash command, the tool call and the turn
+// hooks build the closures a load needs, so they are hosts (engine.json).
+export const registerPanes = (on: On, rules: readonly PaneRule[], panes: Panes): void => {
   on('session.start', async ($, e, next) => {
     for (const rule of rules) {
       await $.command.register({ name: rule.pane.command, description: rule.pane.description, immediate: true })
@@ -104,37 +121,11 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
   })
 
   for (const rule of rules) {
-    const { id, title, command } = rule.pane
-
-    on('command.run', { command }, async $ => {
-      const live: Live = {
-        host: {
-          run: argv => $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS }),
-          cwd: () => $.session.cwd(),
-          usage: () => $.session.usage(),
-          turns: () => read($, turns),
-          files: () => read($, files),
-        },
-        now: () => $.clock.now(),
-        isOpen: async pane => (await $.ui.panes()).some(open => open.id === pane),
-        write: (pane, view) => update($, views, all => ({ ...all, [pane]: view })),
-        log: text => $.ui.log(text),
-        after: (ms, fn) => $.clock.after(ms, fn),
-        every: (ms, fn) => $.clock.every(ms, fn),
-      }
-      if (await live.isOpen(id)) {
-        stop(id)
-        await $.ui.close({ id })
-        return { text: `${title} pane closed.` }
-      }
-      await $.ui.open({ id, title, closeOnEscape: true })
-      await request(rule, live)
-      return { text: `${title} pane opened. Run /${command} again or press Esc to close it.` }
-    })
+    const { id } = rule.pane
 
     // Must pass the close on: answering without `next` keeps the pane open.
     on('ui.close', { id }, async ($, e, next) => {
-      stop(id)
+      panes.stop(id)
       return next(e)
     })
 
@@ -144,104 +135,77 @@ export const registerPanes = (on: On, rules: readonly PaneRule[]): void => {
       return paneTree({ Box, Text }, rule.pane, all[id], e.props.bodyColumns)
     })
   }
-
-  const watchers = rules.filter(rule => rule.observe !== undefined)
-  const turnRules = rules.filter(rule => rule.turns === true)
-  const keepsFiles = rules.some(rule => rule.files === true)
-
-  on('tool.call', async ($, e, next) => {
-    const startedAt = watchers.length > 0 ? await $.clock.now() : 0
-    const ran = await next(e)
-    try {
-      // Before any refresh below, so a load reads this call too.
-      if (turnRules.length > 0) await update($, turns, countTool)
-      const touch = keepsFiles ? touchOf(e, ran) : undefined
-      if (touch !== undefined) {
-        const at = await $.clock.now()
-        await update($, files, ledger => touchFile(ledger, touch.path, touch.action, at))
-      }
-      if (watchers.length > 0) {
-        const at = await $.clock.now()
-        for (const rule of watchers) {
-          let lines: PaneLine[] | undefined
-          try {
-            lines = rule.observe?.({ e, ran, durationMs: at - startedAt })
-          } catch (error) {
-            lines = failedLines(error)
-          }
-          if (lines !== undefined) {
-            const view: PaneView = { at, lines: redactLines(lines) }
-            await update($, views, all => ({ ...all, [rule.pane.id]: view }))
-          }
-        }
-      }
-      const due = rules.filter(rule => rule.load !== undefined && rule.refreshAfter?.(e) === true)
-      if (due.length > 0) {
-        const live: Live = {
-          host: {
-          run: argv => $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS }),
-          cwd: () => $.session.cwd(),
-          usage: () => $.session.usage(),
-          turns: () => read($, turns),
-          files: () => read($, files),
-        },
-          now: () => $.clock.now(),
-          isOpen: async pane => (await $.ui.panes()).some(open => open.id === pane),
-          write: (pane, view) => update($, views, all => ({ ...all, [pane]: view })),
-          log: text => $.ui.log(text),
-          after: (ms, fn) => $.clock.after(ms, fn),
-          every: (ms, fn) => $.clock.every(ms, fn),
-        }
-        // Not awaited: the tool's result does not wait on a pane's refresh.
-        for (const rule of due) void request(rule, live)
-      }
-    } catch (error) {
-      await $.ui.log(`pane: a tool call was not read, ${message(error)}`)
-    }
-    return ran
-  })
-
-  // A mod with no rule that asks for turns hooks none.
-  if (turnRules.length === 0) return
-
-  // Only the main loop raises turn.start, so a subagent's run is never a turn.
-  on('turn.start', async ($, e, next) => {
-    try {
-      const usd = (await $.session.usage()).cost?.usd
-      const at = await $.clock.now()
-      await update($, turns, ledger => startTurn(ledger, e.turnId, usd, at))
-    } catch (error) {
-      await $.ui.log(`pane: a turn start was not read, ${message(error)}`)
-    }
-    return next(e)
-  })
-
-  on('turn.complete', async ($, e, next) => {
-    if (e.agentId !== undefined) return next(e)
-    try {
-      const usd = (await $.session.usage()).cost?.usd
-      const at = await $.clock.now()
-      await update($, turns, ledger => endTurn(ledger, e.turnId, usd, at))
-      const live: Live = {
-        host: {
-          run: argv => $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS }),
-          cwd: () => $.session.cwd(),
-          usage: () => $.session.usage(),
-          turns: () => read($, turns),
-          files: () => read($, files),
-        },
-        now: () => $.clock.now(),
-        isOpen: async pane => (await $.ui.panes()).some(open => open.id === pane),
-        write: (pane, view) => update($, views, all => ({ ...all, [pane]: view })),
-        log: text => $.ui.log(text),
-        after: (ms, fn) => $.clock.after(ms, fn),
-        every: (ms, fn) => $.clock.every(ms, fn),
-      }
-      // Not awaited, as after a tool call: the turn does not wait on a pane.
-      for (const rule of turnRules) void request(rule, live)
-    } catch (error) {
-      await $.ui.log(`pane: a turn end was not read, ${message(error)}`)
-    }
-    return next(e)
-  })
 }
+
+// The slash command: opens the pane and loads it, or closes an open one.
+export const togglePane = async (
+  rule: PaneRule,
+  panes: Panes,
+  live: Live,
+  ui: { open: () => Promise<unknown>; close: () => Promise<unknown> },
+): Promise<{ text: string }> => {
+  const { id, title, command } = rule.pane
+  if (await live.isOpen(id)) {
+    panes.stop(id)
+    await ui.close()
+    return { text: `${title} pane closed.` }
+  }
+  await ui.open()
+  await panes.request(rule, live)
+  return { text: `${title} pane opened. Run /${command} again or press Esc to close it.` }
+}
+
+// What a finished tool call writes, as closures over the hook's `$`.
+export type CallWrites = {
+  now: () => Promise<number>
+  countTurn: () => Promise<unknown>
+  touch: (path: string, action: FileAction, at: number) => Promise<unknown>
+  show: (id: string, view: PaneView) => Promise<unknown>
+  live: () => Live
+  log: (text: string) => unknown
+}
+
+// After each tool call: the turn and file ledgers, each watching rule's new
+// lines, then a load of each pane the call is due to refresh.
+export const afterToolCall = async (
+  rules: readonly PaneRule[],
+  panes: Panes,
+  e: ToolCallEnvelope,
+  next: (e: ToolCallEnvelope) => Promise<ToolCallResult>,
+  writes: CallWrites,
+): Promise<ToolCallResult> => {
+  const watchers = rules.filter(rule => rule.observe !== undefined)
+  const counts = rules.some(rule => rule.turns === true)
+  const keepsFiles = rules.some(rule => rule.files === true)
+  const startedAt = watchers.length > 0 ? await writes.now() : 0
+  const ran = await next(e)
+  try {
+    // Before any refresh below, so a load reads this call too.
+    if (counts) await writes.countTurn()
+    const touch = keepsFiles ? touchOf(e, ran) : undefined
+    if (touch !== undefined) await writes.touch(touch.path, touch.action, await writes.now())
+    if (watchers.length > 0) {
+      const at = await writes.now()
+      for (const rule of watchers) {
+        let lines: PaneLine[] | undefined
+        try {
+          lines = rule.observe?.({ e, ran, durationMs: at - startedAt })
+        } catch (error) {
+          lines = failedLines(error)
+        }
+        if (lines !== undefined) await writes.show(rule.pane.id, { at, lines: redactLines(lines) })
+      }
+    }
+    const due = rules.filter(rule => rule.load !== undefined && rule.refreshAfter?.(e) === true)
+    if (due.length > 0) {
+      const live = writes.live()
+      // Not awaited: the tool's result does not wait on a pane's refresh.
+      for (const rule of due) void panes.request(rule, live)
+    }
+  } catch (error) {
+    await writes.log(`pane: a tool call was not read, ${message(error)}`)
+  }
+  return ran
+}
+
+export const failedTurn = (where: string, error: unknown): string => `pane: a turn ${where} was not read, ${message(error)}`

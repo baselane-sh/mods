@@ -47,9 +47,13 @@ const write = (path, text) => {
 //               { perRule: true, hosts: [...] } (rules exported as values
 //               only): each rule gets its own smallest host, called with
 //               the rules that chose it; every rule needs one, so the
-//               group has a host with empty `gives`. `core: true` passes
-//               what the engine's `register` returned as the last argument
-//               (state its hooks and the host's share, such as timers).
+//               group has a host with empty `gives`. `shared: true` passes
+//               the engine's shared value as the last argument.
+//   shared      optional: a function hooks/engine.ts exports that makes what
+//               register and the hosts share (timers, say). register.ts calls
+//               it once and passes the value to register and to each host
+//               with `shared: true`. A function that takes `on` may not
+//               return a value, so it cannot hand this over itself.
 //   ruleExport  "rule" (a module exports a value) or "create" (a factory,
 //               called once per load, for rules that keep session state)
 //   options     optional. true passes the plugin's userConfig values to
@@ -130,34 +134,36 @@ const registerSource = (engine, mod, picks) => {
   const takesOptions = engine.options || rules.some(id => engine.optionsFor?.includes(id))
   if (engine.register === undefined && picks.length === 0) throw new Error(`${mod.name}: no register and no host`)
   const imports = [
-    ...(engine.register === undefined ? [] : [`import { ${engine.register} } from './engine'`]),
+    ...(engine.register === undefined && engine.shared === undefined
+      ? []
+      : [`import { ${[engine.register, engine.shared].filter(name => name !== undefined).join(', ')} } from './engine'`]),
     ...picks.map(({ host }) => `import { ${host.export} } from '${fromHooks(host.file)}'`),
     ...rules.map(engine.importRule),
   ]
   const head = ["import type { Register } from 'claude-code'", '', ...imports, '']
   // No host: the one-line form every mod had before hosts.
-  if (picks.length === 0) {
+  if (picks.length === 0 && engine.shared === undefined) {
     const call = takesOptions
       ? `(on, options) => ${engine.register}(on, ${list}, options)`
       : `on => ${engine.register}(on, ${list})`
     return [...head, `export const register: Register = ${call}`, ''].join('\n')
   }
   const usesOptions = takesOptions || picks.some(({ host }) => host.options === true)
-  const usesCore = picks.some(({ host }) => host.core === true)
-  if (usesCore && engine.register === undefined) throw new Error(`${mod.name}: a host asks for core, but the engine has no register`)
+  // The value of `shared`, made once here, goes to register and to each host
+  // that asks: a function that takes `on` may not hand a value back.
+  const usesShared = engine.shared !== undefined
+  if (picks.some(({ host }) => host.shared === true) && !usesShared) throw new Error(`${mod.name}: a host asks for shared, but the engine has no shared`)
   const withOptions = (args, options) => `${args}${options ? ', options' : ''}`
-  const core =
-    engine.register === undefined
-      ? []
-      : [`  ${usesCore ? 'const core = ' : ''}${engine.register}(on, ${withOptions('rules', takesOptions)})`]
+  const core = engine.register === undefined ? [] : [`  ${engine.register}(on, ${withOptions('rules', takesOptions)}${usesShared ? ', shared' : ''})`]
   const calls = picks.map(({ host, rules: some }) => {
     const args = some === undefined ? 'rules' : `[${some.map(camel).join(', ')}]`
-    return `  ${host.export}(on, ${withOptions(args, host.options === true)}${host.core === true ? ', core' : ''})`
+    return `  ${host.export}(on, ${withOptions(args, host.options === true)}${host.shared === true ? ', shared' : ''})`
   })
   return [
     ...head,
     `export const register: Register = ${usesOptions ? '(on, options)' : 'on'} => {`,
     `  const rules = ${list}`,
+    ...(usesShared ? [`  const shared = ${engine.shared}()`] : []),
     ...core,
     ...calls,
     '}',

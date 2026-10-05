@@ -24,7 +24,7 @@
     },
     {
       "name": "sports-narrator",
-      "description": "At turn end, one line of sports play-by-play on what Claude did. OFF by default: it spends tokens (one haiku call per turn with tools). Turn on the enabled option. Sends only tool and file names.",
+      "description": "One line of sports play-by-play at turn end. OFF by default: one haiku call per turn with tools. Turn on the enabled option. Sends tool names, file names and the first two words of each command.",
       "rules": [
         "sports-narrator"
       ]

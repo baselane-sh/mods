@@ -16,7 +16,7 @@ claude plugin install receipt@baselane-mods
 
 Start Claude Code. Now it asks before harsh commands, and `/receipt` prints a receipt of the session.
 
-Browse every mod at https://baselane-sh.github.io/mods-catalog/. The gallery (`baselane-mods`) pins each mod to a reviewed commit. For update, uninstall, options and starter sets, read [docs/INSTALL.md](docs/INSTALL.md).
+Browse every mod at https://baselane-sh.github.io/mods-catalog/. The gallery (`baselane-mods`) pins each mod to a reviewed commit, so a new mod reaches the gallery a short time after it reaches this repo. For update, uninstall, options and starter sets, read [docs/INSTALL.md](docs/INSTALL.md).
 
 This repo also has a development marketplace, `baselane-mods-dev`, that tracks `main`. Use it only to try changes that are not released yet:
 
@@ -42,14 +42,14 @@ The catalog below marks each pack with "pack".
 
 - **Guards ask. They do not block.** A guard stops a harsh command and asks you first. You decide. If a guard check fails, it asks you. It does not let the call through without a question.
 - **Your data stays on your machine.** No mod sends data out unless you set a destination yourself, such as an ntfy topic for `ntfy-notify` or `long-run-notify`, or a webhook URL for `slack-notify` or `discord-notify`. With a destination set, those mods send a short message only: a generic "needs input" text with the project folder name, or the project name and the seconds.
-- **One mod can make a model call, and it is off by default.** `sports-narrator` makes one small model call at the end of a turn that used tools. It sends tool names and file names, never command arguments or file contents. It spends tokens, so you must turn it on.
-- **Display mods do not change what Claude reads.** The mods in "Display and render" change only how rows and replies look on your screen. Other families can add text for Claude: prompt styles change how Claude writes, `secret-output-guard` tells Claude not to repeat a credential, and `auto-format` tells Claude to read a file again.
+- **One mod can make a model call, and it is off by default.** `sports-narrator` makes one small model call at the end of a turn that used tools. It sends tool names, file names and the first two words of each shell command, never file contents. It spends tokens, so you must turn it on.
+- **Display mods do not change what Claude reads.** The mods in "Display and render" change only how rows and replies look on your screen. Other families can add text for Claude: prompt styles change how Claude writes, `secret-output-guard` tells Claude not to repeat a credential, and `auto-format` and `auto-lint` tell Claude to read a file again.
 - **Stats stay local.** Streaks, achievements and `/wrapped` read records that the mods keep on your machine.
-- **Mods that write files say so.** `/handoff` writes `.claude/handoff.md` and never overwrites it. `session-journal` appends to `~/.claude/journal.log`. `auto-format` runs your project's own formatter. The descriptions say what each mod writes.
+- **Mods that write files say so.** `/handoff` writes `.claude/handoff.md` and never overwrites it. `session-journal` appends to `~/.claude/journal.log`. `auto-format` and `auto-lint` run your project's own formatter or linter fix, which can rewrite files. The descriptions say what each mod writes.
 
 ## Requirements
 
-- Claude Code 2.1.288 or later, with mods (the plugin function-hook API, in early access).
+- Claude Code 2.1.288 or later, with mods (the plugin function-hook API, in early access). Read the [Claude Code mods docs](https://code.claude.com/docs/en/plugins/mods/overview).
 - Some mods use local tools: git for the git pane, the git band and most commands, and `lsof` for `port-watch` (macOS and most Linux).
 - To build from source: Node.js.
 
@@ -130,7 +130,7 @@ One quiet toast at turn end when something needs your attention.
 | `test-reminder` | Reminds you at turn end when source files changed but no test command ran since. |  |  |
 | `ctx-nudge` | Reminds you to /clear or /compact when the context window passes 75 percent. |  |  |
 | `clippy` | One helpful toast per session per trigger, in the classic paperclip voice: when you edit a migrations folder, a Dockerfile or a GitHub workflow, or run rm -rf. At most one toast per turn. |  |  |
-| `sports-narrator` | At turn end, one line of sports play-by-play on what Claude did. OFF by default: it spends tokens (one haiku call per turn with tools). Turn on the enabled option. Sends only tool and file names. |  | needs setup |
+| `sports-narrator` | One line of sports play-by-play at turn end. OFF by default: one haiku call per turn with tools. Turn on the enabled option. Sends tool names, file names and the first two words of each command. |  | needs setup |
 | `commit-nudge` | Suggests a commit at turn end after 8 or more file edits since the last git commit. One toast per batch of edits; a successful git commit resets the count. |  |  |
 | `todo-nudge` | At turn end, one toast with the count of TODO, FIXME and HACK lines your edits added this turn. Quiet when none were added. |  |  |
 | `break-nudge` | Suggests a short break once the session has run 90 minutes, and again every 90 minutes after that. |  |  |

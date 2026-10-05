@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerLifecycle } from './engine'
+import { afterToolWithFilesAndRoot } from './hosts/tool-lint'
 import { rule as autoLint } from './rules/auto-lint'
 
-export const register: Register = (on, options) => registerLifecycle(on, [autoLint], options)
+export const register: Register = (on, options) => {
+  const rules = [autoLint]
+  afterToolWithFilesAndRoot(on, rules, options)
+}

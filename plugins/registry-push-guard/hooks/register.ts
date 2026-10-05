@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCalls } from './hosts/check'
 import { rule as registryPush } from './rules/registry-push'
 
-export const register: Register = on => registerGuards(on, [registryPush])
+export const register: Register = on => {
+  const rules = [registryPush]
+  checkCalls(on, rules)
+}

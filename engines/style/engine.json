@@ -1,5 +1,4 @@
 {
-  "hooks": ["engine.ts"],
   "tests": ["probe.ts", "engine.test.ts"],
   "register": "registerStyles",
   "ruleExport": "rule",

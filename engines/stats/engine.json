@@ -1,5 +1,4 @@
 {
-  "hooks": ["engine.ts", "date.ts", "rollup.ts", "streak.ts", "tracker.ts", "testcmd.ts", "rule.ts", "exts.ts"],
   "tests": ["probe.ts", "engine.test.ts"],
   "register": "registerStats",
   "ruleExport": "rule",

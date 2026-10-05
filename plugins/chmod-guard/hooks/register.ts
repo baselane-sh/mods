@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCalls } from './hosts/check'
 import { rule as chmod } from './rules/chmod'
 
-export const register: Register = on => registerGuards(on, [chmod])
+export const register: Register = on => {
+  const rules = [chmod]
+  checkCalls(on, rules)
+}

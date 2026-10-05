@@ -1,5 +1,4 @@
 {
-  "hooks": ["engine.tsx", "view.tsx", "record.ts", "patterns.ts"],
   "tests": ["probe.ts", "engine.test.ts", "view.test.ts"],
   "register": "registerFirewall",
   "ruleExport": "rule",

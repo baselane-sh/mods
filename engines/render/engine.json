@@ -1,8 +1,32 @@
 {
-  "hooks": ["engine.ts", "diff.ts", "refs.ts", "badge.ts", "output.ts", "urls.ts", "forge.ts", "marks.ts"],
   "tests": ["probe.ts"],
-  "register": "registerRender",
   "ruleExport": "create",
   "types": "types/index.d.ts",
-  "nameToken": "render-mods"
+  "nameToken": "render-mods",
+  "needs": {
+    "diff-stats": ["row"],
+    "exit-badge": ["row"],
+    "size-badge": ["row"],
+    "path-shorten": ["row", "row-paths"],
+    "time-badge": ["row", "row-timed"],
+    "sha-links": ["row", "row-repo", "text", "text-repo"],
+    "json-pretty": ["result"],
+    "url-links": ["result"],
+    "issue-links": ["text", "text-repo"],
+    "file-links": ["text", "text-files"]
+  },
+  "hosts": {
+    "timer": [{ "file": "hooks/hosts/timer.ts", "export": "keepDurations", "gives": ["row-timed"] }],
+    "row": [
+      { "file": "hooks/hosts/row.ts", "export": "drawToolRows", "gives": ["row"] },
+      { "file": "hooks/hosts/row-paths.ts", "export": "drawToolRowsWithPaths", "gives": ["row", "row-paths"] },
+      { "file": "hooks/hosts/row-timed.ts", "export": "drawToolRowsWithDurations", "gives": ["row", "row-timed"] },
+      { "file": "hooks/hosts/row-reads.ts", "export": "drawToolRowsWithRepo", "gives": ["row", "row-repo"] }
+    ],
+    "result": [{ "file": "hooks/hosts/result.ts", "export": "drawToolResults", "gives": ["result"] }],
+    "text": [
+      { "file": "hooks/hosts/text-reads.ts", "export": "drawTextWithRepo", "gives": ["text", "text-repo"] },
+      { "file": "hooks/hosts/text-files.ts", "export": "drawTextWithFiles", "gives": ["text", "text-files"] }
+    ]
+  }
 }

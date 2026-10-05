@@ -1,6 +1,26 @@
 {
-  "hooks": ["engine.ts", "patterns.ts", "git.ts", "shell.ts"],
   "tests": ["probe.ts", "fixtures.ts", "engine.test.ts", "shell.test.ts"],
-  "register": "registerGuards",
-  "ruleExport": "rule"
+  "ruleExport": "rule",
+  "needs": {
+    "migration": ["paths"],
+    "path-jail": ["paths"],
+    "gitignore": ["run"],
+    "protect-main": ["run"],
+    "secret-commit": ["run"],
+    "tag": ["run"],
+    "big-file": ["paths", "run"],
+    "ssh": ["paths", "run"],
+    "secret-output": ["after"],
+    "secret-value": ["prompt"]
+  },
+  "hosts": {
+    "check": [
+      { "file": "hooks/hosts/check.ts", "export": "checkCalls", "gives": [] },
+      { "file": "hooks/hosts/check-paths.ts", "export": "checkCallsWithPaths", "gives": ["paths"] },
+      { "file": "hooks/hosts/check-run.ts", "export": "checkCallsWithRun", "gives": ["run"] },
+      { "file": "hooks/hosts/check-all.ts", "export": "checkCallsWithAll", "gives": ["paths", "run"] }
+    ],
+    "notes": [{ "file": "hooks/hosts/notes.ts", "export": "noteResults", "gives": ["after"] }],
+    "prompt": [{ "file": "hooks/hosts/prompt-notes.ts", "export": "notePrompts", "gives": ["prompt"] }]
+  }
 }

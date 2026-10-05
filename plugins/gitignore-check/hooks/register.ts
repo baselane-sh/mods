@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCallsWithRun } from './hosts/check-run'
 import { rule as gitignore } from './rules/gitignore'
 
-export const register: Register = on => registerGuards(on, [gitignore])
+export const register: Register = on => {
+  const rules = [gitignore]
+  checkCallsWithRun(on, rules)
+}

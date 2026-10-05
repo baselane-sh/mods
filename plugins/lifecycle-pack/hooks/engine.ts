@@ -1,4 +1,4 @@
-import type { On, PluginOptions, ProcessRunResult, ToolCallEnvelope } from 'claude-code'
+import type { PluginOptions, ProcessRunResult, ToolCallEnvelope, ToolCallResult } from 'claude-code'
 
 // What each kind of rule may use. The engine forbids passing `$` itself, so
 // it hands over these functions instead, one set per hook.
@@ -68,14 +68,17 @@ const PUSH_TIMEOUT_MS = 5000
 // the like) need no input, so they send nothing.
 const NEEDS_INPUT = new Set(['permission_prompt', 'idle_prompt', 'elicitation_dialog'])
 // A desktop notification or a spoken line must not hold up the session long.
-const NOTIFY_TIMEOUT_MS = 10_000
+export const NOTIFY_TIMEOUT_MS = 10_000
+export const RUN_TIMEOUT_MS = 30_000
+
+type Log = (text: string) => unknown
 
 const failed = (id: string, error: unknown): string =>
   `${id}: skipped, ${error instanceof Error ? error.message : String(error)}`
 
 // A rule that throws is logged and skipped, never allowed to break the tool
 // call or the shutdown.
-const guarded = async (id: string, log: (text: string) => unknown, work: () => Promise<void>): Promise<void> => {
+const guarded = async (id: string, log: Log, work: () => Promise<void>): Promise<void> => {
   try {
     await work()
   } catch (error) {
@@ -83,9 +86,9 @@ const guarded = async (id: string, log: (text: string) => unknown, work: () => P
   }
 }
 
-// $.http.fetch has no timeout of its own, and a stuck push must not hold up
-// the tool result. `fetch` and `sleep` are closures over the hook's `$`.
-const push = async (fetch: () => Promise<{ ok: boolean; status: number }>, sleep: (ms: number) => Promise<void>) => {
+// The fetch has no timeout of its own, and a stuck push must not hold up the
+// tool result. `fetch` and `sleep` are closures over the hook's `$`.
+export const push = async (fetch: () => Promise<{ ok: boolean; status: number }>, sleep: (ms: number) => Promise<void>) => {
   const answer = await Promise.race([
     fetch(),
     sleep(PUSH_TIMEOUT_MS).then(() => {
@@ -95,83 +98,70 @@ const push = async (fetch: () => Promise<{ ok: boolean; status: number }>, sleep
   if (!answer.ok) throw new Error(`the push was refused (HTTP ${answer.status})`)
 }
 
-export const registerLifecycle = (on: On, rules: readonly LifecycleRule[], options: PluginOptions): void => {
-  const settings = settingsFrom(options)
-  const has = (pick: (rule: LifecycleRule) => unknown) => rules.some(rule => pick(rule) !== undefined)
+// The tools a host does not give. A rule that calls one is logged and
+// skipped, and its tests fail: name what it uses in engine.json `needs`.
+const absent = (name: string) => (): Promise<never> =>
+  Promise.reject(new Error(`${name} is not given to this mod; name it in engine.json needs`))
 
-  if (has(rule => rule.afterTool)) {
-    on('tool.call', async ($, e, next) => {
-      const tools: ToolTools = {
-        cwd: () => $.session.cwd(),
-        root: () => $.session.root(),
-        exists: path => $.fs.exists(path),
-        read: path => $.fs.read(path),
-        list: async path => (await $.fs.list(path)).map(entry => entry.name),
-        run: (argv, cwd) => $.process.run(argv, cwd === undefined ? { timeoutMs: 30_000 } : { cwd, timeoutMs: 30_000 }),
-        post: (url, headers, body) =>
-          push(
-            () => $.http.fetch(url, { method: 'POST', headers, body }),
-            ms => $.clock.sleep(ms),
-          ),
-      }
-      const log = (text: string) => $.ui.log(text)
-      const startedAt = await $.clock.now()
-      const ran = await next(e)
-      if (ran.deny !== undefined || ran.isError !== undefined) return ran
-      const elapsedMs = (await $.clock.now()) - startedAt
-      let notes: readonly string[] = []
-      for (const rule of rules) {
-        await guarded(rule.id, log, async () => {
-          const note = await rule.afterTool?.({ e, elapsedMs }, tools, settings)
-          if (note !== undefined) notes = [...notes, note]
-        })
-      }
-      return notes.length === 0 ? ran : { ...ran, context: [...(ran.context ?? []), ...notes] }
+export const NO_TOOL_TOOLS: ToolTools = {
+  cwd: absent('cwd'),
+  root: absent('root'),
+  exists: absent('exists'),
+  read: absent('read'),
+  list: absent('list'),
+  run: absent('run'),
+  post: absent('post'),
+}
+
+export const NO_NOTIFY_TOOLS: NotifyTools = { post: absent('post'), run: absent('run') }
+
+// After each tool call that ran (not denied, no error): each rule's
+// `afterTool`, and the notes they return beside the result. `now` and `log`
+// close over the hook's `$`.
+export const afterTool = async (
+  rules: readonly LifecycleRule[],
+  settings: Settings,
+  tools: ToolTools,
+  host: { now: () => Promise<number>; log: Log },
+  e: ToolCallEnvelope,
+  next: (e: ToolCallEnvelope) => Promise<ToolCallResult>,
+): Promise<ToolCallResult> => {
+  const startedAt = await host.now()
+  const ran = await next(e)
+  if (ran.deny !== undefined || ran.isError !== undefined) return ran
+  const elapsedMs = (await host.now()) - startedAt
+  let notes: readonly string[] = []
+  for (const rule of rules) {
+    await guarded(rule.id, host.log, async () => {
+      const note = await rule.afterTool?.({ e, elapsedMs }, tools, settings)
+      if (note !== undefined) notes = [...notes, note]
     })
   }
+  return notes.length === 0 ? ran : { ...ran, context: [...(ran.context ?? []), ...notes] }
+}
 
-  if (has(rule => rule.onNeedsInput)) {
-    on('classic.Notification', async ($, e, next) => {
-      if (!NEEDS_INPUT.has(e.notification_type)) return next(e)
-      const tools: NotifyTools = {
-        post: (url, headers, body) =>
-          push(
-            () => $.http.fetch(url, { method: 'POST', headers, body }),
-            ms => $.clock.sleep(ms),
-          ),
-        run: argv => $.process.run(argv, { timeoutMs: NOTIFY_TIMEOUT_MS }),
-      }
-      const log = (text: string) => $.ui.log(text)
-      for (const rule of rules) await guarded(rule.id, log, async () => rule.onNeedsInput?.(e, tools, settings))
-      return next(e)
-    })
-  }
+// Only the Notification types that wait for the person reach the rules.
+export const needsInput = async (
+  rules: readonly LifecycleRule[],
+  settings: Settings,
+  tools: NotifyTools,
+  log: Log,
+  e: { cwd: string; notification_type: string },
+): Promise<void> => {
+  if (!NEEDS_INPUT.has(e.notification_type)) return
+  for (const rule of rules) await guarded(rule.id, log, async () => rule.onNeedsInput?.(e, tools, settings))
+}
 
-  // A subagent's turn is not the person's turn. The answer is shown first.
-  if (has(rule => rule.onTurnEnd)) {
-    on('turn.complete', async ($, e, next) => {
-      const done = await next(e)
-      if (e.agentId !== undefined) return done
-      const tools: RunTools = { run: argv => $.process.run(argv, { timeoutMs: NOTIFY_TIMEOUT_MS }) }
-      const log = (text: string) => $.ui.log(text)
-      const end: TurnEnd = { cwd: await $.session.cwd(), durationMs: e.durationMs, isAborted: e.isAborted }
-      for (const rule of rules) await guarded(rule.id, log, async () => rule.onTurnEnd?.(end, tools, settings))
-      return done
-    })
-  }
+export const turnEnd = async (rules: readonly LifecycleRule[], settings: Settings, tools: RunTools, log: Log, end: TurnEnd): Promise<void> => {
+  for (const rule of rules) await guarded(rule.id, log, async () => rule.onTurnEnd?.(end, tools, settings))
+}
 
-  if (has(rule => rule.onSessionEnd)) {
-    on('classic.SessionEnd', async ($, e, next) => {
-      const tools: JournalTools = {
-        home: () => $.env.get('HOME'),
-        now: () => $.clock.now(),
-        exists: path => $.fs.exists(path),
-        read: path => $.fs.read(path),
-        write: (path, text) => $.fs.write(path, text),
-      }
-      const log = (text: string) => $.ui.log(text)
-      for (const rule of rules) await guarded(rule.id, log, async () => rule.onSessionEnd?.(e, tools, settings))
-      return next(e)
-    })
-  }
+export const sessionEnd = async (
+  rules: readonly LifecycleRule[],
+  settings: Settings,
+  tools: JournalTools,
+  log: Log,
+  e: { cwd: string; reason: string },
+): Promise<void> => {
+  for (const rule of rules) await guarded(rule.id, log, async () => rule.onSessionEnd?.(e, tools, settings))
 }

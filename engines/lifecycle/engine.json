@@ -1,9 +1,35 @@
 {
-  "hooks": ["engine.ts", "patterns.ts", "ntfy.ts", "notify.ts", "webhook.ts"],
   "tests": ["probe.ts", "engine.test.ts"],
-  "register": "registerLifecycle",
   "ruleExport": "rule",
-  "options": true,
+  "needs": {
+    "auto-format": ["tool-files"],
+    "auto-lint": ["tool-files", "tool-root"],
+    "long-run-notify": ["tool-push"],
+    "ntfy-notify": ["input-push"],
+    "slack-notify": ["input-push"],
+    "discord-notify": ["input-push"],
+    "desktop-notify": ["input-run"],
+    "say-done": ["turn-run"],
+    "session-journal": ["journal"]
+  },
+  "hosts": {
+    "tool": [
+      { "file": "hooks/hosts/tool-files.ts", "export": "afterToolWithFiles", "gives": ["tool-files"], "options": true },
+      { "file": "hooks/hosts/tool-lint.ts", "export": "afterToolWithFilesAndRoot", "gives": ["tool-files", "tool-root"], "options": true },
+      { "file": "hooks/hosts/tool-push.ts", "export": "afterToolWithPush", "gives": ["tool-push"], "options": true },
+      { "file": "hooks/hosts/tool-files-push.ts", "export": "afterToolWithFilesAndPush", "gives": ["tool-files", "tool-push"], "options": true }
+    ],
+    "input": [
+      { "file": "hooks/hosts/input-push.ts", "export": "needsInputWithPush", "gives": ["input-push"], "options": true },
+      { "file": "hooks/hosts/input-run.ts", "export": "needsInputWithRun", "gives": ["input-run"], "options": true }
+    ],
+    "turn": [
+      { "file": "hooks/hosts/turn-run.ts", "export": "turnEndWithRun", "gives": ["turn-run"], "options": true }
+    ],
+    "end": [
+      { "file": "hooks/hosts/journal.ts", "export": "sessionEndWithJournal", "gives": ["journal"], "options": true }
+    ]
+  },
   "userConfig": {
     "ntfy-notify": {
       "ntfyTopic": {

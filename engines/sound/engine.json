@@ -1,8 +1,4 @@
 {
-  "hooks": [
-    "engine.ts",
-    "runner.ts"
-  ],
   "tests": [
     "probe.ts",
     "suite.ts",

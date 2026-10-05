@@ -1,6 +1,9 @@
 import type { Register } from 'claude-code'
 
-import { registerGuards } from './engine'
+import { checkCalls } from './hosts/check'
 import { rule as noVerify } from './rules/no-verify'
 
-export const register: Register = on => registerGuards(on, [noVerify])
+export const register: Register = on => {
+  const rules = [noVerify]
+  checkCalls(on, rules)
+}

@@ -49,10 +49,10 @@ export const rule: BandRule = {
     onEdit: true,
     onEditWhen: ranBd,
     timeoutMs: 10_000,
-    read: async (run, _git, now) => {
-      const all = await bdJson(run, ['count', '--by-priority'], now)
+    read: async (run, _git, now, generation) => {
+      const all = await bdJson(run, ['count', '--by-priority'], { now, generation })
       if (all === null) return null
-      return priorityLine(all, await bdJson(run, ['count', '--by-priority', '--status', 'closed'], now))
+      return priorityLine(all, await bdJson(run, ['count', '--by-priority', '--status', 'closed'], { now, generation }))
     },
   },
   segment: ({ fetched }) => {

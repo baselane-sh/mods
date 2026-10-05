@@ -34,7 +34,7 @@ const write = (path, text) => {
 //   needs       optional. { ruleId: [need] }: what a rule needs beyond the
 //               engine core, named by the engine (a capability such as
 //               "run", or a hook such as "after").
-//   hosts       optional. { group: [{ file, export, gives, options? }] }: a
+//   hosts       optional. { group: [{ file, export, gives, options?, shared? }] }: a
 //               host is a function `(on, rules)` in its own file that
 //               registers one hook and builds the `$` closures that hook
 //               hands the rules. A `$` call cannot cross an import, so a
@@ -274,8 +274,12 @@ const buildMod = (engine, engineDir, mod, outDir) => {
   const sharedTests = (engine.tests ?? [])
     .map(file => closureOf(engineDir, [join('tests', file)]))
     .filter(files => [...files].every(file => !file.startsWith('hooks/') || shipped.has(file)))
-  const files = new Set([...shipped, ...ruleTests, ...sharedTests.flatMap(set => [...set])])
-  if (engine.types !== undefined) files.add(engine.types)
+  const files = new Set([
+    ...shipped,
+    ...ruleTests,
+    ...sharedTests.flatMap(set => [...set]),
+    ...(engine.types === undefined ? [] : [engine.types]),
+  ])
 
   for (const file of [...files].sort()) place(engine, mod, engineDir, outDir, file)
   if (engine.assets !== undefined) copyAssets(engine, mod, engineDir, outDir)

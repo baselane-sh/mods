@@ -23,6 +23,7 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['git push -f origin +v1.2.0', 'push tag v1.2.0'],
   ['git push origin refs/tags/v2.0.0', 'push tag refs/tags/v2.0.0'],
   ['git push origin tag v3.0.0', 'push tag v3.0.0'],
+  ['git push origin HEAD:refs/tags/v3.2.0', 'push tag refs/tags/v3.2.0'],
   ['git push origin :refs/tags/v0.9.0', 'delete remote tag refs/tags/v0.9.0'],
   ['git push --delete origin v1.2.0', 'delete remote tag v1.2.0'],
   ['git tag -d v0.9.0 && git push origin :v0.9.0', 'delete remote tag v0.9.0'],

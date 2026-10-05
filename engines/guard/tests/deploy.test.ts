@@ -33,6 +33,8 @@ const MISSES = [
   'vercel deploy',
   'vercel dev',
   'vercel env pull',
+  'vercel build --prod',
+  'vercel pull --environment=production',
   'netlify deploy',
   'netlify deploy --dir dist',
   'netlify dev',

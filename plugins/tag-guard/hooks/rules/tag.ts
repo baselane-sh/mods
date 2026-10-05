@@ -28,7 +28,9 @@ const refsOf = (refspecs: readonly string[], deletes: boolean): readonly Ref[] =
     if (spec === 'tag') return []
     if (refspecs[i - 1] === 'tag') return [{ name: spec, deletes, isTag: true }]
     const bare = spec.replace(/^\+/, '')
-    const ref = bare.startsWith(':') ? { name: bare.slice(1), deletes: true } : { name: bare.split(':')[0] ?? bare, deletes }
+    const [src, dst] = bare.split(':')
+    // `main:refs/tags/v1` writes a tag on the remote whatever src is.
+    const ref = bare.startsWith(':') ? { name: bare.slice(1), deletes: true } : dst?.startsWith(TAGS) ? { name: dst, deletes } : { name: src ?? bare, deletes }
     return [{ ...ref, isTag: ref.name.startsWith(TAGS) }]
   })
 

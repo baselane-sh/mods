@@ -37,7 +37,11 @@ const firebaseDanger = (args: readonly string[]): string | undefined => {
   return isPreview ? undefined : 'firebase deploy'
 }
 
+// Vercel subcommands that build or fetch locally and deploy nothing.
+const VERCEL_LOCAL = new Set(['build', 'pull', 'dev', 'env'])
+
 const vercelDanger = (args: readonly string[]): string | undefined => {
+  if (VERCEL_LOCAL.has(args.find(arg => !arg.startsWith('-')) ?? '')) return undefined
   const isProd = args.some(arg => arg === '--prod' || arg === '--prod=true') || valueOf(args, ['--target']) === 'production'
   return isProd ? 'vercel --prod' : undefined
 }

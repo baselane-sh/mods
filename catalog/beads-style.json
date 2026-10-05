@@ -1,0 +1,6 @@
+{
+  "engine": "style",
+  "mods": [
+    { "name": "beads-prime", "description": "Runs bd prime once per session and adds its text (up to 8 KB) to the system prompt in a beads folder. With bd setup claude hooks on, you may get the text twice.", "rules": ["beads-prime"] }
+  ]
+}

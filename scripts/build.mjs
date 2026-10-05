@@ -33,7 +33,8 @@ const write = (path, text) => {
 //               of the engine uses.
 //   needs       optional. { ruleId: [need] }: what a rule needs beyond the
 //               engine core, named by the engine (a capability such as
-//               "run", or a hook such as "after").
+//               "run", or a hook such as "after"). The build fails when
+//               a key is not a rule or a need is given by no host.
 //   hosts       optional. { group: [{ file, export, gives, options?, shared? }] }: a
 //               host is a function `(on, rules)` in its own file that
 //               registers one hook and builds the `$` closures that hook
@@ -88,6 +89,21 @@ const loadEngine = name => {
     ...config,
     importRule: id => `import { ${config.ruleExport} as ${camel(id)} } from './rules/${id}'`,
     useRule: id => (isFactory ? `${camel(id)}()` : camel(id)),
+  }
+}
+
+// pickHost skips a need its group does not know (another group may give it),
+// so a mistyped need or rule id would build a mod without the host its rule
+// needs. Check every `needs` entry against the rules and all the hosts once.
+const checkNeeds = (name, engine, engineDir) => {
+  const groups = Object.values(engine.hosts ?? {}).map(entry => (Array.isArray(entry) ? entry : entry.hosts))
+  const given = new Set(groups.flat().flatMap(host => host.gives))
+  for (const [id, needs] of Object.entries(engine.needs ?? {})) {
+    if (!existsSync(join(engineDir, 'hooks/rules', `${id}.ts`))) {
+      throw new Error(`${name}: needs names "${id}", but there is no rule hooks/rules/${id}.ts`)
+    }
+    const missing = needs.find(need => !given.has(need))
+    if (missing !== undefined) throw new Error(`${name}: rule ${id} needs "${missing}", but no host gives it`)
   }
 }
 
@@ -294,6 +310,7 @@ const mods = catalogs.flatMap(catalog => {
     throw new Error(`unknown engine ${catalog.engine}`)
   }
   const engine = loadEngine(catalog.engine)
+  checkNeeds(catalog.engine, engine, join(ROOT, 'engines', catalog.engine))
   return catalog.mods.map(mod => {
     buildMod(engine, join(ROOT, 'engines', catalog.engine), mod, join(ROOT, 'plugins', mod.name))
     return mod

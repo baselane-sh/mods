@@ -5,10 +5,12 @@
 //
 //   node scripts/calls-report.mjs [mod ...] > calls.txt
 //
-// Line format: <mod> | hooks: a, b | calls: c, d
+// Line format: <mod> | hooks: a, b | calls: c, d, then `env reads`,
+// `env writes`, `state reads` and `state writes` fields when not empty.
 import { execFile } from 'node:child_process'
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
 
 const ROOT = new URL('..', import.meta.url).pathname
@@ -47,26 +49,44 @@ const field = (output, name) => {
   return [...new Set(values)].sort()
 }
 
+// Validate also lists the env vars and `$.state` keys a mod touches. They
+// show only when the mod has some, so most lines stay short.
+const EXTRAS = ['env reads', 'env writes', 'state reads', 'state writes']
+
+// One report line from the output of `claude plugin validate`.
+export const lineFor = (name, output) => {
+  const extras = EXTRAS.map(label => [label, field(output, label)]).filter(([, values]) => values.length > 0)
+  return [
+    name,
+    `hooks: ${field(output, 'hooks').join(', ')}`,
+    `calls: ${field(output, 'calls').join(', ')}`,
+    ...extras.map(([label, values]) => `${label}: ${values.join(', ')}`),
+  ].join(' | ')
+}
+
 const report = async name => {
   try {
     const { stdout, stderr } = await run('claude', ['plugin', 'validate', join(PLUGINS, name)])
-    const output = `${stdout}\n${stderr}`
-    return `${name} | hooks: ${field(output, 'hooks').join(', ')} | calls: ${field(output, 'calls').join(', ')}`
+    return lineFor(name, `${stdout}\n${stderr}`)
   } catch (error) {
     process.exitCode = 1
     return `${name} | validate failed: ${String(error.stderr || error.message).split('\n')[0]}`
   }
 }
 
-const names = process.argv.length > 2 ? process.argv.slice(2) : readdirSync(PLUGINS).sort()
-const lines = new Array(names.length)
-let next = 0
-const worker = async () => {
-  while (next < names.length) {
-    const index = next
-    next += 1
-    lines[index] = await report(names[index])
+const main = async () => {
+  const names = process.argv.length > 2 ? process.argv.slice(2) : readdirSync(PLUGINS).sort()
+  const lines = new Array(names.length)
+  let next = 0
+  const worker = async () => {
+    while (next < names.length) {
+      const index = next
+      next += 1
+      lines[index] = await report(names[index])
+    }
   }
+  await Promise.all(Array.from({ length: PARALLEL }, worker))
+  process.stdout.write(`${lines.join('\n')}\n`)
 }
-await Promise.all(Array.from({ length: PARALLEL }, worker))
-process.stdout.write(`${lines.join('\n')}\n`)
+
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) await main()

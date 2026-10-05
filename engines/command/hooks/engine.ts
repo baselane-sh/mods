@@ -12,6 +12,8 @@ export type Facts = {
   elapsedMs?: number
   contextPercent?: number
   costUsd?: number
+  // The engine's clock now (epoch ms), for a rule that needs the date.
+  nowMs?: number
 }
 
 // What a rule may reach beyond the record, as closures over the host calls
@@ -125,6 +127,7 @@ export const answerCommand = async (rule: CommandRule, args: string, tools: Comm
 
   const facts: Facts = {
     ...(turns === undefined ? {} : { turns }),
+    ...(now === undefined ? {} : { nowMs: now }),
     ...(usage === undefined || now === undefined ? {} : { elapsedMs: Math.max(0, now - usage.startedAt) }),
     ...(usage?.context.percent === undefined ? {} : { contextPercent: usage.context.percent }),
     ...(usage?.cost === undefined ? {} : { costUsd: usage.cost.usd }),

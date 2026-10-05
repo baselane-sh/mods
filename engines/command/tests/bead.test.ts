@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { bead, json, NO_PROJECT_ERR } from './bd-fixtures'
+import { bead, json, NO_PROJECT_ERR, NOT_FOUND_ERR, NOT_FOUND_OUT } from './bd-fixtures'
 import { probe } from './probe'
 
 const KEY = 'bd show bm-ooq.64 --include-dependents --json'
@@ -93,4 +93,10 @@ test('bead: exit 1 outside a beads folder prints the no-project line', async ($,
 test('bead: JSON that does not parse prints "bd did not answer."', async ($, on) => {
   const session = probe($, on, { git: { [KEY]: '{oops' } })
   expect(await session.run('bead', 'bm-ooq.64')).toBe('bd did not answer.')
+})
+
+test('bead: an id that does not exist prints "No bead <id> in this project."', async ($, on) => {
+  const key = 'bd show nosuch-1 --include-dependents --json'
+  const session = probe($, on, { git: { [key]: NOT_FOUND_OUT }, exit: { [key]: 1 }, stderr: { [key]: NOT_FOUND_ERR } })
+  expect(await session.run('bead', 'nosuch-1')).toBe('No bead nosuch-1 in this project.')
 })

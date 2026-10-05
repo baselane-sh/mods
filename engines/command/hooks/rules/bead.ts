@@ -27,7 +27,7 @@ const compose = async (_record: unknown, _facts: unknown, tools: CommandTools, a
   // One id, checked before bd runs, so it can never be read as an option.
   if (!BEAD_ID.test(args)) return message(USAGE)
   const answer = await bd(tools, 'show', args, '--include-dependents', '--json')
-  if (!answer.ok) return message(answer.text)
+  if (!answer.ok) return message(answer.notFound === true ? `No bead ${args} in this project.` : answer.text)
   const found = asBeads(answer.json)?.[0]
   if (found === undefined) return message(NO_ANSWER)
 

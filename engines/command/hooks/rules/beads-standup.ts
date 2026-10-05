@@ -1,6 +1,6 @@
 import { asBeads, bd, byPriorityThenAge, NO_ANSWER, row, yesterdayStart } from '../beads'
 import type { Bead } from '../beads'
-import type { CommandRule, CommandTools, Composed } from '../engine'
+import type { CommandRule, CommandTools, Composed, Facts } from '../engine'
 import { finish, message } from '../helpers'
 
 const NEXT = 5
@@ -12,8 +12,9 @@ const section = (title: string, beads: readonly Bead[], limit = LIST_CAP): strin
   ...(beads.length > limit ? [`  +${beads.length - limit} more`] : []),
 ]
 
-const compose = async (_record: unknown, _facts: unknown, tools: CommandTools): Promise<Composed> => {
-  const closed = await bd(tools, 'list', '--status', 'closed', '--closed-after', yesterdayStart(new Date()), '--json', '-n', '0')
+const compose = async (_record: unknown, facts: Facts, tools: CommandTools): Promise<Composed> => {
+  if (facts.nowMs === undefined) return message(NO_ANSWER)
+  const closed = await bd(tools, 'list', '--status', 'closed', '--closed-after', yesterdayStart(new Date(facts.nowMs)), '--json', '-n', '0')
   if (!closed.ok) return message(closed.text)
   const doing = await bd(tools, 'list', '--status', 'in_progress', '--json', '-n', '0')
   if (!doing.ok) return message(doing.text)

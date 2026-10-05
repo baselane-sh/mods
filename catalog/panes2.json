@@ -8,7 +8,7 @@
     },
     {
       "name": "test-pane",
-      "description": "A live side pane with the last test run: runner, pass, fail and skip counts, duration and the first failing tests, read from vitest, jest, pytest, go test, cargo test, bun test and claude plugin test output. Open it with /tests.",
+      "description": "A live side pane with the last test run (vitest, jest, pytest, go test, cargo test, bun test, claude plugin test): runner, pass, fail and skip counts, duration and first failures. Open it with /tests.",
       "rules": ["test-pane"]
     },
     {

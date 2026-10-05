@@ -1,0 +1,10 @@
+{
+  "name": "docker-guard",
+  "version": "0.3.0",
+  "description": "Asks before Docker commands that delete data: system, volume or image prune, rm -f, volume rm and compose down -v.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

@@ -24,12 +24,16 @@ const MAX_DEPTH = 3
 
 export const base = (word: string): string => word.slice(word.lastIndexOf('/') + 1)
 
-// `sudo -E npm i x` reads as `npm i x` for a rule about the command that runs.
+// sudo and doas options whose value is the next word. `-h` stays out: alone
+// it means help.
+const SUDO_VALUE_FLAGS = new Set(['-u', '-g', '-C', '-D', '-p', '-r', '-t', '-T', '-U', '--user', '--group', '--close-from', '--chdir', '--prompt', '--role', '--type', '--command-timeout', '--other-user'])
+
+// `sudo -E npm i x` and `sudo -u deploy npm i x` read as `npm i x` for a rule
+// about the command that runs.
 export const withoutSudo = (argv: readonly string[]): readonly string[] => {
   if (argv[0] === undefined || !['sudo', 'doas'].includes(base(argv[0]))) return argv
-  const rest = argv.slice(1)
-  const at = rest.findIndex(word => !word.startsWith('-'))
-  return at < 0 ? [] : rest.slice(at)
+  const { sub, args } = subcommandOf(argv, SUDO_VALUE_FLAGS)
+  return sub === undefined ? [] : [sub, ...args]
 }
 
 const tokenize = (text: string, prefix: string): Raw[] => {
@@ -179,3 +183,32 @@ export const segmentsOf = (command: string): readonly Segment[] => segmentsAt(co
 // match text inside quotes.
 export const blankQuotes = (command: string): string =>
   command.replace(/'[^']*'|"(?:[^"\\]|\\.)*"/g, span => `${span[0]}${'_'.repeat(span.length - 2)}${span[0]}`)
+
+// A CLI call split at its subcommand: the global options in front, the
+// subcommand and the words after it. `valueFlags` names the options whose
+// value is the next word (`-C dir`); `--opt=value` is one word already.
+export type Subcommand = { globals: readonly string[]; sub: string | undefined; args: readonly string[] }
+
+export const subcommandOf = (argv: readonly string[], valueFlags: ReadonlySet<string>): Subcommand => {
+  let i = 1
+  while (i < argv.length && argv[i]!.startsWith('-')) i += valueFlags.has(argv[i]!) ? 2 : 1
+  return { globals: argv.slice(1, i), sub: argv[i], args: argv.slice(i + 1) }
+}
+
+const XARGS_VALUE_FLAGS = new Set(['-I', '-J', '-L', '-n', '-P', '-s', '-d', '-E', '-R', '-S', '-a', '--max-args', '--max-procs', '--max-lines', '--delimiter', '--arg-file', '--eof'])
+
+// `ls | xargs chmod 777` reads as `chmod 777` for a rule about the command
+// that runs.
+export const withoutXargs = (argv: readonly string[]): readonly string[] => {
+  if (argv[0] === undefined || base(argv[0]) !== 'xargs') return argv
+  const { sub, args } = subcommandOf(argv, XARGS_VALUE_FLAGS)
+  return sub === undefined ? [] : [sub, ...args]
+}
+
+// Every simple command in a command line as the argv that really runs, past
+// sudo and xargs.
+export const commandsOf = (command: string): ReadonlyArray<readonly string[]> =>
+  segmentsOf(command).map(({ argv }) => withoutSudo(withoutXargs(withoutSudo(argv))))
+
+// True when a short option cluster (`-fdx`) holds the letter.
+export const hasShortFlag = (word: string, letter: string): boolean => /^-[a-zA-Z]+$/.test(word) && word.includes(letter)

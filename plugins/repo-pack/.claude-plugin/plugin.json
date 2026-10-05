@@ -1,6 +1,6 @@
 {
   "name": "repo-pack",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches.",
   "author": {
     "name": "Baselane",

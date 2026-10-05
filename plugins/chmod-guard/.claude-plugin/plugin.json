@@ -1,0 +1,10 @@
+{
+  "name": "chmod-guard",
+  "version": "0.3.0",
+  "description": "Asks before chmod makes files world-writable (777, a+w, o+w) or chmod or chown runs recursively on a broad path (/, a system folder, a home folder).",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

@@ -1,6 +1,6 @@
 {
   "name": "ctx-nudge",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Reminds you to /clear or /compact when the context window passes 75 percent.",
   "author": {
     "name": "Baselane",

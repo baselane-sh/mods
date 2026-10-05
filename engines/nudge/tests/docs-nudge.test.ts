@@ -58,3 +58,29 @@ test('docs-nudge: docs path table', () => {
     expect({ path, docs: isDocsFile(path) }).toEqual({ path, docs: false })
   }
 })
+
+test('docs-nudge: a Write over an existing file skips the exports it kept', async ($, on) => {
+  const session = probe($, on)
+  await session.write('src/api.ts', 'export const run = () => 2', 'export const run = () => 1')
+  expect(await session.stop()).toEqual([])
+})
+
+test('docs-nudge: a repo inside a folder named docs or test still nudges', async ($, on) => {
+  const session = probe($, on)
+  session.setCwd('/x/docs/repo')
+  await session.write('/x/docs/repo/src/api.ts', 'export const run = () => 1')
+  expect(await session.stop()).toEqual([NUDGE])
+  session.setCwd('/x/test/repo')
+  await session.write('/x/test/repo/src/api.ts', 'export const go = () => 1')
+  expect(await session.stop()).toEqual([NUDGE])
+})
+
+test('docs-nudge: absolute paths to docs and tests inside the repo still count', async ($, on) => {
+  const session = probe($, on)
+  session.setCwd('/x/repo')
+  await session.write('/x/repo/tests/api.ts', 'export const t = 1')
+  expect(await session.stop()).toEqual([])
+  await session.write('/x/repo/docs/api.md', 'run')
+  await session.write('/x/repo/src/api.ts', 'export const run = () => 1')
+  expect(await session.stop()).toEqual([])
+})

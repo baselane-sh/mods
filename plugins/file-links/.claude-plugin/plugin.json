@@ -1,10 +1,11 @@
 {
   "name": "file-links",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "In Claude's replies, path/to/file.ts:42 references to files in your project become links. Click one to put @path/to/file.ts in the prompt.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "types": "./types/index.d.ts"
 }

@@ -1,0 +1,10 @@
+{
+  "name": "say-done",
+  "version": "0.3.0",
+  "description": "On macOS, says \"Claude is done\" when a turn ends after more than 30 seconds. Does nothing on other platforms.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

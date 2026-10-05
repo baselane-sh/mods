@@ -57,6 +57,10 @@ export type BandRule = {
   tracksGit?: true
   // For a rule with a timer, started and stopped by a slash command.
   ticker?: Ticker
+  // Set by a rule whose segment moves with the clock alone. While it answers
+  // true for the last turn's reading, the engine redraws the band on each
+  // minute, and only then.
+  everyMinute?: (reading: Reading) => boolean
 }
 
 // A timer the person starts and stops with `/<command.name>`. Pure, so a rule

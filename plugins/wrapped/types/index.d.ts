@@ -44,6 +44,8 @@ export type SessionMemo = {
   seen: string[]
   /** Tool calls flushed this session. Absent in a memo from before it was kept. */
   calls?: number
+  /** When this process first saw the session start. Absent until it does. */
+  since?: number
 }
 
 declare module 'claude-code' {

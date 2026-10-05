@@ -1,6 +1,6 @@
 {
   "name": "conventional-commits",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Commit messages follow Conventional Commits: type(scope): subject, imperative, under 72 characters.",
   "author": {
     "name": "Baselane",

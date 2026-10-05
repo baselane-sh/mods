@@ -1,6 +1,6 @@
 {
   "name": "shakespeare-mode",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Prose in Early Modern English flair. Code, commands, commit messages and error text stay exact.",
   "author": {
     "name": "Baselane",

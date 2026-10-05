@@ -1,6 +1,6 @@
 {
   "name": "todos",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Adds /todos: TODO, FIXME and HACK lines in tracked files, grouped by file (50 lines at most). Read-only.",
   "author": {
     "name": "Baselane",

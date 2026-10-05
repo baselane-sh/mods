@@ -1,0 +1,10 @@
+{
+  "name": "migration-guard",
+  "version": "0.3.0",
+  "description": "Asks before Write or Edit changes a migration that already exists; new migration files pass.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

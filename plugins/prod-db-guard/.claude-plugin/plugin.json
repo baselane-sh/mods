@@ -1,6 +1,6 @@
 {
   "name": "prod-db-guard",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Asks before destructive SQL runs in a command: TRUNCATE, DELETE or UPDATE with no WHERE.",
   "author": {
     "name": "Baselane",

@@ -1,12 +1,19 @@
 import type { ToolCallEnvelope, ToolCallResult } from 'claude-code'
 
 // What one successful Write or Edit changed, for the rules that read edits.
-// A Write has no "before", so every line it writes counts as added.
+// A Write's "before" is the old file the host reports. A new file has none,
+// and neither has a file too large for the host to include, so there every
+// line the Write writes counts as added.
 export type FileEdit = { path: string; before: string; after: string }
+
+const originalFile = (result: unknown): string => {
+  if (typeof result !== 'object' || result === null || !('originalFile' in result)) return ''
+  return typeof result.originalFile === 'string' ? result.originalFile : ''
+}
 
 export const fileEdit = (e: ToolCallEnvelope, ran: ToolCallResult): FileEdit | undefined => {
   if (ran.deny !== undefined || ran.isError) return undefined
-  if (e.tool === 'Write') return { path: e.file_path, before: '', after: e.content }
+  if (e.tool === 'Write') return { path: e.file_path, before: originalFile(ran.result), after: e.content }
   if (e.tool === 'Edit') return { path: e.file_path, before: e.old_string, after: e.new_string }
   return undefined
 }
@@ -46,6 +53,13 @@ export const changedLines = (edit: FileEdit): { added: string[]; removed: string
   const before = tally(edit.before)
   const after = tally(edit.after)
   return { added: surplus(after, before), removed: surplus(before, after) }
+}
+
+// The path inside the session cwd, so a folder above the repo (say ~/docs)
+// never matches a rule's folder pattern. Other paths come back unchanged.
+export const repoPath = (path: string, cwd: string): string => {
+  const root = cwd.endsWith('/') ? cwd : `${cwd}/`
+  return cwd !== '' && path.startsWith(root) ? path.slice(root.length) : path
 }
 
 export const dirname = (path: string): string => path.split('/').slice(0, -1).join('/')

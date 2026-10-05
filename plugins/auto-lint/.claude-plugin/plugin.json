@@ -1,0 +1,10 @@
+{
+  "name": "auto-lint",
+  "version": "0.3.0",
+  "description": "Runs your project's own linter fix (eslint, ruff or golangci-lint) on each file Claude writes or edits, only when the project has that linter's config, and tells Claude what is left.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

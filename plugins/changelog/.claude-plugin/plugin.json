@@ -1,6 +1,6 @@
 {
   "name": "changelog",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Adds /changelog: commits since the last tag (or the last 30), grouped by conventional-commit type, as Markdown.",
   "author": {
     "name": "Baselane",

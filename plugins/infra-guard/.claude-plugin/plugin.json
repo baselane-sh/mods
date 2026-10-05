@@ -1,6 +1,6 @@
 {
   "name": "infra-guard",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Asks before terraform destroy, kubectl delete, force-push, DROP TABLE or rm -rf.",
   "author": {
     "name": "Baselane",

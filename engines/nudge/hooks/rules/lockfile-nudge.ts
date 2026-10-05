@@ -16,11 +16,19 @@ const LOCKFILES: Readonly<Record<string, Ecosystem>> = {
 
 // Does a changed line declare a dependency? Version, name and engine lines
 // are not dependencies, so bumping them needs no lockfile.
-const NODE_VERSION = /^(?:[\^~<>=]*\s*\d|\*$|latest$|next$|workspace:|npm:|file:|link:|git|github:|https?:)/
+const NODE_VERSION = /^(?:[\^~<>=]*\s*\d|\*$|latest$|next$|workspace:|npm:|file:|link:)/
+// A git or URL source. Only in a dependency, since package links look alike.
+const NODE_SOURCE = /^(?:git(\+[a-z]+)?:|git@|github:|https?:)/
+const NOT_DEPENDENCY = /^(version|name|description|author|license|main|module|types|node|npm|pnpm|yarn|bun|vscode)$/
+// Package link fields. `url` is also a real package, so a version still counts.
+const LINK_FIELD = /^(homepage|repository|bugs|url|funding)$/
 const nodeDependency = (line: string): boolean => {
   if (/"(dev|peer|optional)?[dD]ependencies"\s*:/.test(line)) return true
   const pair = /^\s*"([^"]+)"\s*:\s*"([^"]*)"/.exec(line)
-  return pair !== undefined && pair !== null && !/^(version|node|npm|pnpm|yarn|bun|vscode)$/.test(pair[1] ?? '') && NODE_VERSION.test(pair[2] ?? '')
+  if (pair === null) return false
+  const [, key = '', value = ''] = pair
+  if (NOT_DEPENDENCY.test(key)) return false
+  return NODE_VERSION.test(value) || (NODE_SOURCE.test(value) && !LINK_FIELD.test(key))
 }
 
 const DEPENDENCY: Readonly<Record<Ecosystem, (line: string) => boolean>> = {

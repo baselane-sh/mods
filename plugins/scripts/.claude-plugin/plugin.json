@@ -1,0 +1,11 @@
+{
+  "name": "scripts",
+  "version": "0.3.0",
+  "description": "Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts. Read-only.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

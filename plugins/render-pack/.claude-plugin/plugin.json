@@ -1,10 +1,11 @@
 {
   "name": "render-pack",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Every rendering mod in one: diff-stats bars on Edit and Write rows, and file-links in Claude's replies.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "types": "./types/index.d.ts"
 }

@@ -82,3 +82,10 @@ test('env-example-nudge: nothing is read on a turn with no new reference', async
   await session.stop()
   expect(session.reads()).toEqual([])
 })
+
+test('env-example-nudge: a Write over an existing file skips the references it kept', async ($, on) => {
+  const session = probe($, on)
+  session.setEnvExample(EXAMPLE)
+  await session.write('src/a.ts', 'const k = process.env.STRIPE_KEY\nconst a = 2', 'const k = process.env.STRIPE_KEY\nconst a = 1')
+  expect(await session.stop()).toEqual([])
+})

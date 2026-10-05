@@ -1,0 +1,11 @@
+{
+  "name": "render-plus",
+  "version": "0.3.0",
+  "description": "Three row badges in one: time-badge, exit-badge and size-badge.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

@@ -1,6 +1,6 @@
 {
   "name": "band-pack",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Every Baselane band meter in one row above the prompt: session cost, lattes, context bar, today's spend, the focus timer and the mood ring.",
   "author": {
     "name": "Baselane",

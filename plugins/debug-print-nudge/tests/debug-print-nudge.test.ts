@@ -34,3 +34,9 @@ test('debug-print-nudge: line pattern table', () => {
     expect({ line, hit: DEBUG_LINE.test(line) }).toEqual({ line, hit: false })
   }
 })
+
+test('debug-print-nudge: a Write over an existing file skips the prints it kept', async ($, on) => {
+  const session = probe($, on)
+  await session.write('src/a.ts', 'console.log(x)\nconst a = 2', 'console.log(x)\nconst a = 1')
+  expect(await session.stop()).toEqual([])
+})

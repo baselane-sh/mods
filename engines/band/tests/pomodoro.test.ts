@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { SURFACES, probe } from './probe'
+import { NOON, SURFACES, probe } from './probe'
 
 const MIN = 60_000
 const SEC = 1000
@@ -41,7 +41,10 @@ test('pomodoro: counts down as the clock moves', async ($, on) => {
 test('pomodoro: switches to a 5 minute break with a toast, then back to focus with a toast', async ($, on) => {
   const session = probe($, on)
   await session.run('pomodoro')
-  await session.advance(25 * MIN - SEC)
+  // The timer as it stands one second before each phase ends, so the test
+  // ticks through the switches and not through 25 minutes of seconds. The
+  // 25 minute focus itself is the start and countdown tests' to check.
+  session.seedState('pomodoro', { phase: 'focus', endsAt: NOON + SEC, now: NOON })
   expect(session.toasts()).toEqual([])
   expect(await shown(session)).toBe('focus 00:01')
 

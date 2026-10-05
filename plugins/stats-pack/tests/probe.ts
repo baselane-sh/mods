@@ -59,7 +59,8 @@ export type StatsProbe = {
   edit: (file_path: string) => Promise<unknown>
   read: (file_path: string) => Promise<unknown>
   start: () => Promise<void>
-  end: () => Promise<void>
+  // Ends the session; `clear` is how a /clear looks (default `other`).
+  end: (reason?: 'clear' | 'other') => Promise<void>
   // A whole turn: turn.start, the cost moves to `usd` when given, turn.complete.
   // `durationMs` is the turn's length as turn.complete reports it (default 1).
   turn: (usd?: number, durationMs?: number) => Promise<void>
@@ -75,11 +76,13 @@ export type StatsProbe = {
   stored: () => Readonly<Record<string, unknown>>
   days: () => Record<string, Day>
   setUsd: (usd: number | undefined) => void
+  // What the session reports as its start from now on (a /clear moves it).
+  setStartedAt: (at: number) => void
 }
 
 export const probe = ($: Engine, on: OnFn, opts: Opts = {}): StatsProbe => {
   const clock = mock.clock(on, { now: opts.now ?? NOON })
-  const startedAt = opts.startedAt ?? opts.now ?? NOON
+  let startedAt = opts.startedAt ?? opts.now ?? NOON
   let usd = opts.usd
   let turns = 0
   let toasts: string[] = []
@@ -149,8 +152,8 @@ export const probe = ($: Engine, on: OnFn, opts: Opts = {}): StatsProbe => {
     start: async () => {
       await $.session.start({ cwd: '/repo', surface: null, isInteractive: true })
     },
-    end: async () => {
-      await $.session.end({ reason: 'other', sessionId: 's', resume: { id: 's' } })
+    end: async (reason = 'other') => {
+      await $.session.end({ reason, sessionId: 's', resume: { id: 's' } })
     },
     turn: async (after, durationMs) => {
       turns += 1
@@ -170,6 +173,9 @@ export const probe = ($: Engine, on: OnFn, opts: Opts = {}): StatsProbe => {
     days: () => (kept['days'] ?? {}) as Record<string, Day>,
     setUsd: value => {
       usd = value
+    },
+    setStartedAt: at => {
+      startedAt = at
     },
   }
 }

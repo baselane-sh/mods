@@ -1,6 +1,6 @@
 {
   "name": "lifecycle-pack",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Every Baselane lifecycle mod in one: auto-format, long-run and input pushes, and the session journal.",
   "author": {
     "name": "Baselane",

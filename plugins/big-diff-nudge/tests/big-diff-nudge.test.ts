@@ -65,3 +65,10 @@ test('big-diff-nudge: a successful git commit resets the count, a failed one doe
   await session.write('data/c.txt', lines(300, 'k'))
   expect(await session.stop()).toEqual([NUDGE(600)])
 })
+
+test('big-diff-nudge: a Write over an existing file counts only the lines it changed', async ($, on) => {
+  const session = probe($, on)
+  const original = lines(600)
+  await session.write('data/a.txt', original.replace('l7\n', 'changed\n'), original)
+  expect(await session.stop()).toEqual([])
+})

@@ -1,0 +1,19 @@
+{
+  "name": "slack-notify",
+  "version": "0.3.0",
+  "description": "Posts to a Slack incoming webhook when Claude Code needs your input. Sends the project name and a short status only. Does nothing until you set a webhook URL.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "slackWebhookUrl": {
+      "type": "string",
+      "title": "Slack webhook URL",
+      "description": "A Slack incoming webhook URL (https://hooks.slack.com/...). Anyone who has it can post to your channel. Empty means nothing is sent.",
+      "default": "",
+      "sensitive": true
+    }
+  }
+}

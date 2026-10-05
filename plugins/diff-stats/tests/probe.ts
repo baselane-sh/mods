@@ -27,7 +27,44 @@ export const standIn = (on: OnFn): void => {
     const { Box, Text } = $.ui.resolve(e)
     return h(Box, { key: ENGINE_KEY }, h(Text, null, e.props.text)) as RenderElement
   })
+  // A result block draws what its props carry: a Bash record's stdout, a
+  // string as it is, so a rewrite of the props shows in the drawing.
+  on('ui.render', { component: 'ToolResult' }, ($, e) => {
+    const { Box, Text } = $.ui.resolve(e)
+    const { output } = e.props
+    const shown = typeof output === 'string' ? output : typeof output === 'object' && output !== null && 'stdout' in output ? output.stdout : undefined
+    return h(Box, { key: ENGINE_KEY }, h(Text, null, typeof shown === 'string' ? shown : '(result)')) as RenderElement
+  })
+  // The engine answers the settings hooks' events once the plugin passes them on.
+  on('classic.PostToolUse', () => ({}))
+  on('classic.PostToolUseFailure', () => ({}))
 }
+
+// The engine reports a call that ran `ms` milliseconds, as a session does
+// once the tool returns (or failed, when `isFailed`).
+export const ran = async ($: Engine, tool_use_id: string, ms: number | undefined, isFailed = false): Promise<void> => {
+  const base = { tool_name: 'Bash', tool_input: { command: 'sleep 2' }, tool_use_id, ...(ms === undefined ? {} : { duration_ms: ms }) }
+  if (isFailed) await $.classic.PostToolUseFailure({ ...base, error: 'Exit code 1' })
+  else await $.classic.PostToolUse({ ...base, tool_response: { stdout: '', stderr: '', interrupted: false } })
+}
+
+export const toolResult = (
+  tool: string,
+  output: unknown,
+  extra: Partial<RenderPropsOf['ToolResult']> = {},
+): RenderPropsOf['ToolResult'] => ({
+  tool_use_id: 'toolu_01',
+  tool,
+  output,
+  isErrored: false,
+  ...extra,
+})
+
+export const mountToolResult = ($: Engine, surface: Surface, props: RenderPropsOf['ToolResult']) =>
+  $.ui.mount({ plugin: PLUGIN, surface, component: 'ToolResult', requestId: props.tool_use_id, props })
+
+// A finished Bash call's stored record.
+export const bashOutput = (stdout: string, stderr = '') => ({ stdout, stderr, interrupted: false })
 
 export const toolUse = (
   tool: string,

@@ -1,6 +1,6 @@
 {
   "name": "todo-pane",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A live side pane of the TODO, FIXME and HACK lines in tracked files (git grep), grouped by file and capped at 30. It refreshes after file edits while open. Open it with /todo-pane.",
   "author": {
     "name": "Baselane",

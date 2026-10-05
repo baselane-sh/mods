@@ -14,9 +14,11 @@ export const ageText = (ms: number): string => {
 }
 
 // The wall clock and how long the session has run. Both come from the clock at
-// each drawing, so no timer runs: the figures move whenever the screen redraws.
+// each drawing. The band redraws only when something it reads changes, so the
+// engine redraws it on each minute while the clock shows.
 export const rule: BandRule = {
   id: 'session-clock',
+  everyMinute: reading => reading.startedAt !== undefined,
   segment: ({ reading, now }) =>
     reading.startedAt === undefined
       ? undefined

@@ -6,12 +6,19 @@ export type PushTools = {
   post: (url: string, headers: Record<string, string>, body: string) => Promise<void>
 }
 
+export type RunTools = {
+  run: (argv: readonly string[]) => Promise<ProcessRunResult>
+}
+
+export type NotifyTools = PushTools & RunTools
+
 export type ToolTools = PushTools & {
   cwd: () => Promise<string>
+  root: () => Promise<string>
   exists: (path: string) => Promise<boolean>
   read: (path: string) => Promise<string>
   list: (path: string) => Promise<readonly string[]>
-  run: (argv: readonly string[]) => Promise<ProcessRunResult>
+  run: (argv: readonly string[], cwd?: string) => Promise<ProcessRunResult>
 }
 
 export type JournalTools = {
@@ -23,21 +30,27 @@ export type JournalTools = {
 }
 
 // The plugin's userConfig values, checked.
-export type Settings = { ntfyTopic: string; longRunSecs: number }
+export type Settings = { ntfyTopic: string; longRunSecs: number; slackWebhookUrl: string; discordWebhookUrl: string }
 
 export const DEFAULT_LONG_RUN_SECS = 60
 
+const text = (value: unknown): string => (typeof value === 'string' ? value.trim() : '')
+
 export const settingsFrom = (options: PluginOptions): Settings => {
-  const topic = options['ntfyTopic']
   const secs = options['longRunSecs']
   return {
-    ntfyTopic: typeof topic === 'string' ? topic.trim() : '',
+    ntfyTopic: text(options['ntfyTopic']),
     longRunSecs: typeof secs === 'number' && Number.isFinite(secs) && secs > 0 ? secs : DEFAULT_LONG_RUN_SECS,
+    slackWebhookUrl: text(options['slackWebhookUrl']),
+    discordWebhookUrl: text(options['discordWebhookUrl']),
   }
 }
 
 // A finished tool call, as the rules after a tool see it.
 export type ToolRun = { e: ToolCallEnvelope; elapsedMs: number }
+
+// A finished main-loop turn, as the rules at a turn's end see it.
+export type TurnEnd = { cwd: string; durationMs: number; isAborted: boolean }
 
 // One lifecycle rule. Each member is optional: a rule names what it does at
 // the moments it cares about. `afterTool` may return a note the model reads
@@ -45,11 +58,17 @@ export type ToolRun = { e: ToolCallEnvelope; elapsedMs: number }
 export type LifecycleRule = {
   id: string
   afterTool?: (run: ToolRun, tools: ToolTools, settings: Settings) => Promise<string | undefined>
-  onNeedsInput?: (e: { cwd: string }, tools: PushTools, settings: Settings) => Promise<void>
+  onNeedsInput?: (e: { cwd: string }, tools: NotifyTools, settings: Settings) => Promise<void>
+  onTurnEnd?: (e: TurnEnd, tools: RunTools, settings: Settings) => Promise<void>
   onSessionEnd?: (e: { cwd: string; reason: string }, tools: JournalTools, settings: Settings) => Promise<void>
 }
 
 const PUSH_TIMEOUT_MS = 5000
+// The Notification types that wait for the person. Others (auth_success and
+// the like) need no input, so they send nothing.
+const NEEDS_INPUT = new Set(['permission_prompt', 'idle_prompt', 'elicitation_dialog'])
+// A desktop notification or a spoken line must not hold up the session long.
+const NOTIFY_TIMEOUT_MS = 10_000
 
 const failed = (id: string, error: unknown): string =>
   `${id}: skipped, ${error instanceof Error ? error.message : String(error)}`
@@ -84,10 +103,11 @@ export const registerLifecycle = (on: On, rules: readonly LifecycleRule[], optio
     on('tool.call', async ($, e, next) => {
       const tools: ToolTools = {
         cwd: () => $.session.cwd(),
+        root: () => $.session.root(),
         exists: path => $.fs.exists(path),
         read: path => $.fs.read(path),
         list: async path => (await $.fs.list(path)).map(entry => entry.name),
-        run: argv => $.process.run(argv, { timeoutMs: 30_000 }),
+        run: (argv, cwd) => $.process.run(argv, cwd === undefined ? { timeoutMs: 30_000 } : { cwd, timeoutMs: 30_000 }),
         post: (url, headers, body) =>
           push(
             () => $.http.fetch(url, { method: 'POST', headers, body }),
@@ -112,16 +132,31 @@ export const registerLifecycle = (on: On, rules: readonly LifecycleRule[], optio
 
   if (has(rule => rule.onNeedsInput)) {
     on('classic.Notification', async ($, e, next) => {
-      const tools: PushTools = {
+      if (!NEEDS_INPUT.has(e.notification_type)) return next(e)
+      const tools: NotifyTools = {
         post: (url, headers, body) =>
           push(
             () => $.http.fetch(url, { method: 'POST', headers, body }),
             ms => $.clock.sleep(ms),
           ),
+        run: argv => $.process.run(argv, { timeoutMs: NOTIFY_TIMEOUT_MS }),
       }
       const log = (text: string) => $.ui.log(text)
       for (const rule of rules) await guarded(rule.id, log, async () => rule.onNeedsInput?.(e, tools, settings))
       return next(e)
+    })
+  }
+
+  // A subagent's turn is not the person's turn. The answer is shown first.
+  if (has(rule => rule.onTurnEnd)) {
+    on('turn.complete', async ($, e, next) => {
+      const done = await next(e)
+      if (e.agentId !== undefined) return done
+      const tools: RunTools = { run: argv => $.process.run(argv, { timeoutMs: NOTIFY_TIMEOUT_MS }) }
+      const log = (text: string) => $.ui.log(text)
+      const end: TurnEnd = { cwd: await $.session.cwd(), durationMs: e.durationMs, isAborted: e.isAborted }
+      for (const rule of rules) await guarded(rule.id, log, async () => rule.onTurnEnd?.(end, tools, settings))
+      return done
     })
   }
 

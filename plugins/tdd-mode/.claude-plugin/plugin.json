@@ -1,6 +1,6 @@
 {
   "name": "tdd-mode",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Writes a failing test first, watches it fail, then implements.",
   "author": {
     "name": "Baselane",

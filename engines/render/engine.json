@@ -1,7 +1,8 @@
 {
-  "hooks": ["engine.ts", "diff.ts", "refs.ts"],
+  "hooks": ["engine.ts", "diff.ts", "refs.ts", "badge.ts", "output.ts", "urls.ts"],
   "tests": ["probe.ts"],
   "register": "registerRender",
   "ruleExport": "create",
+  "types": "types/index.d.ts",
   "nameToken": "render-mods"
 }

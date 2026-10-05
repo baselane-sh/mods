@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { On, Timer } from 'claude-code'
 
-import type { GitState, Outcome, Pomodoro, Tally } from '../types'
+import type { GitState, Outcome, Pomodoro, Reading, Tally } from '../types'
 import { ARGV, READ_TIMEOUT_MS, TOUCHING_TOOLS, refreshGit } from './git'
 import type { BandRule } from './rule'
 import { addCall } from './tally'
@@ -17,6 +17,10 @@ const git = atom({ plugin: 'model-badge', key: 'git' } as const, null as GitStat
 
 const failed = (where: string, error: unknown): string =>
   `band: ${where} skipped, ${error instanceof Error ? error.message : String(error)}`
+
+// Counts the git reads started, so only the newest one writes: a slow read
+// that started first never lands over a newer one. Not drawn state.
+let gitReads = 0
 
 // Watches each tool call for the rules that draw from how it ended: the recent
 // outcomes, the tally of the session, the repository. The result is passed on
@@ -36,16 +40,58 @@ export const watchCalls = (on: On, rules: readonly BandRule[]): void => {
     } catch (error) {
       await $.ui.log(failed('outcomes', error))
     }
-    // A denied call changed nothing.
+    // A denied call changed nothing. Not awaited: the tool's result does not
+    // wait on git, and refreshGit logs its own failures.
     if (isGit && ran.deny === undefined && TOUCHING_TOOLS.has(e.tool)) {
-      await refreshGit({
+      gitReads += 1
+      const id = gitReads
+      void refreshGit({
         run: () => $.process.run(ARGV, { timeoutMs: READ_TIMEOUT_MS }),
-        set: state => update($, git, () => state),
+        set: state => (id === gitReads ? update($, git, () => state) : undefined),
         log: text => $.ui.log(text),
       })
     }
     return ran
   })
+}
+
+const MINUTE_MS = 60_000
+
+// The minute tick, a handle like `running` below. A hot reload cancels it and
+// the next turn end starts it again.
+let minuteTick: Timer | undefined
+
+// The clock as closures over `$.clock`, and `tick`, which redraws the band.
+export type MinuteDeps = {
+  now: () => Promise<number>
+  after: (ms: number, fn: () => void) => Timer
+  every: (ms: number, fn: () => void) => Timer
+  tick: () => Promise<void>
+}
+
+export const stopMinuteTick = (): void => {
+  minuteTick?.cancel()
+  minuteTick = undefined
+}
+
+// Ticks on each minute while some rule wants it for `reading`, and stops once
+// none does. The first tick waits for the next whole minute, so a clock drawn
+// as HH:MM turns over when the minute does.
+export const syncMinuteTick = async (rules: readonly BandRule[], reading: Reading, deps: MinuteDeps): Promise<void> => {
+  if (!rules.some(rule => rule.everyMinute?.(reading) === true)) return stopMinuteTick()
+  const now = await deps.now()
+  if (minuteTick !== undefined) return
+  let every: Timer | undefined
+  const first = deps.after(MINUTE_MS - (now % MINUTE_MS), () => {
+    void deps.tick()
+    every = deps.every(MINUTE_MS, () => void deps.tick())
+  })
+  minuteTick = {
+    cancel: () => {
+      first.cancel()
+      every?.cancel()
+    },
+  }
 }
 
 // The running intervals, by command name. A handle is not drawn state, so it

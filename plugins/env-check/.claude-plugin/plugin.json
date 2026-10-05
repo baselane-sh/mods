@@ -1,0 +1,11 @@
+{
+  "name": "env-check",
+  "version": "0.3.0",
+  "description": "Adds /env-check: variable names in .env.example against .env, listing missing and extra names. Reads names only, never a value. Read-only.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

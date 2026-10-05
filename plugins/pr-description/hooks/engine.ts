@@ -24,6 +24,9 @@ export type CommandTools = {
   // 4 MiB cap, or a git that times out, throws.
   git: (...args: string[]) => Promise<string | undefined>
   exists: (path: string) => Promise<boolean>
+  // The text of a file (a relative path is under the cwd), or undefined when it
+  // is missing, unreadable or over the host's 4 MiB cap.
+  read: (path: string) => Promise<string | undefined>
   // Creates the file and its directories.
   write: (path: string, text: string) => Promise<void>
 }
@@ -103,6 +106,7 @@ export const registerCommands = (on: On, rules: readonly CommandRule[]): void =>
           return ran.exitCode === 0 ? ran.stdout : undefined
         },
         exists: path => $.fs.exists(path),
+        read: path => attempt(() => $.fs.read(path)),
         write: (path, text) => $.fs.write(path, text),
       }
 

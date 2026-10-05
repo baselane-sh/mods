@@ -1,7 +1,7 @@
 {
   "name": "sports-narrator",
-  "version": "0.2.0",
-  "description": "At turn end, one line of sports play-by-play about what Claude just did. OFF by default: it spends tokens (one small haiku call per turn that used tools), so turn it on with the enabled option in the plugin config. It sends tool names and file names, never commands' arguments or file contents.",
+  "version": "0.3.0",
+  "description": "One line of sports play-by-play at turn end. OFF by default: one haiku call per turn with tools. Turn on the enabled option. Sends tool names, file names and the first two words of each command.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

@@ -1,6 +1,6 @@
 {
   "name": "long-run-notify",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Sends a phone push through ntfy.sh when a Bash command ran longer than a threshold (60 seconds by default). Sends the project name and the seconds only. Does nothing until you set an ntfy topic.",
   "author": {
     "name": "Baselane",

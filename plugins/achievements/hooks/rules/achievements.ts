@@ -27,7 +27,10 @@ export const BADGES: readonly Badge[] = [
     id: 'marathon',
     name: 'Marathon',
     hint: 'a session over 2 hours',
-    earned: ctx => ctx.event === 'turn' && ctx.startedAt !== undefined && ctx.now - ctx.startedAt > TWO_HOURS_MS,
+    earned: ctx => {
+      const since = ctx.runStartedAt ?? ctx.startedAt
+      return ctx.event === 'turn' && since !== undefined && ctx.now - since > TWO_HOURS_MS
+    },
   },
   { id: 'night-owl', name: 'Night owl', hint: 'a turn from 00:00 to 04:00', earned: ctx => ctx.event === 'turn' && new Date(ctx.now).getHours() < NIGHT_END_HOUR },
 ]

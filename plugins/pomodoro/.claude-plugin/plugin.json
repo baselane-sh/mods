@@ -1,6 +1,6 @@
 {
   "name": "pomodoro",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A band above the prompt with a 25/5 focus timer (focus 18:42, break 03:10). Start and stop it with /pomodoro; a toast marks each switch.",
   "author": {
     "name": "Baselane",

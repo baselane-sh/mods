@@ -1,0 +1,10 @@
+{
+  "name": "notify-pack",
+  "version": "0.3.0",
+  "description": "Local alerts in one: a desktop notification when Claude Code needs your input, and a spoken line on macOS when a long turn ends.",
+  "author": {
+    "name": "Baselane",
+    "url": "https://baselane.sh"
+  },
+  "license": "MIT"
+}

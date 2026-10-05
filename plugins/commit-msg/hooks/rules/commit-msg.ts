@@ -21,7 +21,7 @@ const parse = (row: string): Change | undefined => {
 
 const kindOf = (path: string): Kind => {
   if (/(^|\/)(\.github|\.circleci)\//.test(path) || /(^|\/)(\.gitlab-ci\.yml|Jenkinsfile)$/.test(path)) return 'ci'
-  if (/\.(md|mdx|rst|txt)$/i.test(path) || /^docs\//.test(path) || /(^|\/)LICENSE/.test(path)) return 'docs'
+  if ((/\.(md|mdx|rst|txt)$/i.test(path) && !MANIFEST.test(path)) || /^docs\//.test(path) || /(^|\/)LICENSE/.test(path)) return 'docs'
   if (/(^|\/)(tests?|__tests__|spec)\//.test(path) || /\.(test|spec)\.[^/]+$/.test(path)) return 'test'
   if (LOCKFILE.test(path) || MANIFEST.test(path)) return 'build'
   if (/(^|\/)\.[^/]+$/.test(path)) return 'chore'

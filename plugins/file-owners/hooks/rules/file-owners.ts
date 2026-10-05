@@ -1,5 +1,5 @@
 import type { CommandRule, CommandTools, Composed } from '../engine'
-import { count, finish, isRepo, lines, message, notARepo } from '../helpers'
+import { count, finish, isRepo, message, notARepo } from '../helpers'
 
 const TOP = 5
 // A folder is read file by file; past this the answer says it sampled.
@@ -29,8 +29,9 @@ const compose = async (_record: unknown, _facts: unknown, tools: CommandTools, a
   if (path === '') return message('Usage: /owners <path>  (a file or a folder in this repo)')
   if (!(await isRepo(tools))) return notARepo(await tools.cwd())
 
-  // After `--` a path is never read as an option.
-  const files = lines(await tools.git('ls-files', '--', path))
+  // After `--` a path is never read as an option. -z: a non-ASCII name comes
+  // as it is, not C-quoted, so blame finds the file.
+  const files = ((await tools.git('ls-files', '-z', '--', path)) ?? '').split('\0').filter(file => file !== '')
   if (files.length === 0) return message(`No tracked file or folder matches: ${path}`)
 
   const sampled = files.slice(0, MAX_FILES)

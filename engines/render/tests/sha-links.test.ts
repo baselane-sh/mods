@@ -192,3 +192,16 @@ test('sha-links: other commands, a running call and a row with no SHA keep the e
     await ui.unmount()
   }
 })
+
+test('sha-links: blob ids on the index line of a diff are not linked as commits', async ($, on) => {
+  standIn(on)
+  repository(on, GITHUB)
+  const show = [`commit ${FULL}`, 'Author: A <a@b.c>', '', 'diff --git a/x.ts b/x.ts', 'index 3b18e51..a9c8f2d 100644', 'index 3b18e51,a9c8f2d..4c5d6e7f', '--- a/x.ts'].join('\n')
+  const ui = await mountToolUse($, 'terminal', toolUse('Bash', { command: 'git show HEAD' }, { output: bashOutput(show) }))
+  const links = await ui.findAll({ type: 'Link' })
+  expect(links.map(link => link.props.href)).toEqual([`https://github.com/baselane/mods/commit/${FULL}`])
+  await ui.unmount()
+  const diff = await mountToolUse($, 'terminal', toolUse('Bash', { command: 'git diff' }, { output: bashOutput('index 3b18e51..a9c8f2d 100644\n') }))
+  expect(rootProps(await diff.drawn()).key).toBe(ENGINE_KEY)
+  await diff.unmount()
+})

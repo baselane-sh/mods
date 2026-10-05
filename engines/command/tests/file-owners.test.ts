@@ -3,7 +3,8 @@ import { expect, test } from 'claude-code/testing'
 import { FAKE, IN_REPO } from './fixtures'
 import { probe } from './probe'
 
-const LS = (path: string) => `ls-files -- ${path}`
+// -z: each path ends with a NUL and is never C-quoted.
+const LS = (path: string) => `ls-files -z -- ${path}`
 const BLAME = (file: string) => `blame --line-porcelain -- ${file}`
 
 // Two source lines per name: porcelain repeats the author header for every line.
@@ -13,7 +14,7 @@ const blame = (...authors: string[]) =>
 const repo = (files: Record<string, string>, path: string) => ({
   git: {
     ...IN_REPO,
-    [LS(path)]: Object.keys(files).join('\n') + '\n',
+    [LS(path)]: Object.keys(files).join('\0') + '\0',
     ...Object.fromEntries(Object.entries(files).map(([file, out]) => [BLAME(file), out])),
   },
 })
@@ -58,7 +59,7 @@ test('owners: uncommitted lines are not attributed to anyone', async ($, on) => 
 test('owners: a quoted path and a path starting with a dash are read as a path', async ($, on) => {
   const session = probe($, on, repo({ '-odd.ts': blame('Ada') }, '-odd.ts'))
   expect(await session.run('owners', '"-odd.ts"')).toContain('1 line  Ada')
-  expect(session.ran()).toContain('git -C /repo ls-files -- -odd.ts')
+  expect(session.ran()).toContain('git -C /repo ls-files -z -- -odd.ts')
 })
 
 test('owners: no argument shows usage and copies nothing', async ($, on) => {
@@ -105,4 +106,10 @@ test('owners: no credential reaches the text, and it only reads', async ($, on) 
   expect(text + session.copied().join('')).not.toContain(FAKE.github)
   expect(text).not.toContain('—')
   expect(session.written()).toEqual({})
+})
+
+test('owners: a file with a non-ASCII name is blamed by its real name', async ($, on) => {
+  const session = probe($, on, repo({ 'docs/café.txt': blame('Ada', 'Grace', 'Ada') }, 'docs'))
+  const text = await session.run('owners', 'docs')
+  expect(text.startsWith(['Top authors of docs by lines (3 lines in 1 file)', '', '2 lines  Ada', '1 line  Grace'].join('\n'))).toBe(true)
 })

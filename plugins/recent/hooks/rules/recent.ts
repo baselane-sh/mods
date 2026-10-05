@@ -10,12 +10,17 @@ const row = (line: string): string => {
   return `${date}  ${hash}  ${ref.replace(/^refs\/heads\//, '')}  ${subject.join('\t')}`.trimEnd()
 }
 
+// The name as a basic regular expression that matches only itself.
+const asText = (name: string): string => name.replace(/[\\.[\]*^$]/g, '\\$&')
+
 const compose = async (_record: unknown, _facts: unknown, tools: CommandTools): Promise<Composed> => {
   if (!(await isRepo(tools))) return notARepo(await tools.cwd())
   const name = ((await tools.git('config', 'user.name')) ?? '').trim()
   if (name === '') return message('git user.name is not set, so there is no author to match.')
-  // -F: a name such as "J. (Dev)" is text, not a pattern.
-  const log = await tools.git('log', '--branches', '--source', '-F', `--author=${name}`, '-n', String(LIMIT), '--format=%as%x09%h%x09%S%x09%s')
+  // git matches --author anywhere in "Name <email>": anchored on both sides,
+  // "Sam" never matches "Samantha Lee". --basic-regexp overrides the person's
+  // grep.patternType, so the escaping holds.
+  const log = await tools.git('log', '--branches', '--source', '--basic-regexp', `--author=^${asText(name)} <`, '-n', String(LIMIT), '--format=%as%x09%h%x09%S%x09%s')
   // An empty repo has no branch to walk, so git exits non-zero.
   if (log === undefined) return message('No commits yet.')
   const found = lines(log)

@@ -23,8 +23,12 @@ const again = new Set<string>()
 
 const isAsked = (fetch: Fetcher, why: FetchWhy): boolean => (why === 'edit' ? fetch.onEdit === true : fetch.everyMs !== undefined)
 
+// A rate equal to the minute tick would skip every other tick when the last
+// run started a few ms after its own: a run this close to its rate is due.
+const RATE_SLACK_MS = 1000
+
 const isTooSoon = (fetch: Fetcher, last: number | undefined, now: number): boolean =>
-  last !== undefined && fetch.everyMs !== undefined && now - last < fetch.everyMs
+  last !== undefined && fetch.everyMs !== undefined && now - last < fetch.everyMs - RATE_SLACK_MS
 
 const runOne = async (id: string, fetch: Fetcher, why: FetchWhy, deps: FetchDeps): Promise<void> => {
   if (!isAsked(fetch, why)) return
@@ -33,14 +37,16 @@ const runOne = async (id: string, fetch: Fetcher, why: FetchWhy, deps: FetchDeps
     if (why === 'edit') again.add(id)
     return
   }
-  const last = startedAt.get(id)
-  if (why === 'time') {
-    if (isTooSoon(fetch, last, await deps.now())) return
-    // Set before the run starts, so two triggers at once start one run.
-    startedAt.set(id, await deps.now())
-  }
+  // Marked running before the first await, so two triggers at once start one
+  // run; the finally clears it, and runs an edit that came meanwhile.
   running.add(id)
+  const last = startedAt.get(id)
   try {
+    if (why === 'time') {
+      const now = await deps.now()
+      if (isTooSoon(fetch, last, now)) return
+      startedAt.set(id, now)
+    }
     const value = await fetch.read(argv => deps.run(argv, fetch.timeoutMs), await deps.git())
     if (value === undefined) {
       // Nothing to ask yet: the run does not count against the rate.

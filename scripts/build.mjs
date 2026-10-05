@@ -47,7 +47,9 @@ const write = (path, text) => {
 //               { perRule: true, hosts: [...] } (rules exported as values
 //               only): each rule gets its own smallest host, called with
 //               the rules that chose it; every rule needs one, so the
-//               group has a host with empty `gives`.
+//               group has a host with empty `gives`. `core: true` passes
+//               what the engine's `register` returned as the last argument
+//               (state its hooks and the host's share, such as timers).
 //   ruleExport  "rule" (a module exports a value) or "create" (a factory,
 //               called once per load, for rules that keep session state)
 //   options     optional. true passes the plugin's userConfig values to
@@ -141,18 +143,22 @@ const registerSource = (engine, mod, picks) => {
     return [...head, `export const register: Register = ${call}`, ''].join('\n')
   }
   const usesOptions = takesOptions || picks.some(({ host }) => host.options === true)
-  const calls = [
-    ...(engine.register === undefined ? [] : [{ name: engine.register, options: takesOptions, args: 'rules' }]),
-    ...picks.map(({ host, rules: some }) => ({
-      name: host.export,
-      options: host.options === true,
-      args: some === undefined ? 'rules' : `[${some.map(camel).join(', ')}]`,
-    })),
-  ].map(({ name, options, args }) => `  ${name}(on, ${args}${options ? ', options' : ''})`)
+  const usesCore = picks.some(({ host }) => host.core === true)
+  if (usesCore && engine.register === undefined) throw new Error(`${mod.name}: a host asks for core, but the engine has no register`)
+  const withOptions = (args, options) => `${args}${options ? ', options' : ''}`
+  const core =
+    engine.register === undefined
+      ? []
+      : [`  ${usesCore ? 'const core = ' : ''}${engine.register}(on, ${withOptions('rules', takesOptions)})`]
+  const calls = picks.map(({ host, rules: some }) => {
+    const args = some === undefined ? 'rules' : `[${some.map(camel).join(', ')}]`
+    return `  ${host.export}(on, ${withOptions(args, host.options === true)}${host.core === true ? ', core' : ''})`
+  })
   return [
     ...head,
     `export const register: Register = ${usesOptions ? '(on, options)' : 'on'} => {`,
     `  const rules = ${list}`,
+    ...core,
     ...calls,
     '}',
     '',

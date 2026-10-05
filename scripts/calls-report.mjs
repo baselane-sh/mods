@@ -41,6 +41,8 @@ const field = (output, name) => {
     .map(line => line.match(pattern)?.[1])
     .filter(found => found !== undefined)
     .flatMap(splitTop)
+    // `$.a.b (via helper)`: a call made in a same-file helper is still the call.
+    .map(item => item.replace(/ \(via [^)]*\)$/, ''))
     .filter(item => item !== '' && item !== 'nothing')
   return [...new Set(values)].sort()
 }

@@ -1,5 +1,5 @@
-import { atom, read, update } from 'claude-code'
-import type { On, ProcessRunResult } from 'claude-code'
+import { atom, update } from 'claude-code'
+import type { On, ProcessRunResult, SessionUsage, UiCopyResult } from 'claude-code'
 
 import type { CommandRecord } from '../types'
 import { draw } from './render'
@@ -56,7 +56,7 @@ export type CommandRule = {
   compose: (record: CommandRecord, facts: Facts, tools: CommandTools, args: string) => Composed | Promise<Composed>
 }
 
-const GIT_TIMEOUT_MS = 15_000
+export const GIT_TIMEOUT_MS = 15_000
 
 // A state value is written only by the plugin that owns it, and the owner is
 // the mod's name. The host wants the owner as a literal, so this source writes
@@ -64,7 +64,7 @@ const GIT_TIMEOUT_MS = 15_000
 // (engine.json, stateOwner). The same swap runs in types/index.d.ts.
 const record = atom({ plugin: 'hotspots', key: 'record' } as const, EMPTY)
 
-const attempt = async <T>(read: () => Promise<T>): Promise<T | undefined> => {
+export const attempt = async <T>(read: () => Promise<T>): Promise<T | undefined> => {
   try {
     return await read()
   } catch {
@@ -72,11 +72,11 @@ const attempt = async <T>(read: () => Promise<T>): Promise<T | undefined> => {
   }
 }
 
-// Takes a closure over `$.process.run`, never `$` itself. The host rejects both
+// Takes a closure that starts the program, never `$` itself. The host rejects both
 // for a program that cannot start and for one still running at the timeout, and
 // the message does not say which, so a rejection that took nearly the whole
 // timeout counts as a timeout.
-const exec = async (start: () => Promise<ProcessRunResult>, timeoutMs: number, now: () => Promise<number>): Promise<Ran> => {
+export const exec = async (start: () => Promise<ProcessRunResult>, timeoutMs: number, now: () => Promise<number>): Promise<Ran> => {
   const began = await now()
   try {
     const ran = await start()
@@ -88,6 +88,63 @@ const exec = async (start: () => Promise<ProcessRunResult>, timeoutMs: number, n
   }
 }
 
+// The tools a host does not give. A rule that calls one fails with a message,
+// and its tests fail: name what it uses in engine.json `needs`.
+const absent = (name: string) => (): Promise<never> =>
+  Promise.reject(new Error(`${name} is not given to this mod; name it in engine.json needs`))
+
+export const NO_TOOLS: CommandTools = {
+  cwd: absent('cwd'),
+  git: absent('git'),
+  exists: absent('exists'),
+  read: absent('read'),
+  write: absent('write'),
+  gitRun: absent('gitRun'),
+  run: absent('run'),
+  list: absent('list'),
+}
+
+// What every command reads besides its tools, as closures over the hook's `$`.
+export type CommandReads = {
+  usage: () => Promise<SessionUsage>
+  turns: () => Promise<number>
+  now: () => Promise<number>
+  kept: () => Promise<CommandRecord>
+  copy: (text: string) => Promise<UiCopyResult>
+}
+
+// Answers one slash command: the rule composes its text from the record, the
+// facts and its tools, and a result is copied to the clipboard.
+export const answerCommand = async (rule: CommandRule, args: string, tools: CommandTools, reads: CommandReads): Promise<{ text: string }> => {
+  const usage = await attempt(reads.usage)
+  const turns = await attempt(reads.turns)
+  const now = await attempt(reads.now)
+  const kept = await attempt(reads.kept)
+
+  const facts: Facts = {
+    ...(turns === undefined ? {} : { turns }),
+    ...(usage === undefined || now === undefined ? {} : { elapsedMs: Math.max(0, now - usage.startedAt) }),
+    ...(usage?.context.percent === undefined ? {} : { contextPercent: usage.context.percent }),
+    ...(usage?.cost === undefined ? {} : { costUsd: usage.cost.usd }),
+  }
+
+  let composed: Composed
+  try {
+    composed = await rule.compose(kept ?? EMPTY, facts, tools, args.trim())
+  } catch (error) {
+    return { text: `${rule.name}: failed, ${error instanceof Error ? error.message : String(error)}` }
+  }
+
+  if (typeof composed !== 'string') return { text: composed.text }
+  const text = composed
+
+  const copy = await attempt(() => reads.copy(text))
+  const note = copy === undefined ? 'not copied (clipboard error)' : copy.isCopied ? 'copied to clipboard' : `not copied (${copy.reason})`
+  return { text: `${text}\n\n${note}` }
+}
+
+// The hooks every mod of the engine has. Each command's own answer is a host
+// (engine.json hosts), so a command gets only the tools its rule uses.
 export const registerCommands = (on: On, rules: readonly CommandRule[]): void => {
   // The one tracker every rule reads. It lives in `$.state`, so a hot reload
   // of the mod keeps the session so far.
@@ -112,62 +169,8 @@ export const registerCommands = (on: On, rules: readonly CommandRule[]): void =>
     return next(e)
   })
 
+  // A surface without Box or Text keeps the plain output row.
   for (const rule of rules) {
-    on('command.run', { command: rule.name }, async ($, event) => {
-      const usage = await attempt(() => $.session.usage())
-      const turns = await attempt(() => $.session.turns())
-      const now = await attempt(() => $.clock.now())
-      const kept = await attempt(() => read($, record))
-
-      const facts: Facts = {
-        ...(turns === undefined ? {} : { turns }),
-        ...(usage === undefined || now === undefined ? {} : { elapsedMs: Math.max(0, now - usage.startedAt) }),
-        ...(usage?.context.percent === undefined ? {} : { contextPercent: usage.context.percent }),
-        ...(usage?.cost === undefined ? {} : { costUsd: usage.cost.usd }),
-      }
-
-      const tools: CommandTools = {
-        cwd: () => $.session.cwd(),
-        git: async (...args) => {
-          const dir = await $.session.cwd()
-          const ran = await $.process.run(['git', '-C', dir, ...args], { cwd: dir, timeoutMs: GIT_TIMEOUT_MS })
-          if (ran.isStdoutTruncated) throw new Error(`git ${args[0]} output passed the 4 MiB cap`)
-          return ran.exitCode === 0 ? ran.stdout : undefined
-        },
-        exists: path => $.fs.exists(path),
-        read: path => attempt(() => $.fs.read(path)),
-        write: (path, text) => $.fs.write(path, text),
-        gitRun: async (...args) => {
-          const dir = await $.session.cwd()
-          return exec(() => $.process.run(['git', '-C', dir, ...args], { cwd: dir, timeoutMs: GIT_TIMEOUT_MS }), GIT_TIMEOUT_MS, () => $.clock.now())
-        },
-        run: async (argv, timeoutMs) => {
-          const dir = await $.session.cwd()
-          return exec(() => $.process.run(argv, { cwd: dir, timeoutMs }), timeoutMs, () => $.clock.now())
-        },
-        list: async path => {
-          const entries = await attempt(() => $.fs.list(path))
-          return entries?.map(entry => ({ name: entry.name, isDir: entry.kind === 'dir' }))
-        },
-      }
-
-      let composed: Composed
-      try {
-        composed = await rule.compose(kept ?? EMPTY, facts, tools, (event.args ?? '').trim())
-      } catch (error) {
-        return { text: `${rule.name}: failed, ${error instanceof Error ? error.message : String(error)}` }
-      }
-
-      if (typeof composed !== 'string') return { text: composed.text }
-      const text = composed
-
-      const copy = await attempt(() => $.ui.copy({ text }))
-      const note =
-        copy === undefined ? 'not copied (clipboard error)' : copy.isCopied ? 'copied to clipboard' : `not copied (${copy.reason})`
-      return { text: `${text}\n\n${note}` }
-    })
-
-    // A surface without Box or Text keeps the plain output row.
     on('ui.render', { component: 'CommandOutput', props: { command: rule.name } }, ($, e, next) => {
       const { Box, Text } = $.ui.resolve(e)
       return Box === undefined || Text === undefined ? next(e) : draw({ Box, Text }, e.props.text)

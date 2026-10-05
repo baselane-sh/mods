@@ -29,6 +29,8 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['git tag -d v0.9.0 && git push origin :v0.9.0', 'delete remote tag v0.9.0'],
   ['git tag -d v0.9.0 && git push --delete origin v0.9.0', 'delete remote tag v0.9.0'],
   ['git -C /repo push origin v1.2.0', 'push tag v1.2.0'],
+  ['git tag v3.1.0 && git push origin v3.1.0', 'push tag v3.1.0'],
+  ['git tag -a v3.1.0 -m rel && git push origin main v3.1.0', 'push tag v3.1.0'],
 ]
 const MISSES = [
   'git push',
@@ -52,9 +54,13 @@ test('tag-guard: command table', async () => {
   for (const command of MISSES) expect({ command, found: await tagDangersIn(command, isTag) }).toEqual({ command, found: [] })
 })
 
-test('tag-guard: a tag created in the same command counts once it exists', async () => {
-  const fresh = async (name: string) => name === 'v3.1.0'
-  expect(await tagDangersIn('git tag v3.1.0 && git push origin v3.1.0 main', fresh)).toEqual(['push tag v3.1.0'])
+test('tag-guard: a tag made earlier in the same command counts before it exists', async () => {
+  expect(await tagDangersIn('git tag v3.1.0 && git push origin v3.1.0 main', noTags)).toEqual(['push tag v3.1.0'])
+  expect(await tagDangersIn('git tag -m "rel" -a v3.1.0 HEAD~1 && git push origin v3.1.0', noTags)).toEqual(['push tag v3.1.0'])
+  expect(await tagDangersIn('git tag -f v3.1.0 && git push -f origin v3.1.0', noTags)).toEqual(['push tag v3.1.0'])
+  expect(await tagDangersIn('git tag -am rel v3.1.0 && git ' + 'push origin v3.1.0', noTags)).toEqual(['push tag v3.1.0'])
+  expect(await tagDangersIn('git tag -l v3.1.0 && git push origin v3.1.0', noTags)).toEqual([])
+  expect(await tagDangersIn('git tag -m v3.1.0 rel && git push origin v3.1.0', noTags)).toEqual([])
 })
 
 test('tag-guard: a bare name is a branch when the repo has no such tag', async () => {

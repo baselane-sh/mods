@@ -27,6 +27,9 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['sls deploy -s production', 'serverless deploy --stage prod'],
   ['npx serverless deploy --stage=prod', 'serverless deploy --stage prod'],
   ['npm run build && vercel --prod', 'vercel --prod'],
+  ['npx vercel@latest --prod', 'vercel --prod'],
+  ['npx netlify-cli deploy --prod', 'netlify deploy --prod'],
+  ['netlify deploy -p', 'netlify deploy --prod'],
 ]
 const MISSES = [
   'vercel',

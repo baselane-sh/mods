@@ -2,10 +2,12 @@ import type { GuardRule, GuardTools } from '../engine'
 import { base, commandsOf } from '../shell'
 
 // SSH keys and the files that grant SSH access. Asks when a command reads a
-// private key (id_* in a .ssh folder, not .pub), when anything changes
-// authorized_keys or the SSH config, and when ssh-keygen would write over a
-// key that exists. Using a key (ssh -i, ssh-add, chmod) passes, and so do
-// public keys and reads of the config. secret-filename-guard asks on any
+// private key (any file in a .ssh folder but .pub files, config,
+// known_hosts and the other public ones; a glob such as ~/.ssh/* counts),
+// when a copy or archive takes the whole .ssh folder, when anything changes
+// or moves authorized_keys or the SSH config, and when ssh-keygen would write
+// over a key that exists. Using a key (ssh -i, ssh-add, chmod) passes, and so
+// do public keys and reads of the config. secret-filename-guard asks on any
 // command naming id_rsa, .pub included; this rule is the precise one and
 // also covers the file tools.
 const KEY_USERS = new Set(['ssh', 'ssh-add', 'ssh-copy-id', 'ssh-keygen', 'chmod', 'chown', 'ls', 'stat', 'test', '[', 'file', 'echo', 'printf'])
@@ -13,10 +15,16 @@ const IDENTITY_TAKERS = new Set(['scp', 'sftp'])
 const COPIES = new Set(['cp', 'mv', 'install', 'ln', 'rsync', 'ditto'])
 const IN_PLACE = new Set(['sed', 'gsed', 'perl'])
 const REMOVES = new Set(['rm', 'unlink', 'shred', 'truncate'])
+const FOLDER_COPIES = new Set(['cp', 'mv', 'rsync', 'scp', 'ditto', 'tar', 'gtar', 'bsdtar', 'zip', '7z', 'rclone'])
+const PUBLIC_NAMES = /^(authorized_keys2?|config|known_hosts2?(\.old)?|environment|rc|allowed_signers)$/
 const REDIRECT = /^(\d*|&)(>>?|<)\|?$/
 const ATTACHED = /^(\d*|&)(>>?|<)\|?(.+)$/
 
-export const isPrivateKey = (path: string): boolean => !/\s/.test(path) && /(^|\/)\.ssh\/id_[^/]*$/.test(path) && !path.endsWith('.pub')
+export const isPrivateKey = (path: string): boolean => {
+  const name = /(^|\/)\.ssh\/([^/]+)$/.exec(path)?.[2]
+  return !/\s/.test(path) && name !== undefined && !PUBLIC_NAMES.test(name) && !name.endsWith('.pub')
+}
+const isKeyFolder = (path: string): boolean => /(^|\/)\.ssh\/?$/.test(path)
 export const isAccessFile = (path: string): boolean => /(^|\/)\.ssh\/(authorized_keys2?|config)$/.test(path)
 
 // A word of a command: an argument, or the file a redirect reads or writes.
@@ -33,6 +41,7 @@ const wordsOf = (args: readonly string[]): readonly Word[] =>
   })
 
 const keyDanger = (name: string, word: Word): string | undefined => {
+  if (word.via === 'arg' && FOLDER_COPIES.has(name) && isKeyFolder(word.path)) return `copy key folder ${word.path}`
   if (!isPrivateKey(word.path)) return undefined
   if (word.via === 'out' || REMOVES.has(name)) return `change private key ${word.path}`
   const isUse = word.via === 'arg' && (KEY_USERS.has(name) || (IDENTITY_TAKERS.has(name) && word.afterIdentity))
@@ -43,7 +52,7 @@ const accessDanger = (name: string, args: readonly string[], word: Word, last: s
   if (!isAccessFile(word.path)) return undefined
   const inPlace = IN_PLACE.has(name) && args.some(arg => arg.startsWith('--in-place') || /^-[a-zA-Z]*i/.test(arg))
   const writes =
-    word.via === 'out' || name === 'tee' || name === 'dd' || REMOVES.has(name) || inPlace || (COPIES.has(name) && word.path === last)
+    word.via === 'out' || name === 'tee' || name === 'dd' || name === 'mv' || REMOVES.has(name) || inPlace || (COPIES.has(name) && word.path === last)
   return writes ? `change ${word.path}` : undefined
 }
 

@@ -8,11 +8,16 @@ const LAUNCHCTL_VERBS = new Set(['unload', 'remove', 'bootout', 'disable'])
 const SYSTEMCTL_VERBS = new Set(['stop', 'disable', 'mask'])
 const SYSTEMCTL_VALUE_FLAGS = new Set(['-H', '--host', '-M', '--machine', '-t', '--type', '--state', '-p', '--property', '--root', '-o', '--output', '-n', '--lines', '-s', '--signal', '--job-mode', '--kill-whom'])
 
+const OUTPUT_REDIRECT = /^(\d*|&)>/
+const BARE_OUTPUT_REDIRECT = /^(\d*|&)>>?\|?$/
+
 // `crontab -r` removes every job; `crontab -` and `crontab <file>` replace
-// the whole table with what they read.
+// the whole table with what they read. Output redirects (`2>/dev/null`,
+// `> cron.bak`) name no table.
 const crontabDanger = (args: readonly string[]): string | undefined => {
   if (args.some(arg => hasShortFlag(arg, 'r'))) return 'crontab -r'
-  const rest = args.filter((arg, i) => arg === '-' || (!arg.startsWith('-') && args[i - 1] !== '-u'))
+  const words = args.filter((arg, i) => !OUTPUT_REDIRECT.test(arg) && !BARE_OUTPUT_REDIRECT.test(args[i - 1] ?? ''))
+  const rest = words.filter((arg, i) => arg === '-' || (!arg.startsWith('-') && words[i - 1] !== '-u'))
   if (rest.includes('-')) return 'crontab -'
   return rest.length > 0 ? 'crontab <file>' : undefined
 }

@@ -15,6 +15,9 @@ const PYTHON = /^python[0-9.]*$/
 const RAILS_TASKS = new Set(['db:drop', 'db:drop:all', 'db:reset', 'db:migrate:reset', 'db:purge', 'db:purge:all', 'db:truncate_all'])
 const VALUE_FLAGS = new Set(['-c', '--config', '-n', '--name', '-x', '--workdir', '--profile', '--knexfile', '--env', '--cwd', '--client', '--connection', '--migrations-directory'])
 
+// `vercel@latest` and `@scope/cli@2` name the package without the version.
+const withoutVersion = (spec: string): string => spec.replace(/^(@[^/@]+\/[^@]+|[^@]+)@.*$/, '$1')
+
 // `npx prisma`, `pnpm prisma`, `bundle exec rails` and `python -m django`
 // read as the tool itself.
 const withoutRunner = (argv: readonly string[]): readonly string[] => {
@@ -25,7 +28,7 @@ const withoutRunner = (argv: readonly string[]): readonly string[] => {
   if (from === 0) return argv
   const rest = argv.slice(from)
   const start = rest.findIndex(word => !word.startsWith('-'))
-  return start < 0 ? [] : rest.slice(start)
+  return start < 0 ? [] : [withoutVersion(rest[start]!), ...rest.slice(start + 1)]
 }
 
 const dangerOf = (argv: readonly string[]): string | undefined => {
@@ -38,7 +41,7 @@ const dangerOf = (argv: readonly string[]): string | undefined => {
     return task === undefined ? undefined : `${name} ${task}`
   }
   if (name === 'alembic' && sub === 'downgrade') return args.includes('--sql') ? undefined : 'alembic downgrade'
-  const isManage = PYTHON.test(name) && argv[1] !== undefined && base(argv[1]) === 'manage.py' && argv[2] === 'flush'
+  const isManage = (PYTHON.test(name) && argv[1] !== undefined && base(argv[1]) === 'manage.py' && argv[2] === 'flush') || (name === 'manage.py' && argv[1] === 'flush')
   if (isManage || ((name === 'django-admin' || name === 'django') && sub === 'flush')) return 'django flush'
   if (name === 'supabase' && sub === 'db' && args[0] === 'reset') return 'supabase db reset'
   return name === 'knex' && sub === 'migrate:rollback' && args.includes('--all') ? 'knex migrate:rollback --all' : undefined

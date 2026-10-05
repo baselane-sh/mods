@@ -7,19 +7,32 @@ const DOCKER_VALUE_FLAGS = new Set(['-c', '--context', '-H', '--host', '-l', '--
 const GCLOUD_VALUE_FLAGS = new Set(['--project', '--account', '--configuration', '--impersonate-service-account', '--verbosity', '--format'])
 const LOCAL = /^(oci:\/\/)?(localhost|127\.[0-9.]+|\[::1\])([:/]|$)/
 
+// docker and podman push options whose value is the next word.
+const PUSH_VALUE_FLAGS = new Set(['--authfile', '--creds', '--format', '-f', '--sign-by', '--digestfile', '--cert-dir', '--platform'])
+// A build output that pushes: type=registry, or push=true on any type.
+const PUSHING_OUTPUT = /(^|,)(type=registry|push=true)(,|$)/
+
 const isLocal = (target: string | undefined): boolean => target !== undefined && LOCAL.test(target)
-const firstTarget = (args: readonly string[]): string | undefined => args.find(arg => !arg.startsWith('-'))
+// The destination: `podman push localhost/app docker://quay.io/app` pushes a
+// local image to quay.io, so the last name counts, not the first.
+const lastTarget = (args: readonly string[]): string | undefined =>
+  args.filter((arg, i) => !arg.startsWith('-') && !PUSH_VALUE_FLAGS.has(args[i - 1] ?? '')).at(-1)
+const outputsOf = (args: readonly string[]): readonly string[] =>
+  args.flatMap((arg, i) => {
+    if (arg === '-o' || arg === '--output') return args[i + 1] === undefined ? [] : [args[i + 1]!]
+    const attached = /^(-o=?|--output=)(.+)$/.exec(arg)
+    return attached === null ? [] : [attached[2]!]
+  })
 const pushesWithBuild = (args: readonly string[]): boolean =>
-  args.some(arg => arg === '--push' || arg === '--push=true' || /^(-o|--output)=?type=registry/.test(arg)) ||
-  args.some((arg, i) => (arg === '-o' || arg === '--output') && args[i + 1]?.startsWith('type=registry') === true)
+  args.some(arg => arg === '--push' || arg === '--push=true') || outputsOf(args).some(output => PUSHING_OUTPUT.test(output))
 
 // docker and podman share their verbs.
 const containerPush = (name: string, argv: readonly string[]): string | undefined => {
   const { sub, args } = subcommandOf(argv, DOCKER_VALUE_FLAGS)
   const [verb, ...rest] = args
-  if (sub === 'push') return isLocal(firstTarget(args)) ? undefined : `${name} push`
-  if (sub === 'image' && verb === 'push') return isLocal(firstTarget(rest)) ? undefined : `${name} push`
-  if (sub === 'manifest' && verb === 'push') return isLocal(firstTarget(rest)) ? undefined : `${name} manifest push`
+  if (sub === 'push') return isLocal(lastTarget(args)) ? undefined : `${name} push`
+  if (sub === 'image' && verb === 'push') return isLocal(lastTarget(rest)) ? undefined : `${name} push`
+  if (sub === 'manifest' && verb === 'push') return isLocal(lastTarget(rest)) ? undefined : `${name} manifest push`
   const builds = sub === 'build' || (sub === 'buildx' && (verb === 'build' || verb === 'bake'))
   return builds && pushesWithBuild(args) ? `${name} buildx --push` : undefined
 }

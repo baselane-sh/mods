@@ -1,6 +1,6 @@
 {
   "name": "debug-print-nudge",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "At turn end, one toast naming the count of console.log, print(, debugger and dbg! lines your edits added this turn. Only code files count.",
   "author": {
     "name": "Baselane",

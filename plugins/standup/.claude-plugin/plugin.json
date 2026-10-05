@@ -1,6 +1,6 @@
 {
   "name": "standup",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Adds /standup: Yesterday, Today and Blockers from your git log and this session's record, printed and copied.",
   "author": {
     "name": "Baselane",

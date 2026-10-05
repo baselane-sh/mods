@@ -1,6 +1,6 @@
 {
   "name": "cache-meter",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A band above the prompt with the share of prompt tokens the cache served this session (cache 87%). A high share means cheaper, faster turns.",
   "author": {
     "name": "Baselane",

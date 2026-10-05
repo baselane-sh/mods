@@ -1,6 +1,6 @@
 {
   "name": "langs",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Counts the file types Claude edits across sessions and adds /langs: a bar list of the types edited most, each file counted once per session.",
   "author": {
     "name": "Baselane",

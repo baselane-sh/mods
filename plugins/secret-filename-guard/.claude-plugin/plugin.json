@@ -1,6 +1,6 @@
 {
   "name": "secret-filename-guard",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Asks before a Bash command touches a secret-looking file (.env, private keys, credentials).",
   "author": {
     "name": "Baselane",

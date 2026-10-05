@@ -1,6 +1,6 @@
 {
   "name": "path-shorten",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Tool rows draw long absolute file paths shorter: the project root as ./ and your home folder as ~. Display only; Bash commands are drawn as they ran.",
   "author": {
     "name": "Baselane",

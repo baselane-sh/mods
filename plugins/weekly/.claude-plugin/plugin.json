@@ -1,6 +1,6 @@
 {
   "name": "weekly",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Adds /week: this week (since Monday) against last week, with sessions, turns, tool calls, files edited and cost, and the change for each.",
   "author": {
     "name": "Baselane",

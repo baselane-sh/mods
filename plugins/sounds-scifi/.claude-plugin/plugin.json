@@ -1,6 +1,6 @@
 {
   "name": "sounds-scifi",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Sci-fi console sounds: a beep when tests pass, an alarm when they fail, a warp when a turn ends.",
   "author": {
     "name": "Baselane",

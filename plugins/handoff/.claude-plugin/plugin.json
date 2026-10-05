@@ -1,6 +1,6 @@
 {
   "name": "handoff",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Adds /handoff: writes a session summary with the git status to .claude/handoff.md (never overwriting) and answers with the path.",
   "author": {
     "name": "Baselane",

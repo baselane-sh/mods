@@ -1,6 +1,6 @@
 {
   "name": "notify-pack",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Local alerts in one: a desktop notification when Claude Code needs your input (osascript or notify-send), and a spoken line (say) on macOS when a long turn ends.",
   "author": {
     "name": "Baselane",

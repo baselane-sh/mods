@@ -1,6 +1,6 @@
 {
   "name": "env-example-nudge",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "At turn end, one toast when edits add a reference to an environment variable (process.env, os.environ, os.getenv, Deno.env) that .env.example does not list. Reads only .env.example names, never .env.",
   "author": {
     "name": "Baselane",

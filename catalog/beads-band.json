@@ -1,0 +1,40 @@
+{
+  "engine": "band",
+  "mods": [
+    {
+      "name": "beads-band",
+      "description": "A band above the prompt with your beads counts (bd 97 ready · 45 active · 29 blocked), read with bd status every 2 minutes and after Bash calls. Hidden without bd or a beads project.",
+      "rules": ["beads-band"]
+    },
+    {
+      "name": "bead-now",
+      "description": "A band above the prompt with the bead in progress you updated last and how many more are in progress, read with bd list every 2 minutes and after Bash calls. Hidden when none is.",
+      "rules": ["bead-now"]
+    },
+    {
+      "name": "epic-bar",
+      "description": "A band above the prompt with the progress of the epic you work on, or of the open epic nearest to done (bm-ooq ███████░ 7/8), read with bd. Hidden without epics or bd.",
+      "rules": ["epic-bar"]
+    },
+    {
+      "name": "beads-done-bar",
+      "description": "A band above the prompt with how much of your beads project is closed, as a bar and a percent (beads █████████░ 88%), read with bd status every 2 minutes. Hidden without bd.",
+      "rules": ["beads-done-bar"]
+    },
+    {
+      "name": "beads-today-bar",
+      "description": "A band above the prompt with the beads closed today against a daily goal you set (today ▮▮▮▯▯ 3/5), green when met, read with bd count. Hidden without bd or a beads project.",
+      "rules": ["beads-today-bar"]
+    },
+    {
+      "name": "priority-bar",
+      "description": "A band above the prompt with your open beads by priority (P0 2 · P1 14 · P2 60 · P3 50), red while a P0 is open, read with bd count every 2 minutes. Hidden without bd.",
+      "rules": ["priority-bar"]
+    },
+    {
+      "name": "beads-bars",
+      "description": "All six beads bands in one row: counts, the bead in progress, epic progress, done percent, closed today and open by priority, read with bd every 2 minutes and after Bash calls.",
+      "rules": ["beads-band", "bead-now", "epic-bar", "beads-done-bar", "beads-today-bar", "priority-bar"]
+    }
+  ]
+}

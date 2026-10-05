@@ -10,6 +10,12 @@
     "branch-band": ["calls", "calls-run"],
     "ci-band": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
     "todo-count": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
+    "beads-band": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
+    "bead-now": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
+    "epic-bar": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
+    "beads-done-bar": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
+    "beads-today-bar": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
+    "priority-bar": ["calls", "calls-run", "start-fetch", "turn-run", "ticks"],
     "battery-band": ["start-fetch", "turn-run", "ticks"],
     "now-playing": ["start-fetch", "turn-run", "ticks"],
     "error-meter": ["calls"],
@@ -52,6 +58,16 @@
         "title": "Latte price",
         "description": "What one latte costs, in the currency of the session cost (US dollars). The latte meter divides the cost by it.",
         "default": 5.0
+      }
+    },
+    "beads-today-bar": {
+      "dailyGoal": {
+        "type": "number",
+        "title": "Daily bead goal",
+        "description": "How many beads you aim to close each day, 1 to 50. The today bar turns green when the beads closed today reach it.",
+        "default": 5,
+        "min": 1,
+        "max": 50
       }
     }
   }

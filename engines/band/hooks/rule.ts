@@ -97,7 +97,12 @@ export type Fetcher = {
   // `run` takes an argv (no shell). Answer what to draw, null to hide the
   // segment, or undefined to leave the last figure as it is and not count the
   // run (for a rule that has nothing to ask yet). A throw hides the segment.
-  read: (run: (argv: readonly string[]) => Promise<ProcessRunResult>, git: GitState | null) => Promise<Fetched | null | undefined>
+  // `now` is the clock at the run's start, in milliseconds.
+  read: (
+    run: (argv: readonly string[]) => Promise<ProcessRunResult>,
+    git: GitState | null,
+    now: number,
+  ) => Promise<Fetched | null | undefined>
 }
 
 // A timer the person starts and stops with `/<command.name>`. Pure, so a rule

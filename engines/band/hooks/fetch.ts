@@ -42,12 +42,12 @@ const runOne = async (id: string, fetch: Fetcher, why: FetchWhy, deps: FetchDeps
   running.add(id)
   const last = startedAt.get(id)
   try {
+    const now = await deps.now()
     if (why === 'time') {
-      const now = await deps.now()
       if (isTooSoon(fetch, last, now)) return
       startedAt.set(id, now)
     }
-    const value = await fetch.read(argv => deps.run(argv, fetch.timeoutMs), await deps.git())
+    const value = await fetch.read(argv => deps.run(argv, fetch.timeoutMs), await deps.git(), now)
     if (value === undefined) {
       // Nothing to ask yet: the run does not count against the rate.
       if (why === 'time') last === undefined ? startedAt.delete(id) : startedAt.set(id, last)

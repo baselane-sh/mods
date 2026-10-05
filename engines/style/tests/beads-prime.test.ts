@@ -11,7 +11,9 @@ type Answer = { exitCode: number; stdout: string } | 'missing'
 // Stands in for the host's process.run: records each argv and answers as told.
 const fakeBd = (on: OnFn, answer: Answer) => {
   let calls: (readonly string[])[] = []
+  on('session.cwd', () => ({ value: '/repo' }))
   on('process.run', (_$, e) => {
+    if (e.init?.cwd !== '/repo') throw new Error(`bd ran in ${e.init?.cwd ?? 'the process folder'}`)
     calls = [...calls, e.argv]
     if (answer === 'missing') throw new Error('spawn bd ENOENT')
     return { value: { ...answer, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }

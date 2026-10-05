@@ -20,7 +20,9 @@ export const addLiveSections = (on: On, rules: readonly StyleRule[]): void => {
       live.map(async rule => {
         try {
           const text = await rule.live?.(async argv => {
-            const done = await $.process.run(argv, { timeoutMs: RUN_TIMEOUT_MS })
+            // The session's folder, not the process's: bd finds .beads from there.
+            const cwd = await $.session.cwd()
+            const done = await $.process.run(argv, { cwd, timeoutMs: RUN_TIMEOUT_MS })
             return { exitCode: done.exitCode, stdout: done.stdout }
           })
           return text === undefined ? [] : [{ id: sectionId(rule), text, scope: 'session' as const }]

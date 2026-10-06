@@ -68,8 +68,6 @@ export type StatsRule = {
   command?: {
     name: string
     description: string
-    /** Whether the answer also goes to the clipboard. */
-    copy: boolean
     compose: (view: View, args: string) => Promise<Composed> | Composed
   }
   /** Has the engine keep files edited per type under the store key `langs`. */

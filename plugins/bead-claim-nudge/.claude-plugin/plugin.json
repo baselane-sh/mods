@@ -1,6 +1,6 @@
 {
   "name": "bead-claim-nudge",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "At turn end, if Claude edited a file and no bead is in progress, shows a toast and reminds Claude at your next prompt, once per session. Reads with bd count; quiet without bd.",
   "author": {
     "name": "Baselane",

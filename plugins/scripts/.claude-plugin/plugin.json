@@ -1,7 +1,7 @@
 {
   "name": "scripts",
-  "version": "0.5.0",
-  "description": "Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts at the git repo root. Read-only.",
+  "version": "0.5.1",
+  "description": "Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts at the git repo root. Read-only. Copies the result to your clipboard.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

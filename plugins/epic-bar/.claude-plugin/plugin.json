@@ -1,6 +1,6 @@
 {
   "name": "epic-bar",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A band above the prompt with the progress of the epic you work on, or of the open epic nearest to done (bm-ooq ███████░ 7/8), read with bd. Hidden without epics or bd.",
   "author": {
     "name": "Baselane",

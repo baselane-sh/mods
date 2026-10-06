@@ -1,7 +1,7 @@
 {
   "name": "file-owners",
-  "version": "0.5.0",
-  "description": "Adds /owners <path>: the top 5 authors of a file or folder by lines, from git blame. Names only, never addresses. Read-only.",
+  "version": "0.5.1",
+  "description": "Adds /owners <path>: the top 5 authors of a file or folder by lines, from git blame. Names only, never addresses. Read-only. Copies the result to your clipboard.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

@@ -1,7 +1,7 @@
 {
   "name": "envinfo",
-  "version": "0.5.0",
-  "description": "Adds /envinfo: versions of git, node, npm, python3, go, rustc and docker if installed, by running each (2 s limit), and the OS. Read-only.",
+  "version": "0.5.1",
+  "description": "Adds /envinfo: versions of git, node, npm, python3, go, rustc and docker if installed, by running each (2 s limit), and the OS. Read-only. Copies the result to your clipboard.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

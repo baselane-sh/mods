@@ -1,6 +1,6 @@
 {
   "name": "env-exfil-guard",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Asks before a command prints your environment, echoes a secret variable or sends local data to a remote host.",
   "author": {
     "name": "Baselane",

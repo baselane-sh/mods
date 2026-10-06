@@ -1,6 +1,6 @@
 {
   "name": "eli5-mode",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Explains like the reader is new: analogies first, no jargon without a one-line definition.",
   "author": {
     "name": "Baselane",

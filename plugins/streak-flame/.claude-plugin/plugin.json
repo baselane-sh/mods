@@ -1,6 +1,6 @@
 {
   "name": "streak-flame",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A band above the prompt with your daily streak, the days in a row you finished a turn (🔥 5d). The mod keeps the count in its own store.",
   "author": {
     "name": "Baselane",

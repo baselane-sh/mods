@@ -1,7 +1,7 @@
 {
   "name": "tree",
-  "version": "0.5.0",
-  "description": "Adds /tree: tracked files (git ls-files) as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only.",
+  "version": "0.5.1",
+  "description": "Adds /tree: tracked files (git ls-files) as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only. Copies the result to your clipboard.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

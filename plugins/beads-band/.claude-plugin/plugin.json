@@ -1,6 +1,6 @@
 {
   "name": "beads-band",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A band above the prompt with your beads counts (bd 97 ready · 45 active · 29 blocked), read with bd status every 2 minutes and after Claude runs bd. Hidden without bd or a beads project.",
   "author": {
     "name": "Baselane",

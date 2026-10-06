@@ -1,6 +1,6 @@
 {
   "name": "big-file-guard",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Asks before a Write creates content over 1 MB, or git add names a file over 5 MB. Measures the files with find.",
   "author": {
     "name": "Baselane",

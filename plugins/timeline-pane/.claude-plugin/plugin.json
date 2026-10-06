@@ -1,6 +1,6 @@
 {
   "name": "timeline-pane",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A live side pane of this session's turns, newest first: start time, length, tool calls and cost of each, with a total. Open it with /timeline.",
   "author": {
     "name": "Baselane",

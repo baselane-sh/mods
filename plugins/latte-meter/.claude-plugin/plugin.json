@@ -1,6 +1,6 @@
 {
   "name": "latte-meter",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A band above the prompt that counts the session cost in lattes. Set the latte price in the plugin options.",
   "author": {
     "name": "Baselane",

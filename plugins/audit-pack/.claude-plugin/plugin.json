@@ -1,7 +1,7 @@
 {
   "name": "audit-pack",
-  "version": "0.5.0",
-  "description": "Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. They read git, project files and dependency folders.",
+  "version": "0.5.1",
+  "description": "Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. They read git, project files and dependency folders. They copy results to the clipboard.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

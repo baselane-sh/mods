@@ -1,6 +1,6 @@
 {
   "name": "beads-prime",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Runs bd prime once per session and adds its text (max 8 KB) to the system prompt, from the repo's .beads files and bd memories. bd setup claude hooks may add it twice.",
   "author": {
     "name": "Baselane",

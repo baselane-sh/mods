@@ -50,3 +50,16 @@ test('shell: sudo and doas options that take a value are skipped', () => {
   expect(withoutSudo(['sudo', '-u', 'root'])).toEqual([])
   expect(commandsOf('sudo -u deploy docker system prune -af')).toEqual([['docker', 'system', 'prune', '-af']])
 })
+
+test('shell: reads command substitution inside double quotes, not single quotes', () => {
+  expect(argvs('echo "$(rm -rf /)"')).toContain('rm -rf /')
+  expect(argvs('x="`rm -rf /`"')).toContain('rm -rf /')
+  expect(argvs('echo "a $(echo "$(rm x)")"')).toContain('rm x')
+  expect(argvs("echo '$(rm -rf /)'")).toEqual(["echo $(rm -rf /)"])
+  expect(argvs('echo "\\$(rm -rf /)"')).toEqual(['echo $(rm -rf /)'])
+})
+
+test('shell: eval reads its words as a command line', () => {
+  expect(argvs('eval "rm -rf /"')).toContain('rm -rf /')
+  expect(argvs('eval rm -rf /')).toContain('rm -rf /')
+})

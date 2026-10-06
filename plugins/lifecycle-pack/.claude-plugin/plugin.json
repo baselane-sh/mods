@@ -1,6 +1,6 @@
 {
   "name": "lifecycle-pack",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "The four original lifecycle mods in one: runs your formatter, sends ntfy.sh pushes for long commands and input waits, and appends to ~/.claude/journal.log.",
   "author": {
     "name": "Baselane",

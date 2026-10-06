@@ -1,6 +1,6 @@
 {
   "name": "sounds-nature",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Soft nature sounds: a bird chirp when tests pass, a plunk into water when they fail, a gust of wind when a call is blocked, a water drop when a turn ends.",
   "author": {
     "name": "Baselane",

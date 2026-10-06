@@ -182,3 +182,14 @@ test('rollup: a Bash test run that is denied is neither passed nor failed', asyn
   expect(session.days()[TODAY]?.failed).toBe(0)
   expect(session.days()[TODAY]?.blocked).toBe(1)
 })
+
+test('copy: only /wrapped copies its answer; every other command prints and copies nothing', async ($, on) => {
+  const session = probe($, on)
+  await session.start()
+  for (const name of session.registered()) {
+    const text = await session.run(name)
+    if (name === 'wrapped') expect(text).toMatch(/\n\ncopied to clipboard$/)
+    else expect(text).not.toMatch(/copied to clipboard|not copied/)
+  }
+  expect(session.copied()).toHaveLength(session.registered().includes('wrapped') ? 1 : 0)
+})

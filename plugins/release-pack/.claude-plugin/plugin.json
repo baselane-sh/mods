@@ -1,6 +1,6 @@
 {
   "name": "release-pack",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Asks before a release leaves your machine: package publish, tag push, production deploy and registry push guards in one mod. The tag guard reads tags with git.",
   "author": {
     "name": "Baselane",

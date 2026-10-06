@@ -1,6 +1,6 @@
 {
   "name": "time-badge",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Tool rows show how long the call ran, for example 2.4s, when it took over one second. The time is the tool's own run time, without permission prompts.",
   "author": {
     "name": "Baselane",

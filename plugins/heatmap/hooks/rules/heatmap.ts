@@ -58,5 +58,5 @@ const compose = ({ days, date }: View): string => {
 
 export const rule: StatsRule = {
   id: 'heatmap',
-  command: { name: 'heatmap', description: 'Show a 12 week grid of the days you used Claude Code, naming your busiest day', copy: false, compose },
+  command: { name: 'heatmap', description: 'Show a 12 week grid of the days you used Claude Code, naming your busiest day', compose },
 }

@@ -1,6 +1,6 @@
 {
   "name": "cron-guard",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Asks before scheduled jobs or services are wiped or stopped: crontab -r, crontab replaced from stdin or a file, launchctl unload or bootout, systemctl stop, disable or mask.",
   "author": {
     "name": "Baselane",

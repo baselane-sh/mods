@@ -1,6 +1,6 @@
 {
   "name": "secret-commit-guard",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Asks before a git commit that would record a credential or a secret-named file. Reads the staged diff with git.",
   "author": {
     "name": "Baselane",

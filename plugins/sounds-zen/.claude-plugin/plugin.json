@@ -1,6 +1,6 @@
 {
   "name": "sounds-zen",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Soft bells and singing-bowl tones: a bell when tests pass, a low bowl when they fail, a muted chime when a call is blocked, a bowl when a turn ends.",
   "author": {
     "name": "Baselane",

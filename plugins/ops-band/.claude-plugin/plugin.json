@@ -1,6 +1,6 @@
 {
   "name": "ops-band",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "The ops band in one row above the prompt: commits ahead and behind the upstream (git), the latest GitHub Actions run of your branch (gh), and the Mac battery (pmset).",
   "author": {
     "name": "Baselane",

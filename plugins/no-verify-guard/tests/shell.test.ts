@@ -63,3 +63,12 @@ test('shell: eval reads its words as a command line', () => {
   expect(argvs('eval "rm -rf /"')).toContain('rm -rf /')
   expect(argvs('eval rm -rf /')).toContain('rm -rf /')
 })
+
+test('shell: nested quotes and heredoc bodies inside a substitution do not end it early', () => {
+  expect(argvs('echo "$(echo ")")" && git reset --hard')).toContain('git reset --hard')
+  expect(argvs('echo "$(echo "(")" && git reset --hard')).toContain('git reset --hard')
+  const body = (text: string) => `git commit -m "$(cat <<'EOF'\n${text}\nEOF\n)"`
+  expect(argvs(body("don't (it's a test) `sudo rm`")).map(a => a.split(' ')[0])).toEqual(['git', 'cat'])
+  for (const text of ['1) the reader\n`git reset --hard`', ':) `docker system prune -af`'])
+    expect(argvs(body(text)).some(a => a.startsWith('git reset') || a.startsWith('docker'))).toBe(false)
+})

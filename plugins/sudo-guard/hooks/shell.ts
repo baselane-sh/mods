@@ -37,27 +37,73 @@ export const withoutSudo = (argv: readonly string[]): readonly string[] => {
   return sub === undefined ? [] : [sub, ...args]
 }
 
+// The index after a `"..."` span that starts at `open`. A `$(...)` inside it
+// is skipped whole, so its quotes and parens do not end the span early.
+const skipDoubleQuoted = (text: string, open: number): number => {
+  let j = open + 1
+  while (j < text.length && text[j] !== '"') {
+    if (text[j] === '\\') j += 2
+    else if (text[j] === '$' && text[j + 1] === '(') j = readParenSub(text, j).end
+    else if (text[j] === '`') j = readBacktickSub(text, j).end
+    else j += 1
+  }
+  return j + 1
+}
+
+// The index after a heredoc whose `<<` is at `open`: the rest of that line and
+// the body up to the line that is exactly the delimiter. A body is text, so
+// its quotes and parens never count.
+const skipHeredoc = (text: string, open: number): number => {
+  let j = open + 2
+  const strip = text[j] === '-'
+  if (strip) j += 1
+  while (text[j] === ' ' || text[j] === '\t') j += 1
+  let delimiter = ''
+  while (j < text.length && !/[\s;&|<>()]/.test(text[j]!)) {
+    if (text[j] !== "'" && text[j] !== '"' && text[j] !== '\\') delimiter += text[j]
+    j += 1
+  }
+  const eol = text.indexOf('\n', j)
+  if (eol < 0) return open + 2
+  j = eol + 1
+  while (j < text.length) {
+    const end = text.indexOf('\n', j)
+    const line = text.slice(j, end < 0 ? text.length : end)
+    j = end < 0 ? text.length : end + 1
+    if ((strip ? line.replace(/^\t+/, '') : line) === delimiter) break
+  }
+  return j
+}
+
 // The text of a `$(...)` that starts at `open` (the index of `$`), and the
-// index after its `)`. Nested parens and single-quoted spans are skipped.
-const readParenSub = (text: string, open: number): { inner: string; end: number } => {
+// index after its `)`. Nested parens, quotes and heredoc bodies are skipped.
+// A heredoc start is taken as a heredoc only when it is followed by a word.
+function readParenSub(text: string, open: number): { inner: string; end: number } {
   let depth = 1
   let j = open + 2
   while (j < text.length && depth > 0) {
-    if (text[j] === "'") {
+    const c = text[j]!
+    if (c === "'") {
       const close = text.indexOf("'", j + 1)
       j = close < 0 ? text.length : close + 1
-      continue
+    } else if (c === '"') {
+      j = skipDoubleQuoted(text, j)
+    } else if (c === '`') {
+      j = readBacktickSub(text, j).end
+    } else if (c === '<' && text[j + 1] === '<' && text[j + 2] !== '<' && text[j + 2] !== '(') {
+      j = skipHeredoc(text, j)
+    } else {
+      if (c === '\\') j += 1
+      else if (c === '(') depth += 1
+      else if (c === ')') depth -= 1
+      j += 1
     }
-    if (text[j] === '\\') j += 1
-    else if (text[j] === '(') depth += 1
-    else if (text[j] === ')') depth -= 1
-    j += 1
   }
   return { inner: text.slice(open + 2, depth === 0 ? j - 1 : j), end: j }
 }
 
 // The text of a backtick span that starts at `open`, and the index after it.
-const readBacktickSub = (text: string, open: number): { inner: string; end: number } => {
+function readBacktickSub(text: string, open: number): { inner: string; end: number } {
   let j = open + 1
   while (j < text.length && text[j] !== '`') j += text[j] === '\\' ? 2 : 1
   return { inner: text.slice(open + 1, j).replace(/\\([`$\\])/g, '$1'), end: j + 1 }

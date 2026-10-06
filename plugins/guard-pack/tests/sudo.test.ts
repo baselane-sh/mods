@@ -5,6 +5,8 @@ import { probe } from './probe'
 
 const HITS: ReadonlyArray<readonly [string, string]> = [
   ['sudo rm -rf /var/log/x', 'sudo'],
+  ['echo "$(sudo ls)"', 'sudo'],
+  ['echo "`sudo ls`"', 'sudo'],
   ['cd /etc && sudo vim hosts', 'sudo'],
   ['ls | sudo tee /etc/hosts', 'sudo'],
   ['/usr/bin/sudo -n true', 'sudo'],
@@ -16,6 +18,10 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['su --command "id"', 'su -c'],
 ]
 const MISSES = [
+  `gh pr create --body "$(cat <<'EOF'\n- a) first \`sudo make install\`\nEOF\n)"`,
+  `git commit -m "$(cat <<'EOF'\ndon't (it's a test) \`sudo rm\`\nEOF\n)"`,
+  'eval "$(ssh-agent -s)"',
+
   'grep sudo README.md',
   'echo "run it with sudo"',
   'man sudo',

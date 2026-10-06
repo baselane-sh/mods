@@ -52,6 +52,8 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['eval bd delete x', 'bd delete'],
 ]
 const MISSES = [
+  `git commit -m "$(cat <<'EOF'\nSmile :)\nsee \`bd delete x\`\nEOF\n)"`,
+
   'bd list --json',
   'bd show bm-1 --json',
   'bd ready',

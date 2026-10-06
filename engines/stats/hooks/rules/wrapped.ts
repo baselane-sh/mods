@@ -62,5 +62,5 @@ const compose = ({ days, date }: View, args: string): Composed => {
 
 export const rule: StatsRule = {
   id: 'wrapped',
-  command: { name: 'wrapped', description: 'Print Claude Code Wrapped for the last 7 days (month for 30) and copy it', copy: true, compose },
+  command: { name: 'wrapped', description: 'Print Claude Code Wrapped for the last 7 days (month for 30) and copy it', compose },
 }

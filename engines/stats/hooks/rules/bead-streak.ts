@@ -91,7 +91,6 @@ export const rule: StatsRule = {
   command: {
     name: 'bead-streak',
     description: 'Show your streak of consecutive days with a closed bead',
-    copy: false,
     compose,
   },
   call: onCall,

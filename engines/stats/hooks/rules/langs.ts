@@ -75,5 +75,5 @@ const compose = async ({ store }: View): Promise<string> => {
 export const rule: StatsRule = {
   id: 'langs',
   langs: true,
-  command: { name: 'langs', description: 'Show which file types Claude edited most across sessions, as bars', copy: false, compose },
+  command: { name: 'langs', description: 'Show which file types Claude edited most across sessions, as bars', compose },
 }

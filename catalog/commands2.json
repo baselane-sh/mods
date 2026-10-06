@@ -3,42 +3,42 @@
   "mods": [
     {
       "name": "todos",
-      "description": "Adds /todos: TODO, FIXME and HACK lines in tracked files, found with git grep, grouped by file (50 lines at most). Read-only.",
+      "description": "Adds /todos: TODO, FIXME and HACK lines in tracked files, found with git grep, grouped by file (50 lines at most). Read-only. Copies the result to your clipboard.",
       "rules": [
         "todos"
       ]
     },
     {
       "name": "loc",
-      "description": "Adds /loc: lines of tracked text files by language, read with git, sorted, with a total. Skips lockfiles and binaries. Read-only.",
+      "description": "Adds /loc: lines of tracked text files by language, read with git, sorted, with a total. Skips lockfiles and binaries. Read-only. Copies the result to your clipboard.",
       "rules": [
         "loc"
       ]
     },
     {
       "name": "hotspots",
-      "description": "Adds /hotspots: the 10 files changed most often in the last 90 days, from git log, with change counts. Read-only.",
+      "description": "Adds /hotspots: the 10 files changed most often in the last 90 days, from git log, with change counts. Read-only. Copies the result to your clipboard.",
       "rules": [
         "hotspots"
       ]
     },
     {
       "name": "commit-msg",
-      "description": "Adds /commit-msg: a Conventional Commits message proposed from the staged diff, read with git. Heuristic, no model call, writes nothing.",
+      "description": "Adds /commit-msg: a Conventional Commits message proposed from the staged diff, read with git. Heuristic, no model call, writes nothing. Copies the result to your clipboard.",
       "rules": [
         "commit-msg"
       ]
     },
     {
       "name": "branches",
-      "description": "Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list, read with git. Never deletes.",
+      "description": "Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list, read with git. Never deletes. Copies the result to your clipboard.",
       "rules": [
         "branches"
       ]
     },
     {
       "name": "repo-pack",
-      "description": "Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. They read git.",
+      "description": "Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. They read git. They copy results to the clipboard.",
       "rules": [
         "todos",
         "loc",

@@ -21,7 +21,7 @@ const compose = ({ days, date }: View): string => {
 
 export const rule: StatsRule = {
   id: 'streaks',
-  command: { name: 'streak', description: 'Show your streak of consecutive days with Claude Code', copy: false, compose },
+  command: { name: 'streak', description: 'Show your streak of consecutive days with Claude Code', compose },
   // The toast is for a session start only: a turn end does not repeat it.
   after: async ({ event, days, date }) => (event === 'session' ? [`Day ${dayNumber(days, date)} streak`] : []),
 }

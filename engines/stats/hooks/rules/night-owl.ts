@@ -49,6 +49,6 @@ const after = async (ctx: After): Promise<readonly string[]> => {
 
 export const rule: StatsRule = {
   id: 'night-owl',
-  command: { name: 'hours', description: 'Show a 24-hour histogram of when you send prompts, and your peak hour', copy: false, compose },
+  command: { name: 'hours', description: 'Show a 24-hour histogram of when you send prompts, and your peak hour', compose },
   after,
 }

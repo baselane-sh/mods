@@ -23,6 +23,8 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['docker --context prod system prune -f', 'docker system prune'],
   ['docker -H tcp://host:2375 volume rm data', 'docker volume rm'],
   ['sudo docker system prune -af', 'docker system prune'],
+  ['echo "$(docker system prune -af)"', 'docker system prune'],
+  ['eval "docker volume rm pgdata"', 'docker volume rm'],
   ['cd app && docker compose down -v', 'docker compose down -v'],
   ['docker ps; docker volume prune -f', 'docker volume prune'],
   ['bash -c "docker system prune -af"', 'docker system prune'],

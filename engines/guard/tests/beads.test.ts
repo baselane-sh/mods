@@ -44,6 +44,12 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['env BEADS_DIR=/r bd delete bm-1', 'bd delete'],
   ['bash -c "bd delete bm-1"', 'bd delete'],
   ['bd list --json | xargs bd delete', 'bd delete'],
+  ['echo "$(bd delete x)"', 'bd delete'],
+  ['x="$(bd purge)"', 'bd purge'],
+  ['echo "`bd delete x`"', 'bd delete'],
+  ['echo "a $(echo "$(bd gc)") b"', 'bd gc'],
+  ['eval "bd delete x"', 'bd delete'],
+  ['eval bd delete x', 'bd delete'],
 ]
 const MISSES = [
   'bd list --json',
@@ -92,6 +98,11 @@ const MISSES = [
   'cat <<EOF\nbd delete bm-1\nEOF',
   'git commit -m "bd delete is next"',
   'docker delete x',
+  "echo '$(bd delete x)'",
+  "echo '`bd delete x`'",
+  'echo "\\$(bd delete x)"',
+  'echo "bd delete x"',
+  'eval echo bd delete x',
 ]
 
 test('beads-guard: command table', () => {

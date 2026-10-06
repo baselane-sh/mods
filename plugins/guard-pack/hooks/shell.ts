@@ -79,9 +79,11 @@ const skipHeredoc = (text: string, open: number): number => {
 // index after its `)`. Nested parens, quotes and heredoc bodies are skipped.
 // A heredoc start is taken as a heredoc only when it is followed by a word.
 function readParenSub(text: string, open: number): { inner: string; end: number } {
-  let depth = 1
+  // One flag per open paren: true inside `$((...))` or `((...))`, where `<<`
+  // is a shift and never a heredoc.
+  const arith = [text[open + 2] === '(']
   let j = open + 2
-  while (j < text.length && depth > 0) {
+  while (j < text.length && arith.length > 0) {
     const c = text[j]!
     if (c === "'") {
       const close = text.indexOf("'", j + 1)
@@ -90,16 +92,18 @@ function readParenSub(text: string, open: number): { inner: string; end: number 
       j = skipDoubleQuoted(text, j)
     } else if (c === '`') {
       j = readBacktickSub(text, j).end
-    } else if (c === '<' && text[j + 1] === '<' && text[j + 2] !== '<' && text[j + 2] !== '(') {
+    } else if (c === '<' && text[j + 1] === '<' && text[j + 2] !== '<' && text[j + 2] !== '(' && !arith[arith.length - 1]) {
       j = skipHeredoc(text, j)
     } else {
       if (c === '\\') j += 1
-      else if (c === '(') depth += 1
-      else if (c === ')') depth -= 1
+      else if (c === '(') {
+        const prev = text[j - 1]
+        arith.push(prev === '(' || (prev === '$' && text[j + 1] === '(') || (prev !== '$' && arith[arith.length - 1]!))
+      } else if (c === ')') arith.pop()
       j += 1
     }
   }
-  return { inner: text.slice(open + 2, depth === 0 ? j - 1 : j), end: j }
+  return { inner: text.slice(open + 2, arith.length === 0 ? j - 1 : j), end: j }
 }
 
 // The text of a backtick span that starts at `open`, and the index after it.

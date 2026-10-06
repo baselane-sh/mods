@@ -68,6 +68,6 @@ const after = async (ctx: After): Promise<readonly string[]> => {
 
 export const rule: StatsRule = {
   id: 'achievements',
-  command: { name: 'achievements', description: 'List your Claude Code badges, locked and unlocked', copy: false, compose },
+  command: { name: 'achievements', description: 'List your Claude Code badges, locked and unlocked', compose },
   after,
 }

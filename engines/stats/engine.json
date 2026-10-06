@@ -7,5 +7,29 @@
   "register": "registerStats",
   "ruleExport": "rule",
   "types": "types/index.d.ts",
-  "nameToken": "stats-tracker"
+  "nameToken": "stats-tracker",
+  "needs": {
+    "wrapped": [
+      "copy"
+    ]
+  },
+  "hosts": {
+    "command": {
+      "perRule": true,
+      "hosts": [
+        {
+          "file": "hooks/hosts/stats-command.ts",
+          "export": "answerStatsCommands",
+          "gives": []
+        },
+        {
+          "file": "hooks/hosts/stats-command-copy.ts",
+          "export": "answerStatsCommandsWithCopy",
+          "gives": [
+            "copy"
+          ]
+        }
+      ]
+    }
+  }
 }

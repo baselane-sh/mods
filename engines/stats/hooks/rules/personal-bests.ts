@@ -128,7 +128,7 @@ const compose = async ({ store }: View): Promise<string> => {
 
 export const rule: StatsRule = {
   id: 'personal-bests',
-  command: { name: 'bests', description: 'List your Claude Code personal bests and when you set them', copy: false, compose },
+  command: { name: 'bests', description: 'List your Claude Code personal bests and when you set them', compose },
   after,
   ended,
 }

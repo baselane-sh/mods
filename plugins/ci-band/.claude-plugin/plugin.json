@@ -1,6 +1,6 @@
 {
   "name": "ci-band",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A band above the prompt with the latest GitHub Actions run of your branch (ci passed, ci failed, ci running), asked of the gh CLI every 2 minutes; branch read with git. Hidden without gh.",
   "author": {
     "name": "Baselane",

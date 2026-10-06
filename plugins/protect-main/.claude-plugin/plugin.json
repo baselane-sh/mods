@@ -1,6 +1,6 @@
 {
   "name": "protect-main",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Asks before a commit, push or merge while you are on main or master. Reads the branch with git.",
   "author": {
     "name": "Baselane",

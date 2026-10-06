@@ -65,7 +65,6 @@ export const rule: StatsRule = {
   command: {
     name: 'week',
     description: 'Show this week against last week: sessions, turns, tool calls, files edited and cost',
-    copy: false,
     compose,
   },
 }

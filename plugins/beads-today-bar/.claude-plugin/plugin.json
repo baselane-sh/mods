@@ -1,6 +1,6 @@
 {
   "name": "beads-today-bar",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A band above the prompt with the beads closed today against a daily goal you set (today ▮▮▮▯▯ 3/5), green when met, read with bd count. Hidden without bd or a beads project.",
   "author": {
     "name": "Baselane",

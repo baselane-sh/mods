@@ -1,6 +1,6 @@
 {
   "name": "break-nudge",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Suggests a short break once the session has run 90 minutes, and again every 90 minutes after that.",
   "author": {
     "name": "Baselane",

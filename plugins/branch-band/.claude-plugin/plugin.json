@@ -1,6 +1,6 @@
 {
   "name": "branch-band",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A band above the prompt with the git branch and the count of changed files, read with git status after each Bash call and file edit.",
   "author": {
     "name": "Baselane",

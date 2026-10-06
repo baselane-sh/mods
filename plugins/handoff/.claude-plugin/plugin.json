@@ -1,7 +1,7 @@
 {
   "name": "handoff",
-  "version": "0.5.0",
-  "description": "Adds /handoff: writes a session summary with the git status to .claude/handoff.md (never overwriting) and answers with the path.",
+  "version": "0.5.1",
+  "description": "Adds /handoff: writes a session summary with the git status to .claude/handoff.md (never overwriting) and answers with the path. Copies the result to your clipboard.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

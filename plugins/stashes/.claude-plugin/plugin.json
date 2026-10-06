@@ -1,7 +1,7 @@
 {
   "name": "stashes",
-  "version": "0.5.0",
-  "description": "Adds /stashes: git stashes with their age and the branch each was made on. Read-only, never applies or drops.",
+  "version": "0.5.1",
+  "description": "Adds /stashes: git stashes with their age and the branch each was made on. Read-only, never applies or drops. Copies the result to your clipboard.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

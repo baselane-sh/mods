@@ -1,6 +1,6 @@
 {
   "name": "registry-push-guard",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Asks before an image or chart is pushed to a registry: docker push, docker buildx --push, podman push, helm push, gcloud artifacts docker push. Local registries pass.",
   "author": {
     "name": "Baselane",

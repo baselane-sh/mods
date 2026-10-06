@@ -1,6 +1,6 @@
 {
   "name": "bullet-mode",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Replies as short bullet lists, at most one sentence per bullet, unless you ask for code.",
   "author": {
     "name": "Baselane",

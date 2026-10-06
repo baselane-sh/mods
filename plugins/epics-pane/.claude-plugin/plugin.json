@@ -1,6 +1,6 @@
 {
   "name": "epics-pane",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A live side pane of each open beads epic: a bar of closed and total children, and a mark when it is ready to close. Read with bd, read-only. Open it with /epics.",
   "author": {
     "name": "Baselane",

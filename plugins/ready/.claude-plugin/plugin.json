@@ -1,6 +1,6 @@
 {
   "name": "ready",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Adds /ready: the 20 top ready beads, one line each, and the total. Read with bd, the beads tracker. Read-only. Prints only, copies nothing.",
   "author": {
     "name": "Baselane",

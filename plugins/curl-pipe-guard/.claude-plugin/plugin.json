@@ -1,6 +1,6 @@
 {
   "name": "curl-pipe-guard",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Asks before a download is piped into a shell or interpreter (curl | sh, wget -O- | bash, bash <(curl ...)).",
   "author": {
     "name": "Baselane",

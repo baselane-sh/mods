@@ -1,6 +1,6 @@
 {
   "name": "beads-standup",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Adds /beads-standup: beads closed since yesterday, in progress, and the next 5 ready. Read with bd, the beads tracker. Read-only. Prints only, copies nothing.",
   "author": {
     "name": "Baselane",

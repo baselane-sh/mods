@@ -1,6 +1,6 @@
 {
   "name": "size-badge",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Read and Write rows show how much was read or written: the line count, for example 312 lines, or the file size for images and PDFs.",
   "author": {
     "name": "Baselane",

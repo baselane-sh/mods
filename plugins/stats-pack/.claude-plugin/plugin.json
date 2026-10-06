@@ -1,7 +1,7 @@
 {
   "name": "stats-pack",
-  "version": "0.5.0",
-  "description": "The three original stats mods in one: /wrapped, streaks and achievements on one shared daily rollup.",
+  "version": "0.5.1",
+  "description": "The three original stats mods in one: /wrapped (copied to your clipboard), streaks and achievements on one shared daily rollup.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

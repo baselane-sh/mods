@@ -1,6 +1,6 @@
 {
   "name": "beads-pane",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A live side pane of your beads: in progress, ready and blocked issues, 10 each, with counts. Read with bd, read-only, after Bash calls. Open it with /beads.",
   "author": {
     "name": "Baselane",

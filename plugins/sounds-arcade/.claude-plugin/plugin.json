@@ -1,6 +1,6 @@
 {
   "name": "sounds-arcade",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Arcade blips: a coin when tests pass, a game-over drop when they fail, a buzz when a call is blocked, a power-up when a turn ends.",
   "author": {
     "name": "Baselane",

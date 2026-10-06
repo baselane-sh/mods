@@ -1,6 +1,6 @@
 {
   "name": "beads-bars",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "All six beads bands in one row: counts, the bead in progress, epic progress, done percent, closed today and open by priority, read with bd every 2 minutes and after Claude runs bd.",
   "author": {
     "name": "Baselane",

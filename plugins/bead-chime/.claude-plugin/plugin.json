@@ -1,6 +1,6 @@
 {
   "name": "bead-chime",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Plays a short chime when a Bash call that ran bd close (or bd done) ends with exit code 0. It reads only the command text and the result, and runs no program.",
   "author": {
     "name": "Baselane",

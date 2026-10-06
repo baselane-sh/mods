@@ -1,6 +1,6 @@
 {
   "name": "tag-guard",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Asks before release tags go to a remote: git push --tags, --follow-tags or --mirror, a push of a tag ref, and a push that deletes a remote tag. Dry runs pass. Reads tags with git.",
   "author": {
     "name": "Baselane",

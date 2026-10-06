@@ -1,7 +1,7 @@
 {
   "name": "commit-msg",
-  "version": "0.5.0",
-  "description": "Adds /commit-msg: a Conventional Commits message proposed from the staged diff, read with git. Heuristic, no model call, writes nothing.",
+  "version": "0.5.1",
+  "description": "Adds /commit-msg: a Conventional Commits message proposed from the staged diff, read with git. Heuristic, no model call, writes nothing. Copies the result to your clipboard.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

@@ -1,6 +1,6 @@
 {
   "name": "process-pane",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A live side pane of the processes the session's Bash calls started that still run, with pid, age and command. Read-only: one ps every 5 seconds. Open it with /procs.",
   "author": {
     "name": "Baselane",

@@ -50,3 +50,25 @@ test('shell: sudo and doas options that take a value are skipped', () => {
   expect(withoutSudo(['sudo', '-u', 'root'])).toEqual([])
   expect(commandsOf('sudo -u deploy docker system prune -af')).toEqual([['docker', 'system', 'prune', '-af']])
 })
+
+test('shell: reads command substitution inside double quotes, not single quotes', () => {
+  expect(argvs('echo "$(rm -rf /)"')).toContain('rm -rf /')
+  expect(argvs('x="`rm -rf /`"')).toContain('rm -rf /')
+  expect(argvs('echo "a $(echo "$(rm x)")"')).toContain('rm x')
+  expect(argvs("echo '$(rm -rf /)'")).toEqual(["echo $(rm -rf /)"])
+  expect(argvs('echo "\\$(rm -rf /)"')).toEqual(['echo $(rm -rf /)'])
+})
+
+test('shell: eval reads its words as a command line', () => {
+  expect(argvs('eval "rm -rf /"')).toContain('rm -rf /')
+  expect(argvs('eval rm -rf /')).toContain('rm -rf /')
+})
+
+test('shell: nested quotes and heredoc bodies inside a substitution do not end it early', () => {
+  expect(argvs('echo "$(echo ")")" && git reset --hard')).toContain('git reset --hard')
+  expect(argvs('echo "$(echo "(")" && git reset --hard')).toContain('git reset --hard')
+  const body = (text: string) => `git commit -m "$(cat <<'EOF'\n${text}\nEOF\n)"`
+  expect(argvs(body("don't (it's a test) `sudo rm`")).map(a => a.split(' ')[0])).toEqual(['git', 'cat'])
+  for (const text of ['1) the reader\n`git reset --hard`', ':) `docker system prune -af`'])
+    expect(argvs(body(text)).some(a => a.startsWith('git reset') || a.startsWith('docker'))).toBe(false)
+})

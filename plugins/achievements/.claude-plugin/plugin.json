@@ -1,6 +1,6 @@
 {
   "name": "achievements",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Unlocks eight badges once each (first session, first green test run, 100 and 1,000 tool calls, 7-day streak, 10 blocked calls, a 2 hour session, night owl), with a toast and /achievements.",
   "author": {
     "name": "Baselane",

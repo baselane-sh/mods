@@ -186,32 +186,32 @@ Slash commands that print a result and, where it helps, copy it.
 | `beads-standup` | Adds /beads-standup: beads closed since yesterday, in progress, and the next 5 ready. Read with bd, the beads tracker. Read-only. Prints only, copies nothing. | `/beads-standup` |  |
 | `receipt` | Adds /receipt: a shareable receipt of the session (tools, files, commands, blocks, context, cost), printed and copied. | `/receipt` |  |
 | `standup` | Adds /standup: Yesterday, Today and Blockers from your git log and this session's record, printed and copied. | `/standup` |  |
-| `changelog` | Adds /changelog: commits since the last tag (or the last 30), read with git log and grouped by conventional-commit type, as Markdown. | `/changelog` |  |
-| `pr-description` | Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master, read with git. | `/pr-description` |  |
-| `handoff` | Adds /handoff: writes a session summary with the git status to .claude/handoff.md (never overwriting) and answers with the path. | `/handoff` |  |
-| `todos` | Adds /todos: TODO, FIXME and HACK lines in tracked files, found with git grep, grouped by file (50 lines at most). Read-only. | `/todos` |  |
-| `loc` | Adds /loc: lines of tracked text files by language, read with git, sorted, with a total. Skips lockfiles and binaries. Read-only. | `/loc` |  |
-| `hotspots` | Adds /hotspots: the 10 files changed most often in the last 90 days, from git log, with change counts. Read-only. | `/hotspots` |  |
-| `commit-msg` | Adds /commit-msg: a Conventional Commits message proposed from the staged diff, read with git. Heuristic, no model call, writes nothing. | `/commit-msg` |  |
-| `branches` | Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list, read with git. Never deletes. | `/branches` |  |
-| `tree` | Adds /tree: tracked files (git ls-files) as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only. | `/tree` |  |
-| `deps` | Adds /deps: direct dependencies with versions from package.json, pyproject.toml, requirements.txt, go.mod and Cargo.toml at the git repo root. No network, no audit. Read-only. | `/deps` |  |
-| `authors` | Adds /authors: the top 15 contributors by commit count with their last commit date, from git log. Names only, never email addresses. Read-only. | `/authors` |  |
-| `scripts` | Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts at the git repo root. Read-only. | `/scripts` |  |
-| `env-check` | Adds /env-check: variable names in .env.example against .env at the git repo root, listing missing and extra names. Reads names only, never a value. Read-only. | `/env-check` |  |
-| `size` | Adds /size: the 15 largest tracked files and the total tracked size at HEAD, read with git. Read-only. | `/size` |  |
-| `licenses` | Adds /licenses: the licence of each direct dependency, from node_modules and Python dist-info at the git repo root. Shows unknown when it cannot tell. Read-only. | `/licenses` |  |
-| `conflicts` | Adds /conflicts: tracked files that still hold merge conflict markers, with line numbers, found with git grep. Read-only. | `/conflicts` |  |
-| `secret-scan` | Adds /secret-scan: tracked files and line numbers that hold secret-shaped text, found with git grep. Never prints a matched value. Read-only. | `/secret-scan` |  |
-| `envinfo` | Adds /envinfo: versions of git, node, npm, python3, go, rustc and docker if installed, by running each (2 s limit), and the OS. Read-only. | `/envinfo` |  |
-| `stashes` | Adds /stashes: git stashes with their age and the branch each was made on. Read-only, never applies or drops. | `/stashes` |  |
-| `recent` | Adds /recent: your last 15 commits across all local branches (author is git user.name), with branch and date. Read-only. | `/recent` |  |
-| `file-owners` | Adds /owners <path>: the top 5 authors of a file or folder by lines, from git blame. Names only, never addresses. Read-only. | `/owners` |  |
-| `readme-check` | Adds /readme-check: which common README sections are missing (install, usage, licence, contributing) and which relative links are broken, at the git repo root. Read-only. | `/readme-check` |  |
-| `command-pack` | The five original slash commands in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. They read git; /handoff also writes .claude/handoff.md. | `/receipt`, `/standup`, `/changelog`, `/pr-description`, `/handoff` | pack |
-| `repo-pack` | Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. They read git. | `/todos`, `/loc`, `/hotspots`, `/commit-msg`, `/branches` | pack |
-| `explore-pack` | Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. They read git and project files. | `/tree`, `/deps`, `/authors`, `/scripts`, `/env-check` | pack |
-| `audit-pack` | Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. They read git, project files and dependency folders. | `/secret-scan`, `/conflicts`, `/licenses` | pack |
+| `changelog` | Adds /changelog: commits since the last tag (or the last 30), read with git log and grouped by conventional-commit type, as Markdown. Copies the result to your clipboard. | `/changelog` |  |
+| `pr-description` | Adds /pr-description: title, summary, diff totals and a test plan stub for the current branch against main or master, read with git. Copies the result to your clipboard. | `/pr-description` |  |
+| `handoff` | Adds /handoff: writes a session summary with the git status to .claude/handoff.md (never overwriting) and answers with the path. Copies the result to your clipboard. | `/handoff` |  |
+| `todos` | Adds /todos: TODO, FIXME and HACK lines in tracked files, found with git grep, grouped by file (50 lines at most). Read-only. Copies the result to your clipboard. | `/todos` |  |
+| `loc` | Adds /loc: lines of tracked text files by language, read with git, sorted, with a total. Skips lockfiles and binaries. Read-only. Copies the result to your clipboard. | `/loc` |  |
+| `hotspots` | Adds /hotspots: the 10 files changed most often in the last 90 days, from git log, with change counts. Read-only. Copies the result to your clipboard. | `/hotspots` |  |
+| `commit-msg` | Adds /commit-msg: a Conventional Commits message proposed from the staged diff, read with git. Heuristic, no model call, writes nothing. Copies the result to your clipboard. | `/commit-msg` |  |
+| `branches` | Adds /branches: local branches merged into the default branch or idle for 30 days, as a cleanup list, read with git. Never deletes. Copies the result to your clipboard. | `/branches` |  |
+| `tree` | Adds /tree: tracked files (git ls-files) as a tree, 2 levels deep, folders with file counts (80 lines at most). Read-only. Copies the result to your clipboard. | `/tree` |  |
+| `deps` | Adds /deps: direct dependencies with versions from package.json, pyproject.toml, requirements.txt, go.mod and Cargo.toml at the repo root. No network. Read-only. Copies the result to your clipboard. | `/deps` |  |
+| `authors` | Adds /authors: the top 15 contributors by commit count with their last commit date, from git log. Names only, never email addresses. Read-only. Copies the result to your clipboard. | `/authors` |  |
+| `scripts` | Adds /scripts: runnable tasks from package.json scripts, Makefile targets, justfile recipes and pyproject scripts at the git repo root. Read-only. Copies the result to your clipboard. | `/scripts` |  |
+| `env-check` | Adds /env-check: variable names in .env.example against .env at the git repo root, listing missing and extra names. Reads names only, never a value. Read-only. Copies the result to your clipboard. | `/env-check` |  |
+| `size` | Adds /size: the 15 largest tracked files and the total tracked size at HEAD, read with git. Read-only. Copies the result to your clipboard. | `/size` |  |
+| `licenses` | Adds /licenses: the licence of each direct dependency, from node_modules and Python dist-info at the git repo root. Shows unknown when it cannot tell. Read-only. Copies the result to your clipboard. | `/licenses` |  |
+| `conflicts` | Adds /conflicts: tracked files that still hold merge conflict markers, with line numbers, found with git grep. Read-only. Copies the result to your clipboard. | `/conflicts` |  |
+| `secret-scan` | Adds /secret-scan: tracked files and line numbers that hold secret-shaped text, found with git grep. Never prints a matched value. Read-only. Copies the result to your clipboard. | `/secret-scan` |  |
+| `envinfo` | Adds /envinfo: versions of git, node, npm, python3, go, rustc and docker if installed, by running each (2 s limit), and the OS. Read-only. Copies the result to your clipboard. | `/envinfo` |  |
+| `stashes` | Adds /stashes: git stashes with their age and the branch each was made on. Read-only, never applies or drops. Copies the result to your clipboard. | `/stashes` |  |
+| `recent` | Adds /recent: your last 15 commits across all local branches (author is git user.name), with branch and date. Read-only. Copies the result to your clipboard. | `/recent` |  |
+| `file-owners` | Adds /owners <path>: the top 5 authors of a file or folder by lines, from git blame. Names only, never addresses. Read-only. Copies the result to your clipboard. | `/owners` |  |
+| `readme-check` | Adds /readme-check: missing README sections (install, usage, licence, contributing) and broken relative links, at the git repo root. Read-only. Copies the result to your clipboard. | `/readme-check` |  |
+| `command-pack` | The five original slash commands in one mod: /receipt, /standup, /changelog, /pr-description and /handoff. They read git; /handoff also writes .claude/handoff.md. They copy results to the clipboard. | `/receipt`, `/standup`, `/changelog`, `/pr-description`, `/handoff` | pack |
+| `repo-pack` | Five read-only repo commands in one mod: /todos, /loc, /hotspots, /commit-msg and /branches. They read git. They copy results to the clipboard. | `/todos`, `/loc`, `/hotspots`, `/commit-msg`, `/branches` | pack |
+| `explore-pack` | Five read-only repo exploration commands in one mod: /tree, /deps, /authors, /scripts and /env-check. They read git and project files. They copy results to the clipboard. | `/tree`, `/deps`, `/authors`, `/scripts`, `/env-check` | pack |
+| `audit-pack` | Three read-only audit commands in one mod: /secret-scan, /conflicts and /licenses. They read git, project files and dependency folders. They copy results to the clipboard. | `/secret-scan`, `/conflicts`, `/licenses` | pack |
 
 ### Band meters (30)
 
@@ -335,7 +335,7 @@ Local records of how you use Claude Code.
 | `heatmap` | Adds /heatmap: a 12-week calendar grid of the days you used Claude Code, like a contribution graph, shaded by turns, naming your busiest day. | `/heatmap` |  |
 | `langs` | Counts the file types Claude edits across sessions and adds /langs: a bar list of the types edited most, each file counted once per session. | `/langs` |  |
 | `weekly` | Adds /week: this week (since Monday) against last week, with sessions, turns, tool calls, files edited and cost, and the change for each. | `/week` |  |
-| `stats-pack` | The three original stats mods in one: /wrapped, streaks and achievements on one shared daily rollup. | `/wrapped`, `/streak`, `/achievements` | pack |
+| `stats-pack` | The three original stats mods in one: /wrapped (copied to your clipboard), streaks and achievements on one shared daily rollup. | `/wrapped`, `/streak`, `/achievements` | pack |
 
 ### Display and render (12)
 

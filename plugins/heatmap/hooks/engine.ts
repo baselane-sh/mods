@@ -1,5 +1,5 @@
 import { atom, read, update } from 'claude-code'
-import type { On } from 'claude-code'
+import type { On, UiCopyResult } from 'claude-code'
 
 import type { Day, Life, Pending, SessionMemo } from '../types'
 import { localDate } from './date'
@@ -306,36 +306,48 @@ export const registerStats = (on: On, rules: readonly StatsRule[]): void => {
     }
     return next(e)
   })
+}
 
-  for (const rule of rules) {
-    const command = rule.command
-    if (command === undefined) continue
-    on('command.run', { command: command.name }, async ($, e) => {
-      const store: Store = { get: key => $.store.get(key), set: (key, value) => $.store.set(key, value) }
-      let view: View
-      try {
-        const now = await $.clock.now()
-        const [days, life] = [readDays(await store.get(DAYS)), readLife(await store.get(LIFE))]
-        view = { date: localDate(now), now, days, life, store }
-      } catch (error) {
-        await $.ui.log(failed(`${command.name} read`, error))
-        view = { date: localDate(0), now: 0, days: {}, life: EMPTY_LIFE, store }
-      }
+// What a command's answer needs from the host, as closures over the hook's `$`.
+export type CommandIo = {
+  now: () => Promise<number>
+  store: Store
+  log: (text: string) => unknown
+  // Absent for a host that never copies: the answer is then the text alone, and
+  // the mod does not hold the clipboard call at all.
+  copy?: (text: string) => Promise<UiCopyResult>
+}
 
-      let composed: Composed
-      try {
-        composed = await command.compose(view, e.args)
-      } catch (error) {
-        return { text: `${command.name}: failed, ${error instanceof Error ? error.message : String(error)}` }
-      }
-      if (typeof composed !== 'string') return { text: composed.text }
-      if (!command.copy) return { text: composed }
-
-      const text = composed
-      const copy = await attempt(() => $.ui.copy({ text }))
-      const note =
-        copy === undefined ? 'not copied (clipboard error)' : copy.isCopied ? 'copied to clipboard' : `not copied (${copy.reason})`
-      return { text: `${text}\n\n${note}` }
-    })
+// Answers one slash command: the rule composes its text from the rollup, and a
+// result is copied to the clipboard only when the host gives a copy.
+export const answerStatsCommand = async (
+  command: NonNullable<StatsRule['command']>,
+  args: string,
+  io: CommandIo,
+): Promise<{ text: string }> => {
+  const { store } = io
+  let view: View
+  try {
+    const now = await io.now()
+    const [days, life] = [readDays(await store.get(DAYS)), readLife(await store.get(LIFE))]
+    view = { date: localDate(now), now, days, life, store }
+  } catch (error) {
+    await io.log(failed(`${command.name} read`, error))
+    view = { date: localDate(0), now: 0, days: {}, life: EMPTY_LIFE, store }
   }
+
+  let composed: Composed
+  try {
+    composed = await command.compose(view, args)
+  } catch (error) {
+    return { text: `${command.name}: failed, ${error instanceof Error ? error.message : String(error)}` }
+  }
+  if (typeof composed !== 'string') return { text: composed.text }
+  const text = composed
+  const copier = io.copy
+  if (copier === undefined) return { text }
+
+  const copy = await attempt(() => copier(text))
+  const note = copy === undefined ? 'not copied (clipboard error)' : copy.isCopied ? 'copied to clipboard' : `not copied (${copy.reason})`
+  return { text: `${text}\n\n${note}` }
 }

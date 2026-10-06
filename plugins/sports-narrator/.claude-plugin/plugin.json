@@ -1,6 +1,6 @@
 {
   "name": "sports-narrator",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "One line of sports play-by-play at turn end. OFF by default: one haiku call per turn with tools. Turn on the enabled option. Sends tool names, file names and the first two words of each command.",
   "author": {
     "name": "Baselane",

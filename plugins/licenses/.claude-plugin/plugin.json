@@ -1,7 +1,7 @@
 {
   "name": "licenses",
-  "version": "0.5.0",
-  "description": "Adds /licenses: the licence of each direct dependency, from node_modules and Python dist-info at the git repo root. Shows unknown when it cannot tell. Read-only.",
+  "version": "0.5.1",
+  "description": "Adds /licenses: the licence of each direct dependency, from node_modules and Python dist-info at the git repo root. Shows unknown when it cannot tell. Read-only. Copies the result to your clipboard.",
   "author": {
     "name": "Baselane",
     "url": "https://baselane.sh"

@@ -18,7 +18,7 @@
     },
     {
       "name": "stats-pack",
-      "description": "The three original stats mods in one: /wrapped, streaks and achievements on one shared daily rollup.",
+      "description": "The three original stats mods in one: /wrapped (copied to your clipboard), streaks and achievements on one shared daily rollup.",
       "rules": ["wrapped", "streaks", "achievements"]
     }
   ]

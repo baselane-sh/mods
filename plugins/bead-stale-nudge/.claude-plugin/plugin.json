@@ -1,6 +1,6 @@
 {
   "name": "bead-stale-nudge",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "At session start, one toast when beads in progress have had no update for 7 days, with their ids. Reads with bd stale, and says nothing without bd or a beads project.",
   "author": {
     "name": "Baselane",

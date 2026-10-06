@@ -30,6 +30,8 @@ const HITS: ReadonlyArray<readonly [string, string]> = [
   ['bash -c "docker system prune -af"', 'docker system prune'],
 ]
 const MISSES = [
+  `git commit -m "$(cat <<'EOF'\nfix :)\nrun \`docker system prune -af\` later\nEOF\n)"`,
+
   'docker ps',
   'docker ps -a',
   'docker rm web',
